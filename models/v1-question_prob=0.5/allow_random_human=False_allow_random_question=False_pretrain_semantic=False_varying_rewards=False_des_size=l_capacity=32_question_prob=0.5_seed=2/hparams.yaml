@@ -1,0 +1,45 @@
+accelerator: cpu
+allow_random_human: false
+allow_random_question: false
+batch_size: 1024
+capacity:
+  episodic: 16
+  semantic: 16
+  short: 1
+des_size: l
+early_stopping_patience: 1000
+epoch_length: 131072
+eps_end: 0
+eps_last_step: 2048
+eps_start: 1.0
+gamma: 0.65
+log_every_n_steps: 1
+loss_function: huber
+lr: 0.001
+max_epochs: 16
+nn_params:
+  architecture: lstm
+  embedding_dim: 32
+  hidden_size: 64
+  human_embedding_on_object_location: false
+  include_human: sum
+  memory_systems:
+  - episodic
+  - semantic
+  - short
+  num_layers: 2
+num_eval_iter: 10
+observation_params: perfect
+optimizer: adam
+policies:
+  encoding: argmax
+  memory_management: rl
+  question_answer: episodic_semantic
+precision: 32
+pretrain_semantic: false
+question_prob: 0.5
+replay_size: 131072
+seed: 2
+sync_rate: 10
+varying_rewards: false
+warm_start_size: 131072

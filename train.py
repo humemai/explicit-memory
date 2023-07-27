@@ -430,11 +430,24 @@ class DQNLightning(LightningModule):
         )
 
         with torch.no_grad():
-            next_state_values = self.target_net(next_states).max(1)[0]
-            next_state_values[dones] = 0.0
-            next_state_values = next_state_values.detach()
+            if self.hparams.dqn_type.lower() == "single":
+                next_state_action_values = self.target_net(next_states).max(1)[0]
+            elif self.hparams.dqn_type.lower() == "double":
+                actions_ = self.net(next_states).argmax(dim=1)
+                next_state_action_values = (
+                    self.target_net(next_states)
+                    .gather(1, actions_.long().unsqueeze(-1))
+                    .squeeze(-1)
+                )
+            else:
+                raise ValueError
 
-        expected_state_action_values = next_state_values * self.hparams.gamma + rewards
+            next_state_action_values[dones] = 0.0
+            next_state_action_values = next_state_action_values.detach()
+
+        expected_state_action_values = (
+            next_state_action_values * self.hparams.gamma + rewards
+        )
 
         if self.hparams.loss_function.lower() == "mse":
             return nn.MSELoss()(state_action_values, expected_state_action_values)

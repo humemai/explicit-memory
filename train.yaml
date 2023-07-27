@@ -39,6 +39,7 @@ log_every_n_steps: 1
 early_stopping_patience: 1000 # number of epochs, not episodes! Atm, I don't do this.
 precision: 32
 accelerator: cpu
+dqn_type: double
 # num_steps_per_epoch = ceil(epoch_length / batch_size)
 # total_number_of_steps = num_steps_per_epoch * max_epochs
 # total_number_of_episodes = total_number_of_steps / last_time_step

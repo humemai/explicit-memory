@@ -48,32 +48,34 @@ train_config = {
     "early_stopping_patience": 1000,
     "precision": 32,
     "accelerator": "cpu",
+    "dqn_type": "double",
 }
 
 commands = []
-num_parallel = 4
+num_parallel = 2
 reverse = False
 os.makedirs("./junks", exist_ok=True)
 
-for capacity in [2, 4, 8, 16, 32, 64]:
-    for pretrain_semantic in [False, True]:
-        for seed in [0, 1, 2, 3, 4]:
-            train_config["question_prob"] = 0.5
-            train_config["capacity"] = {
-                "episodic": capacity // 2,
-                "semantic": capacity // 2,
-                "short": 1,
-            }
-            train_config["pretrain_semantic"] = pretrain_semantic
-            train_config["seed"] = seed
+# for capacity in [2, 4, 8, 16, 32, 64]:
+#     for pretrain_semantic in [False, True]:
+#         for seed in [0, 1, 2, 3, 4]:
+#             train_config["question_prob"] = 0.5
+#             train_config["capacity"] = {
+#                 "episodic": capacity // 2,
+#                 "semantic": capacity // 2,
+#                 "short": 1,
+#             }
+#             train_config["pretrain_semantic"] = pretrain_semantic
+#             train_config["seed"] = seed
 
-            config_file_name = (
-                f"./junks/{str(datetime.datetime.now()).replace(' ', '-')}.yaml"
-            )
+#             config_file_name = (
+#                 f"./junks/{str(datetime.datetime.now()).replace(' ', '-')}.yaml"
+#             )
 
-            write_yaml(train_config, config_file_name)
+#             write_yaml(train_config, config_file_name)
 
-            commands.append(f"python train.py --config {config_file_name}")
+#             commands.append(f"python train.py --config {config_file_name}")
+
 
 for capacity in [2, 4, 8, 16, 32, 64]:
     for pretrain_semantic in [False, True]:

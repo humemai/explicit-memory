@@ -11,7 +11,7 @@ from train import ReplayBuffer, RLAgent
 class RLAgentTest(unittest.TestCase):
     def test_all(self) -> None:
         for pretrain_semantic in [True, False]:
-            env = gym.make("RoomEnv-v1")
+            env = gym.make("room_env:RoomEnv-v1")
             replay_buffer = ReplayBuffer(16)
             agent = RLAgent(
                 env=env,

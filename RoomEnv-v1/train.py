@@ -24,7 +24,7 @@ from torch import Tensor, nn
 from torch.utils.data import DataLoader, Dataset
 from torch.utils.data.dataset import IterableDataset
 
-from utils import write_json
+from memory.utils import write_json
 
 logger = logging.getLogger()
 logger.disabled = True

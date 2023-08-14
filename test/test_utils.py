@@ -1,7 +1,7 @@
 import random
 import unittest
 
-from utils import (argmax, get_duplicate_dicts, list_duplicates_of, read_json,
+from memory.utils import (argmax, get_duplicate_dicts, list_duplicates_of, read_json,
                    read_yaml, seed_everything, write_json, write_yaml)
 
 

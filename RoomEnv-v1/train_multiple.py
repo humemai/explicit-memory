@@ -9,7 +9,7 @@ from copy import deepcopy
 
 from tqdm import tqdm
 
-from utils import write_yaml
+from memory.utils import write_yaml
 
 train_config = {
     "allow_random_human": False,

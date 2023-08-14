@@ -16,7 +16,7 @@ from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 
 from train import DQNLightning, RLAgent
-from utils import read_yaml
+from memory.utils import read_yaml
 
 logger = logging.getLogger()
 logger.disabled = True

@@ -1,8 +1,8 @@
 import random
 from itertools import count
 
-from .memory import EpisodicMemory, SemanticMemory
-from .utils import argmax, seed_everything
+from ..memory import EpisodicMemory, SemanticMemory
+from ..utils import argmax, seed_everything
 
 
 class HandcraftedAgent:

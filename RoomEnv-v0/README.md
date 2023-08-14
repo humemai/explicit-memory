@@ -1,10 +1,7 @@
 # explicit-memory
 
-[There is a newer version](../README.md)
-
 This repo is to train an agent that interacts with the [RoomEnv-v0](https://github.com/tae898/room-env).
-We managed to train RL agents with the higher versions of `RoomEnv`, but with the
-`v0`, we only came up with the heuristic policies. See the [paper](https://arxiv.org/abs/2204.01611) for more information.
+The agent is not trained with RL, but with heuristics. See the paper ["A Machine With Human-Like Memory Systems"](https://arxiv.org/abs/2204.01611) for more information.
 
 ## Prerequisites
 
@@ -13,11 +10,18 @@ We managed to train RL agents with the higher versions of `RoomEnv`, but with th
 1. Running in a virtual environment (e.g., conda, virtualenv, etc.) is highly recommended so that you don't mess up with the system python.
 1. `pip install -r requirements.txt`
 
+## Run training
+```sh
+python train.py
+```
+
+The results will be saved in [`./figures`](./figures)
+
 ## Heuristics
 
 Below are some heuristics for the single and multi agent setups.
 
-### [Single Agent Policies](handcrafted-single-agent.ipynb)
+### Single Agent Policies
 
 Inspired by the theories on the explicit human memory, we have designed
 the following four handcrafted policies (models).
@@ -62,7 +66,7 @@ rest of the space to the episodic memory system. In order to show the
 validity of our handcrafted agents, we compare them with the agents that
 forget and answer uniform-randomly.
 
-### [Multiple Agent Policies](handcrafted-multi-agent.ipynb)
+### Multiple Agent Policies
 
 The multiple agent policies work in the same manner as the single agent
 policies, except that they can use their combined memory systems to

@@ -8,14 +8,23 @@ The agent is not trained with RL, but with heuristics. See the paper ["A Machine
 1. A unix or unix-like x86 machine
 1. python 3.8 or higher.
 1. Running in a virtual environment (e.g., conda, virtualenv, etc.) is highly recommended so that you don't mess up with the system python.
+1. Make sure you are in the same directory where this README is located, i.e., `RoomEnv-v0`
+1. Install the `explicit_memory` python package, by running `pip install ..`
 1. `pip install -r requirements.txt`
 
 ## Run training
+
 ```sh
 python train.py
 ```
 
-The results will be saved in [`./figures`](./figures)
+The results will be saved in [`./figures`](./figures).
+
+## Results
+
+|                 Average loss, training.                 |           Average total rewards per episode, validation.           |              Average total rewards per episode, test.               |           Average total rewards, varying capacities, test.           |
+| :-----------------------------------------------------: | :----------------------------------------------------------------: | :-----------------------------------------------------------------: | :------------------------------------------------------------------: |
+| ![](./figures/episodic-1-v0.png) | ![](./figures/semantic-1-v0.png) | ![](./figures/episodic_semantic-1-v0.png) | ![](./figures/episodic_semantic_pretrain-1-v0.png) |
 
 ## Heuristics
 

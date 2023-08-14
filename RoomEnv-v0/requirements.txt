@@ -1,0 +1,2 @@
+matplotlib==3.7.2
+room-env

@@ -157,9 +157,10 @@ for num_agents in num_agentss:
             fontsize=15,
         )
         os.makedirs("figures", exist_ok=True)
-        plt.savefig(
-            f"./figures/best-strategies-{num_agents}-v0.pdf", bbox_inches="tight"
-        )
+        for fmt in ["png", "pdf"]:
+            plt.savefig(
+                f"./figures/best-strategies-{num_agents}-v0.{fmt}", bbox_inches="tight"
+            )
         # plt.show()
 
 idx = np.asanyarray([i for i in range(len(caps))])
@@ -282,9 +283,10 @@ for num_agents in num_agentss:
                 raise ValueError
 
             plt.title(title, fontsize=15)
-            plt.savefig(
-                f"./figures/{agent_type}-{num_agents}-v0.pdf", bbox_inches="tight"
-            )
+            for fmt in ["png", "pdf"]:
+                plt.savefig(
+                    f"./figures/{agent_type}-{num_agents}-v0.{fmt}", bbox_inches="tight"
+                )
 
 results_all = {}
 seeds = [0, 1, 2, 3, 4]
@@ -417,5 +419,8 @@ for num_agents in num_agentss[::-1]:
             fontsize=15,
         )
         os.makedirs("figures", exist_ok=True)
-        plt.savefig(f"./figures/single-and-double-agents-v0.pdf", bbox_inches="tight")
+        for fmt in ["png", "pdf"]:
+            plt.savefig(
+                f"./figures/single-and-double-agents-v0.{fmt}", bbox_inches="tight"
+            )
         # plt.show()

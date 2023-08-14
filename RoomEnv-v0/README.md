@@ -22,9 +22,21 @@ The results will be saved in [`./figures`](./figures).
 
 ## Results
 
-|                 Average loss, training.                 |           Average total rewards per episode, validation.           |              Average total rewards per episode, test.               |           Average total rewards, varying capacities, test.           |
-| :-----------------------------------------------------: | :----------------------------------------------------------------: | :-----------------------------------------------------------------: | :------------------------------------------------------------------: |
-| ![](./figures/episodic-1-v0.png) | ![](./figures/semantic-1-v0.png) | ![](./figures/episodic_semantic-1-v0.png) | ![](./figures/episodic_semantic_pretrain-1-v0.png) |
+|          Handcrafted 1           |          Handcrafted 2           |
+| :------------------------------: | :------------------------------: |
+| ![](./figures/episodic-1-v0.png) | ![](./figures/semantic-1-v0.png) |
+
+|               Handcrafted 3               |                   Handcrafted 4                    |
+| :---------------------------------------: | :------------------------------------------------: |
+| ![](./figures/episodic_semantic-1-v0.png) | ![](./figures/episodic_semantic_pretrain-1-v0.png) |
+
+| Total rewards with respect to different handcrafted policies and memory capacities. |
+| :---------------------------------------------------------------------------------: |
+|                       ![](./figures/best-strategies-1-v0.png)                       |
+
+| Total rewards with respect to the number of agents. The lighter and narrower bars account for the single agent. |
+| :---------------------------------------------------------------------------------: |
+| ![](./figures/single-and-double-agents-v0.png) |
 
 ## Heuristics
 

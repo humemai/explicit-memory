@@ -3,15 +3,7 @@
 This repo hosts several (RL) agents that learn their policies by interacting with the
 [gymnasium](https://gymnasium.farama.org/) environments.
 
-These agents all have human-like external memory systems that are modeled with knowledge
-graphs. So you should first install the explicit-memory package.
-
-## Prerequisites
-
-1. A unix or unix-like x86 machine
-1. python 3.8 or higher.
-1. Running in a virtual environment (e.g., conda, virtualenv, etc.) is highly recommended so that you don't mess up with the system python.
-1. `python install .`
+These agents all take advantage of have human-like external memory systems that are modeled with knowledge graphs.
 
 ## [Click here for the agent for RoomEnv-v0](./RoomEnv-v0/README.md).
 

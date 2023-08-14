@@ -1,42 +1,25 @@
-# explicit-memory
-
-This repo hosts several (RL) agents that learn their policies by interacting with the
-[gymnasium](https://gymnasium.farama.org/) environments.
-
-These agents all have human-like external memory systems that are modeled with knowledge
-graphs. So you should first install the explicit-memory package by running `python install .`
-
-## [Click here for the agent for RoomEnv-v0](./RoomEnv-v0/README.md).
-
-This agent was featured in the paper ["A Machine With Human-Like Memory Systems"](https://arxiv.org/abs/2204.01611).
-
-## [Click here for the documentation of RoomEnv-v1](./RoomEnv-v1/README.md).
-
-RoomEnv-v1 was featured in the paper ["A Machine with Short-Term, Episodic, and Semantic Memory Systems"](https://doi.org/10.1609/aaai.v37i1.25075).
-
-## RoomEnv-v2 will be out soon!
-
-For the documentation of [the older paper](https://arxiv.org/abs/2204.01611), check out
-[this documentation](./v0/README-v0.md)
+# Agent for RoomEnv-v1
 
 This repo is to train an agent that interacts with the [RoomEnv-v1](https://github.com/tae898/room-env).
-See the [paper](https://arxiv.org/abs/2212.02098) for more information.
+The agent is trained with DQN. See the paper ["A Machine with Short-Term, Episodic, and Semantic Memory Systems"](https://doi.org/10.1609/aaai.v37i1.25075) for more information.
 
 ## Prerequisites
 
 1. A unix or unix-like x86 machine
 1. python 3.8 or higher.
 1. Running in a virtual environment (e.g., conda, virtualenv, etc.) is highly recommended so that you don't mess up with the system python.
+1. Make sure you are in the same directory where this README is located, i.e., `RoomEnv-v0`
+1. Install the `explicit_memory` python package, by running `pip install ..`
 1. `pip install -r requirements.txt`
 
-## Training
+## Run training
 
-```python
-python train.py --config train.yaml
+```sh
+python train.py
 ```
 
-The hyperparameters can be configured in `train.yaml`. The training results with the
-checkpoints will be saved at `./training_results/`
+The hyperparameters can be configured in [`train.yaml`](./train.yaml). The training results with the
+checkpoints will be saved at [`./training_results/`](./training_results/).
 
 ## Results
 
@@ -44,10 +27,7 @@ checkpoints will be saved at `./training_results/`
 | :-----------------------------------------------------: | :----------------------------------------------------------------: | :-----------------------------------------------------------------: | :------------------------------------------------------------------: |
 | ![](./figures/des_size=l-capacity=32-train_loss-v1.png) | ![](./figures/des_size=l-capacity=32-val_total_reward_mean-v1.png) | ![](./figures/des_size=l-capacity=32-test_total_reward_mean-v1.png) | ![](./figures/des_size=l-capacity=all-test_total_reward_mean-v1.png) |
 
-There is one different thing in the RoomEnv from the original AAAI-2023 paper: The reward is either +1 or -1, instead of +1 or 0.
-
-Also check out [`./models/`](./models) to see the saved training results. The `test_debug`
-results might especially be interesting to you.
+Also check out [`./models/`](./models) to see the saved training results.
 
 ## Contributing
 
@@ -60,18 +40,19 @@ Contributions are what make the open source community such an amazing place to b
 1. Push to the Branch (`git push origin feature/AmazingFeature`)
 1. Open a Pull Request
 
-## [Cite our paper](https://arxiv.org/abs/2212.02098)
+## [Cite our paper](https://doi.org/10.1609/aaai.v37i1.25075)
 
 ```bibtex
-@misc{https://doi.org/10.48550/arxiv.2212.02098,
-  doi = {10.48550/ARXIV.2212.02098},
-  url = {https://arxiv.org/abs/2212.02098},
-  author = {Kim, Taewoon and Cochez, Michael and François-Lavet, Vincent and Neerincx, Mark and Vossen, Piek},
-  keywords = {Artificial Intelligence (cs.AI), FOS: Computer and information sciences, FOS: Computer and information sciences},
-  title = {A Machine with Short-Term, Episodic, and Semantic Memory Systems},
-  publisher = {arXiv},
-  year = {2022},
-  copyright = {Creative Commons Attribution 4.0 International}
+@article{Kim_Cochez_Francois-Lavet_Neerincx_Vossen_2023, 
+  title={A Machine with Short-Term, Episodic, and Semantic Memory Systems}, volume={37}, 
+  url={https://ojs.aaai.org/index.php/AAAI/article/view/25075}, 
+  DOI={10.1609/aaai.v37i1.25075}, 
+  abstractNote={Inspired by the cognitive science theory of the explicit human memory systems, we have modeled an agent with short-term, episodic, and semantic memory systems, each of which is modeled with a knowledge graph. To evaluate this system and analyze the behavior of this agent, we designed and released our own reinforcement learning agent environment, “the Room”, where an agent has to learn how to encode, store, and retrieve memories to maximize its return by answering questions. We show that our deep Q-learning based agent successfully learns whether a short-term memory should be forgotten, or rather be stored in the episodic or semantic memory systems. Our experiments indicate that an agent with human-like memory systems can outperform an agent without this memory structure in the environment.}, 
+  number={1}, 
+  journal={Proceedings of the AAAI Conference on Artificial Intelligence}, author={Kim, Taewoon and Cochez, Michael and Francois-Lavet, Vincent and Neerincx, Mark and Vossen, Piek}, 
+  year={2023}, 
+  month={Jun.}, 
+  pages={48-56} 
 }
 ```
 

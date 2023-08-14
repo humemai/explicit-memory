@@ -1,4 +1,4 @@
-# explicit-memory
+# Agent for RoomEnv-v0
 
 This repo is to train an agent that interacts with the [RoomEnv-v0](https://github.com/tae898/room-env).
 The agent is not trained with RL, but with heuristics. See the paper ["A Machine With Human-Like Memory Systems"](https://arxiv.org/abs/2204.01611) for more information.
@@ -18,7 +18,7 @@ The agent is not trained with RL, but with heuristics. See the paper ["A Machine
 python train.py
 ```
 
-The results will be saved in [`./figures`](./figures).
+The hyperparameters can be configured in [`train.yaml`](./train.yaml). The results will be saved in [`./figures`](./figures).
 
 ## Results
 
@@ -35,8 +35,8 @@ The results will be saved in [`./figures`](./figures).
 |                       ![](./figures/best-strategies-1-v0.png)                       |
 
 | Total rewards with respect to the number of agents. The lighter and narrower bars account for the single agent. |
-| :---------------------------------------------------------------------------------: |
-| ![](./figures/single-and-double-agents-v0.png) |
+| :-------------------------------------------------------------------------------------------------------------: |
+|                                 ![](./figures/single-and-double-agents-v0.png)                                  |
 
 ## Heuristics
 

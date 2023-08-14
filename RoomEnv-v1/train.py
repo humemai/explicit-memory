@@ -8,12 +8,10 @@ import logging
 import os
 from collections import deque, namedtuple
 from copy import deepcopy
-from multiprocessing.sharedctypes import Value
 from typing import Iterator, List, Tuple
 
 import gymnasium as gym
 import numpy as np
-import room_env
 import torch
 import torch.optim as optim
 import yaml
@@ -24,7 +22,7 @@ from torch import Tensor, nn
 from torch.utils.data import DataLoader, Dataset
 from torch.utils.data.dataset import IterableDataset
 
-from memory.utils import write_json
+from explicit_memory.utils import write_json
 
 logger = logging.getLogger()
 logger.disabled = True
@@ -336,7 +334,7 @@ class DQNLightning(LightningModule):
         super().__init__()
         self.save_hyperparameters()
         self.env = gym.make(
-            "RoomEnv-v1",
+            "room_env:RoomEnv-v1",
             des_size=self.hparams.des_size,
             seed=self.hparams.seed,
             policies=self.hparams.policies,

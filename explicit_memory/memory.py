@@ -1,8 +1,12 @@
+"""Memory system classes."""
 import logging
 import os
 import random
+from copy import deepcopy
 from pprint import pformat
 from typing import List, Tuple
+
+from .utils import get_duplicate_dicts, list_duplicates_of
 
 logging.basicConfig(
     level=os.environ.get("LOGLEVEL", "INFO").upper(),
@@ -12,14 +16,14 @@ logging.basicConfig(
 
 
 class Memory:
-    """Memory (episodic or semantic) class"""
+    """Memory (episodic, semantic, or short) class"""
 
     def __init__(self, memory_type: str, capacity: int) -> None:
         """
 
         Args
         ----
-        memory_type: either episodic or semantic.
+        memory_type: episodic, semantic, or short
         capacity: memory capacity
 
         """
@@ -27,7 +31,7 @@ class Memory:
             f"instantiating a {memory_type} memory object with size {capacity} ..."
         )
 
-        assert memory_type in ["episodic", "semantic"]
+        assert memory_type in ["episodic", "semantic", "short"]
         self.type = memory_type
         self.entries = []
         self.capacity = capacity
@@ -35,72 +39,23 @@ class Memory:
 
         logging.debug(f"{memory_type} memory object with size {capacity} instantiated!")
 
-    def __eq__(self, other) -> bool:
-        eps = 0.01
-        if self.type != other.type:
-            return False
-        if self.capacity != other.capacity:
-            return False
-        if self._frozen != other._frozen:
-            return False
-
-        if len(self.entries) != len(other.entries):
-            return False
-
-        for se, oe in zip(self.entries, other.entries):
-            if se[0] != oe[0]:
-                return False
-            if se[1] != oe[1]:
-                return False
-            if se[2] != oe[2]:
-                return False
-            if abs(se[3] - oe[3]) > eps:
-                return False
-
-        return True
-
     def __repr__(self):
-
         return pformat(vars(self), indent=4, width=1)
 
-    def is_answerable(self, question: list) -> bool:
-        """Check if a relevant memory is in the system to answer the given question.
-
-        Args
-        ----
-        question: a triple (i.e., (head, relation, tail))
-
-        """
-        logging.debug(
-            f"Check if a relevant memory is in the system to answer the "
-            f"given question: {question} ..."
-        )
-
-        question_head = question[0]
-        question_relation = question[1]
-
-        for mem in self.entries:
-            head = mem[0]
-            assert len(question_head.split()) == len(
-                head.split()
-            ), f"{question_head.split()}, {head.split()}"
-            relation = mem[1]
-
-            if head == question_head and relation == question_relation:
-                logging.info("There is a relevant memory to answer the question!")
-                return True
-
-        logging.info("There is NOT a relevant memory to answer the question!")
-
-        return False
-
-    def forget(self, mem: list) -> None:
+    def forget(self, mem: dict) -> None:
         """forget the given memory.
 
         Args
         ----
-        mem: A memory in a quadruple format (i.e., (head, relation, tail, timestamp)
-            for episodic and (head, relation, tail, num_generalized_memories) for semantic)
+        mem: A memory in a dictionary format.
+
+            for episodic and short:
+            {"human": <HUMAN>, "object": <OBJECT>, "object_location": <OBJECT_LOCATION>,
+             "timestamp": <TIMESTAMP>}
+
+            for semantic:
+            {"object": <OBJECT>, "object_location": <OBJECT_LOCATION>,
+             "num_generalized": <NUM_GENERALIZED>}
 
         """
         if self._frozen:
@@ -129,7 +84,7 @@ class Memory:
 
     @property
     def is_empty(self) -> bool:
-        """Return true if full."""
+        """Return true if empty."""
         return len(self.entries) == 0
 
     @property
@@ -155,149 +110,13 @@ class Memory:
         """Unfreeze the memory so that something can be added / deleted."""
         self._frozen = False
 
-    def get_duplicate_heads(self, head: str, entries: list = None) -> list:
-        """Find if there are duplicate heads and return its index.
-
-        At the moment, this is simply done by matching string values. In the end, an
-        RL agent has to learn this by itself.
-
-        Args
-        ----
-        head: (e.g., Tae's laptop)
-
-        Returns
-        -------
-        duplicates: a list of memories. Every memory in this list has the same head as
-            that of the observation (i.e., (head, relation, tail,
-            timestamp/num_generalized_memories)). None is returned when no duplicate heads
-            were found.
-
-        """
-        if entries is None:
-            logging.debug("No entries were specified. We'll use the memory system.")
-            entries = self.entries
-
-        logging.debug("finding if duplicate heads exist ...")
-        duplicates = []
-        for mem in entries:
-            if mem[0] == head:
-                logging.info(f"{mem} has the same head {head} !!!")
-                duplicates.append(mem)
-
-        if len(duplicates) == 0:
-            logging.debug("no duplicates were found!")
-            return None
-
-        logging.info(f"{len(duplicates)} duplicates were found!")
-
-        return duplicates
-
     def forget_random(self) -> None:
         """Forget a memory in the memory system in a uniform distribution manner."""
         logging.warning("forgetting a random memory using a uniform distribution ...")
         mem = random.choice(self.entries)
         self.forget(mem)
 
-    @staticmethod
-    def remove_name(entity: str) -> str:
-        """Remove name from the entity.
-
-        Args
-        ----
-        entity: e.g., Tae's laptop
-
-        Returns
-        -------
-        e.g., laptop
-
-        """
-        return entity.split()[-1]
-
-    @staticmethod
-    def is_question_valid(question) -> bool:
-        """Check if the given question is valid.
-
-        Args
-        ----
-        question: a double (i.e., (head, relation))
-
-        Returns
-        -------
-        valid: True or False.
-
-        """
-        logging.debug(f"Checking if the question {question} is valid ..")
-        if len(question) == 2:
-            logging.info(f"{question} is a valid question.")
-            return True
-        else:
-            logging.info(f"{question} is NOT a valid question.")
-            return False
-
-    def answer_random(self, question: list) -> Tuple[str, int]:
-        """Answer the question with a uniform-randomly chosen memory.
-
-        Args
-        ----
-        question: a couple (i.e., (head, relation))
-
-        Returns
-        -------
-        pred: prediction
-        num: this is either timestamp or num_generalized
-
-        """
-        if not self.is_question_valid(question):
-            raise ValueError
-        logging.debug(
-            "answering the question with a uniform-randomly retrieved memory ..."
-        )
-
-        if self.is_empty:
-            logging.warning("Memory is empty. I can't answer any questions!")
-            pred = None
-            num = None
-
-        else:
-            mem = random.choice(self.entries)
-            pred = self.remove_name(mem[2])
-            num = mem[3]
-
-        logging.info(f"pred: {pred}, timestamp or num_generalized: {num}")
-
-        return pred, num
-
-    def add(self, mem: list) -> None:
-        """Append a memory to the memory system.
-
-        Args
-        ----
-        mem: A memory in a quadruple format (i.e., (head, relation, tail,
-            timestamp/num_generalized_memories))
-
-        """
-        assert len(mem) == 4
-        if self._frozen:
-            error_msg = "The memory system is frozen!"
-            logging.error(error_msg)
-            raise ValueError(error_msg)
-
-        assert not self.is_full
-
-        logging.debug(f"Adding a new memory entry {mem} ...")
-        self.entries.append(mem)
-        logging.info(
-            f"memory entry {mem} added. Now there are in total of "
-            f"{len(self.entries)} memories!"
-        )
-        self.sort_memories_ascending()
-
-    def sort_memories_ascending(self) -> None:
-        """Sort the memories in an ascending order with respect to the 4th element."""
-        self.entries.sort(key=lambda x: x[-1])
-        logging.info("memories have been sorted!")
-
-    def increase_capacity(self, increase):
+    def increase_capacity(self, increase: int) -> None:
         """Increase the capacity.
 
         Args
@@ -313,7 +132,7 @@ class Memory:
             f"{self.capacity}!"
         )
 
-    def decrease_capacity(self, decrease):
+    def decrease_capacity(self, decrease: int) -> None:
         """decrease the capacity.
 
         Args
@@ -338,52 +157,117 @@ class EpisodicMemory(Memory):
     """Episodic memory class."""
 
     def __init__(self, capacity: int) -> None:
+        """Init an episodic memory system.
+
+        Args
+        ----
+        capacity: capacity of the memory system (i.e., number of entries)
+
+        """
         super().__init__("episodic", capacity)
 
-    def get_oldest_memory(self, entries: list = None) -> list:
-        """Get the oldest memory in the episodic memory system.
+    def can_be_added(self, mem: dict) -> bool:
+        """Checks if a memory can be added to the system or not.
 
-        At the moment, this is simply done by looking up the timestamps and comparing
-        them. In the end, an RL agent has to learn this by itself.
+        Args
+        ----
+        mem: An episodic memory in a dictionary format
+
+            {"human": <HUMAN>, "object": <OBJECT>, "object_location": <OBJECT_LOCATION>,
+             "timestamp": <TIMESTAMP>}
 
         Returns
         -------
-        mem: the oldest memory in a quadruple format (i.e., (head, relation, tail,
-            timestamp))
+        True or False
+
+        """
+        if (self.capacity <= 0) or (self._frozen) or (self.is_full):
+            return False
+
+        else:
+            return True
+
+    def add(self, mem: dict) -> None:
+        """Append a memory to the episodic memory system.
+
+        Args
+        ----
+        mem: An episodic memory in a dictionary format
+
+            {"human": <HUMAN>, "object": <OBJECT>, "object_location": <OBJECT_LOCATION>,
+             "timestamp": <TIMESTAMP>}
+
+        """
+        if self._frozen:
+            error_msg = "The memory system is frozen!"
+            logging.error(error_msg)
+            raise ValueError(error_msg)
+
+        logging.debug(f"Adding a new memory entry {mem} ...")
+        self.entries.append(mem)
+        logging.info(
+            f"memory entry {mem} added. Now there are in total of "
+            f"{len(self.entries)} memories!"
+        )
+        self.clean_old_memories()
+
+        # sort ascending
+        self.entries.sort(key=lambda x: x["timestamp"])
+
+        assert self.size <= self.capacity
+
+    def get_oldest_memory(self, entries: list = None) -> List:
+        """Get the oldest memory in the episodic memory system.
+
+        At the moment, this is simply done by looking up the timestamps and comparing
+        them.
+
+        Returns
+        -------
+        mem: the oldest memory in a dictionary format
+
+            {"human": <HUMAN>, "object": <OBJECT>, "object_location": <OBJECT_LOCATION>,
+             "timestamp": <TIMESTAMP>}
 
         """
         if entries is None:
             logging.debug("No entries were specified. We'll use the memory system.")
             entries = self.entries
 
-        # The last element [-1] of a memory is timestamp
-        mem_candidate = sorted(entries, key=lambda x: x[-1])[0]
-        mem = random.choice([mem for mem in entries if mem_candidate[-1] == mem[-1]])
-        assert len(mem) == 4
+        # sorted() is ascending by default.
+        mem_candidate = sorted(entries, key=lambda x: x["timestamp"])[0]
+        mem = random.choice(
+            [mem for mem in entries if mem_candidate["timestamp"] == mem["timestamp"]]
+        )
         logging.info(f"{mem} is the oldest memory in the entries.")
 
         return mem
 
-    def get_latest_memory(self, entries: list = None) -> list:
+    def get_latest_memory(self, entries: list = None) -> dict:
         """Get the latest memory in the episodic memory system.
 
         At the moment, this is simply done by looking up the timestamps and comparing
-        them. In the end, an RL agent has to learn this by itself.
+        them.
 
         Returns
         -------
-        mem: the latest memory in a quadruple format (i.e., (head, relation, tail,
-            timestamp))
+        mem: the latest memory in a dictionary format
+
+            for episodic:
+            {"human": <HUMAN>, "object": <OBJECT>, "object_location": <OBJECT_LOCATION>,
+             "timestamp": <TIMESTAMP>}
 
         """
         if entries is None:
             logging.debug("No entries were specified. We'll use the memory system.")
             entries = self.entries
 
-        mem_candidate = sorted(entries, key=lambda x: x[-1])[-1]
-        mem = random.choice([mem for mem in entries if mem_candidate[-1] == mem[-1]])
-        assert len(mem) == 4
-        logging.info(f"{mem} is the latest memory in the entries.")
+        # sorted() is ascending by default.
+        mem_candidate = sorted(entries, key=lambda x: x["timestamp"])[-1]
+        mem = random.choice(
+            [mem for mem in entries if mem_candidate["timestamp"] == mem["timestamp"]]
+        )
+        logging.info(f"{mem} is the oldest memory in the entries.")
 
         return mem
 
@@ -391,7 +275,7 @@ class EpisodicMemory(Memory):
         """Forget the oldest entry in the memory system.
 
         At the moment, this is simply done by looking up the timestamps and comparing
-        them. In the end, an RL agent has to learn this by itself.
+        them.
 
         """
         logging.debug("forgetting the oldest memory (FIFO)...")
@@ -399,7 +283,30 @@ class EpisodicMemory(Memory):
         mem = self.get_oldest_memory()
         self.forget(mem)
 
-    def answer_latest(self, question: list) -> Tuple[str, int]:
+    def answer_random(self) -> Tuple[str, int]:
+        """Answer the question with a uniform-randomly chosen memory.
+
+        Returns
+        -------
+        pred: prediction (e.g., desk)
+        timestamp
+
+        """
+        if self.is_empty:
+            logging.warning("Memory is empty. I can't answer any questions!")
+            pred = None
+            timestamp = None
+
+        else:
+            mem = random.choice(self.entries)
+            pred = mem["object_location"]
+            timestamp = mem["timestamp"]
+
+        logging.info(f"pred: {pred}, timestamp: {timestamp}")
+
+        return pred, timestamp
+
+    def answer_latest(self, question: dict) -> Tuple[str, int]:
         """Answer the question with the latest relevant memory.
 
         If object X was found at Y and then later on found Z, then this strategy answers
@@ -407,7 +314,7 @@ class EpisodicMemory(Memory):
 
         Args
         ----
-        question: a double (i.e., (head, relation))
+        question: a dict (i.e., {"human": <HUMAN>, "object": <OBJECT>})
 
         Returns
         -------
@@ -415,8 +322,6 @@ class EpisodicMemory(Memory):
         timestamp: timestamp
 
         """
-        if not self.is_question_valid(question):
-            raise ValueError
         logging.debug("answering a question with the answer_latest policy ...")
 
         if self.is_empty:
@@ -425,9 +330,11 @@ class EpisodicMemory(Memory):
             timestamp = None
 
         else:
-            query_head = question[0]
-            duplicates = self.get_duplicate_heads(query_head, self.entries)
-            if duplicates is None:
+            duplicates = get_duplicate_dicts(
+                {"human": question["human"], "object": question["object"]}, self.entries
+            )
+
+            if len(duplicates) == 0:
                 logging.info("no relevant memories found.")
                 pred = None
                 timestamp = None
@@ -437,286 +344,498 @@ class EpisodicMemory(Memory):
                     f"{len(duplicates)} relevant memories were found in the entries!"
                 )
                 mem = self.get_latest_memory(duplicates)
-                pred = self.remove_name(mem[2])
-                timestamp = mem[3]
+                pred = mem["object_location"]
+                timestamp = mem["timestamp"]
 
-        logging.info(f"pred: {pred}")
+        logging.info(f"pred: {pred}, timestamp: {timestamp}")
 
         return pred, timestamp
 
     @staticmethod
-    def ob2epi(ob: list):
+    def ob2epi(ob: dict) -> dict:
         """Turn an observation into an episodic memory.
 
-        At the moment, the observation format is the same as an episodic memory for
-        simplification.
+        At the moment, the observation format is the same as an episodic memory
+        for simplification.
 
         Args
         ----
-        ob: An observation in a quadruple format
-            (i.e., (head, relation, tail, timestamp))
+        ob: An observation in a dictionary format
+
+            {"human": <HUMAN>, "object": <OBJECT>,
+            "object_location": <OBJECT_LOCATION>, "current_time": <CURRENT_TIME>}
+
+        Returns
+        -------
+        mem: An episodic memory in a dictionary format
+
+            {"human": <HUMAN>, "object": <OBJECT>, "object_location": <OBJECT_LOCATION>,
+             "timestamp": <TIMESTAMP>}
 
         """
-        assert len(ob) == 4
         logging.debug(f"Turning an observation {ob} into a episodic memory ...")
-        mem_epi = ob
-        logging.info(f"Observation {ob} is now a episodic memory {mem_epi}")
 
-        return mem_epi
+        mem = deepcopy(ob)
+        mem["timestamp"] = mem.pop("current_time")
 
-    @staticmethod
-    def remove_timestamp(entry: list) -> list:
-        """Remove the timestamp from a given observation/episodic memory.
+        logging.info(f"Observation {ob} is now a episodic memory {mem}")
 
-        Args
-        ----
-        entry: An observation / episodic memory in a quadruple format
-            (i.e., (head, relation, tail, timestamp))
+        return mem
 
-        Returns
-        -------
-        entry_without_timestamp: i.e., (head, relation, tail)
-
-        """
-        assert len(entry) == 4
-        logging.debug(f"Removing timestamp from {entry} ...")
-        entry_without_timestamp = entry[:-1]
-        logging.info(f"Timestamp is removed from {entry}: {entry_without_timestamp}")
-
-        return entry_without_timestamp
-
-    @staticmethod
-    def split_name_entity(name_entity: str) -> Tuple[str, str]:
-        """Separate name and entity from the given string.
+    def find_same_memory(self, mem) -> dict:
+        """Find an episodic memory that's almost the same as the query memory.
 
         Args
         ----
-        name_entity: e.g., "Tae's laptop"
+        mem: An episodic memory in a dictionary format
+
+            {"human": <HUMAN>, "object": <OBJECT>,
+             "object_location": <OBJECT_LOCATION>, "timestamp": <TIMESTAMP>}
 
         Returns
         -------
-        name: e.g., Tae
-        entity: e.g., laptop
+        an episodic memory if it exists. Otherwise return None.
 
         """
-        logging.debug(f"spliting name and entity from {name_entity}")
-        splitted = name_entity.split()
-        assert len(splitted) == 2 and "'" in splitted[0]
-        name = splitted[0].split("'")[0]
-        entity = splitted[1]
+        for entry in self.entries:
+            if (
+                (entry["human"] == mem["human"])
+                and (entry["object"] == mem["object"])
+                and (entry["object_location"] == mem["object_location"])
+            ):
+                return entry
 
-        return name, entity
+        return None
 
-    def get_similar(self, entries: list = None):
-        """Find N episodic memories that can be compressed into one semantic.
+    def clean_old_memories(self) -> List:
+        """Find if there are duplicate memories with different timestamps."""
+        logging.debug("finding if duplicate memories exist ...")
 
-        At the moment, this is simply done by matching string values. In the end, a
-        neural network has to learn this by itself (e.g., symbolic knowledge graph
-        compression).
+        entries = deepcopy(self.entries)
+        logging.debug(f"There are {len(entries)} episdoic memories before cleaning")
+        for entry in entries:
+            del entry["timestamp"]
 
-        Returns
-        -------
-        episodic_memories: similar episodic memories
-        semantic_memory: encoded (compressed) semantic memory in a quadruple format
-            (i.e., (head, relation, tail, num_generalized_memories))
+        entries = [str(mem) for mem in entries]  # to make list hashable
+        uniques = set(entries)
 
-        """
-        logging.debug("looking for episodic entries that can be compressed ...")
-        if entries is None:
-            logging.debug("No entries were specified. We'll use the memory system.")
-            entries = self.entries
-
-        # -1 removes the timestamps from the quadruples
-        semantic_possibles = [
-            [self.remove_name(e) for e in self.remove_timestamp(entry)]
-            for entry in entries
+        locs_all = [
+            list_duplicates_of(entries, unique_entry) for unique_entry in uniques
         ]
-        # "^" is to allow hashing.
-        semantic_possibles = ["^".join(elem) for elem in semantic_possibles]
+        locs_all.sort(key=len)
+        entries_cleaned = []
 
-        def duplicates(mylist, item):
-            return [i for i, x in enumerate(mylist) if x == item]
+        for locs in locs_all:
+            mem = self.entries[locs[0]]
+            mem["timestamp"] = max([self.entries[loc]["timestamp"] for loc in locs])
+            entries_cleaned.append(mem)
 
-        semantic_possibles = dict(
-            (x, duplicates(semantic_possibles, x)) for x in set(semantic_possibles)
+        self.entries = entries_cleaned
+        logging.debug(f"There are {len(self.entries)} episdoic memories after cleaning")
+
+
+class ShortMemory(Memory):
+    """Short-term memory class."""
+
+    def __init__(self, capacity: int) -> None:
+        super().__init__("short", capacity)
+
+    def add(self, mem: dict) -> None:
+        """Append a memory to the short memory system.
+
+        mem: A short memory in a dictionary format
+
+            {"human": <HUMAN>, "object": <OBJECT>, "object_location": <OBJECT_LOCATION>,
+             "timestamp": <TIMESTAMP>}
+
+        """
+        if self._frozen:
+            error_msg = "The memory system is frozen!"
+            logging.error(error_msg)
+            raise ValueError(error_msg)
+
+        assert not self.is_full
+
+        logging.debug(f"Adding a new memory entry {mem} ...")
+        self.entries.append(mem)
+        logging.info(
+            f"memory entry {mem} added. Now there are in total of "
+            f"{len(self.entries)} memories!"
         )
+        # sort ascending
+        self.entries.sort(key=lambda x: x["timestamp"])
 
-        if len(semantic_possibles) == len(entries):
-            logging.info("no episodic memories found to be compressible.")
-            return None, None
-        elif len(semantic_possibles) < len(entries):
-            logging.debug("some episodic memories found to be compressible.")
+        assert self.size <= self.capacity
 
-            max_key = max(semantic_possibles, key=lambda k: len(semantic_possibles[k]))
-            indexes = semantic_possibles[max_key]
+    def get_oldest_memory(self, entries: list = None) -> List:
+        """Get the oldest memory in the episodic memory system.
 
-            episodic_memories = map(entries.__getitem__, indexes)
-            episodic_memories = list(episodic_memories)
-            # sort from the oldest to the latest
-            episodic_memories = sorted(episodic_memories, key=lambda x: x[-1])
-            semantic_memory = max_key.split("^")
-            # num_generalized_memories is the number of compressed episodic memories.
-            semantic_memory.append(len(indexes))
-            assert (len(semantic_memory)) == 4
-            for mem in episodic_memories:
-                assert len(mem) == 4
+        At the moment, this is simply done by looking up the timestamps and comparing
+        them.
 
-            logging.info(
-                f"{len(indexes)} episodic memories can be compressed "
-                f"into one semantic memory: {semantic_memory}."
-            )
+        Returns
+        -------
+        mem: the oldest memory in a dictionary format
 
-            return episodic_memories, semantic_memory
-        else:
-            raise ValueError
+            {"human": <HUMAN>, "object": <OBJECT>, "object_location": <OBJECT_LOCATION>,
+             "timestamp": <TIMESTAMP>}
 
-    def find_mem_for_semantic(self, entries: list = None):
+        """
         if entries is None:
             logging.debug("No entries were specified. We'll use the memory system.")
             entries = self.entries
 
-        best_semantic_possibles = []
-        for mem in self.entries:
-            head = mem[0]
-            head = self.remove_name(head)
-            relation = mem[1]
-            tail = mem[2]
-            tail = self.remove_name(tail)
+        # sorted() is ascending by default.
+        mem_candidate = sorted(entries, key=lambda x: x["timestamp"])[0]
+        mem = random.choice(
+            [mem for mem in entries if mem_candidate["timestamp"] == mem["timestamp"]]
+        )
+        logging.info(f"{mem} is the oldest memory in the entries.")
 
-            best_semantic_possibles.append([head, relation, tail])
+        return mem
 
-        best_semantic_possibles = [
-            (i, elem, best_semantic_possibles.count(elem))
-            for i, elem in enumerate(best_semantic_possibles)
-        ]
+    def get_latest_memory(self, entries: list = None) -> dict:
+        """Get the latest memory in the episodic memory system.
 
-        highest_freq = max([elem[2] for elem in best_semantic_possibles])
+        At the moment, this is simply done by looking up the timestamps and comparing
+        them.
 
-        best_semantic_possibles = [
-            elem for elem in best_semantic_possibles if elem[2] == highest_freq
-        ]
+        Returns
+        -------
+        mem: the latest memory in a dictionary format
 
-        mem_sem = random.choice(best_semantic_possibles)
-        idx = mem_sem[0]
+            {"human": <HUMAN>, "object": <OBJECT>, "object_location": <OBJECT_LOCATION>,
+             "timestamp": <TIMESTAMP>}
 
-        mem_selected = self.entries[idx]
+        """
+        if entries is None:
+            logging.debug("No entries were specified. We'll use the memory system.")
+            entries = self.entries
 
-        return mem_selected
+        # sorted() is ascending by default.
+        mem_candidate = sorted(entries, key=lambda x: x["timestamp"])[-1]
+        mem = random.choice(
+            [mem for mem in entries if mem_candidate["timestamp"] == mem["timestamp"]]
+        )
+        logging.info(f"{mem} is the oldest memory in the entries.")
+
+        return mem
+
+    def forget_oldest(self) -> None:
+        """Forget the oldest entry in the memory system.
+
+        At the moment, this is simply done by looking up the timestamps and comparing
+        them.
+
+        """
+        logging.debug("forgetting the oldest memory (FIFO)...")
+
+        mem = self.get_oldest_memory()
+        self.forget(mem)
+
+    def find_similar_memories(self, mem) -> None:
+        """Find similar memories.
+
+        mem: A short memory in a dictionary format
+
+            {"human": <HUMAN>, "object": <OBJECT>, "object_location": <OBJECT_LOCATION>,
+             "timestamp": <TIMESTAMP>}
+
+        """
+        logging.debug("Searching for similar memories in the short memory system...")
+        similar = []
+        for entry in self.entries:
+            if (entry["object"] == mem["object"]) and (
+                entry["object_location"] == mem["object_location"]
+            ):
+                similar.append(entry)
+
+        logging.info(f"{len(similar)} similar short memories found!")
+
+        return similar
+
+    @staticmethod
+    def ob2short(ob: dict) -> dict:
+        """Turn an observation into an short memory.
+
+        At the moment, the observation format is almost the same as an episodic memory
+        for simplification.
+
+        Args
+        ----
+        ob: An observation in a dictionary format
+
+            {"human": <HUMAN>, "object": <OBJECT>,
+            "object_location": <OBJECT_LOCATION>, "current_time": <CURRENT_TIME>}
+
+        Returns
+        -------
+        mem: An episodic memory in a dictionary format
+
+            {"human": <HUMAN>, "object": <OBJECT>, "object_location": <OBJECT_LOCATION>,
+             "timestamp": <TIMESTAMP>}
+
+        """
+        logging.debug(f"Turning an observation {ob} into a short memory ...")
+
+        mem = deepcopy(ob)
+        mem["timestamp"] = mem.pop("current_time")
+
+        logging.info(f"Observation {ob} is now a episodic memory {mem}")
+
+        return mem
+
+    @staticmethod
+    def short2epi(short: dict) -> dict:
+        """Turn a short memory into a episodic memory.
+
+        Args
+        ----
+        short: A short memory in a dictionary format
+
+            {"human": <HUMAN>, "object": <OBJECT>, "object_location": <OBJECT_LOCATION>,
+             "timestamp": <TIMESTAMP>}
+
+        Returns
+        -------
+        epi: An episodic memory in a dictionary format
+
+            {"human": <HUMAN>,
+             "object": <OBJECT>, "object_location": <OBJECT_LOCATION>,
+             "timestamp": <TIMESTAMP>}
+
+        """
+        epi = deepcopy(short)
+        return epi
+
+    @staticmethod
+    def short2sem(short: dict) -> dict:
+        """Turn a short memory into a episodic memory.
+
+        Args
+        ----
+        short: A short memory in a dictionary format
+
+            {"human": <HUMAN>, "object": <OBJECT>, "object_location": <OBJECT_LOCATION>,
+             "timestamp": <TIMESTAMP>}
+
+        Returns
+        -------
+        sem: A semantic memory in a dictionary format
+
+            {"object": <OBJECT>, "object_location": <OBJECT_LOCATION>,
+             "num_generalized": <NUM_GENERALIZED>}
+
+        """
+        sem = deepcopy(short)
+
+        del sem["human"]
+        del sem["timestamp"]
+        sem["num_generalized"] = 1
+
+        return sem
+
+    def find_same_memory(self, mem) -> dict:
+        """Find a short memory that's almost the same as the query memory.
+
+        Args
+        ----
+        mem: A short memory in a dictionary format
+
+            {"human": <HUMAN>, "object": <OBJECT>,
+             "object_location": <OBJECT_LOCATION>, "timestamp": <TIMESTAMP>}
+
+        Returns
+        -------
+        A short memory if it exists. Otherwise return None.
+
+        """
+        for entry in self.entries:
+            if (
+                (entry["human"] == mem["human"])
+                and (entry["object"] == mem["object"])
+                and (entry["object_location"] == mem["object_location"])
+            ):
+                return entry
+
+        return None
 
 
 class SemanticMemory(Memory):
     """Semantic memory class."""
 
-    def __init__(self, capacity: int) -> None:
+    def __init__(
+        self,
+        capacity: int,
+    ) -> None:
+        """Init a semantic memory system.
+
+        Args
+        ----
+        capacity: capacity of the memory system (i.e., number of entries)
+
+        """
         super().__init__("semantic", capacity)
+
+    def can_be_added(self, mem: dict) -> bool:
+        """Checks if a memory can be added to the system or not.
+
+        Args
+        ----
+        True or False
+
+        """
+        if self.capacity <= 0:
+            return False
+
+        if self._frozen:
+            return False
+
+        if self.is_full:
+            if self.find_same_memory(mem) is None:
+                return False
+            else:
+                return True
+        else:
+            return True
 
     def pretrain_semantic(
         self,
-        env,
+        semantic_knowledge: dict,
+        return_remaining_space: bool = True,
+        freeze: bool = True,
     ) -> int:
         """Pretrain the semantic memory system from ConceptNet.
+
+        Args
+        ----
+        semantic_knowledge: from ConceptNet.
+        return_remaining_space: whether or not to return the remaining space from the
+            semantic memory system.
+        freeze: whether or not to freeze the semantic memory system or not.
 
         Returns
         -------
         free_space: free space that was not used, if any, so that it can be added to
             the episodic memory system.
-
         """
-
-        for head, relation_tails in env.semantic_knowledge.items():
+        self.semantic_knowledge = deepcopy(semantic_knowledge)
+        for obj, loc in self.semantic_knowledge.items():
             if self.is_full:
                 break
+            mem = {"object": obj, "object_location": loc, "num_generalized": 1}
+            logging.debug(f"adding a pretrained semantic knowledge {mem}")
+            self.add(mem)
 
-            if env.weighting_mode == "weighted":
-                for relation, tails in relation_tails.items():
-                    for tail in tails:
-                        mem = [head, relation, tail["tail"], tail["weight"]]
+        if return_remaining_space:
+            free_space = self.capacity - len(self.entries)
+            self.decrease_capacity(free_space)
+            logging.info(
+                f"The remaining space {free_space} will be returned. Now "
+                f"the capacity of the semantic memory system is {self.capacity}"
+            )
 
-                        logging.debug(
-                            f"weighting mode: {env.weighting_mode}: adding {mem} to the "
-                            "semantic memory system ..."
-                        )
-                        self.add(mem)
+        else:
+            free_space = None
 
-            elif env.weighting_mode == "highest":
-                for relation, tails in relation_tails.items():
-                    tail = sorted(tails, key=lambda x: x["weight"])[-1]
-                    mem = [head, relation, tail["tail"], tail["weight"]]
-
-                    logging.debug(
-                        f"weighting mode: {env.weighting_mode}: adding {mem} to the "
-                        "semantic memory system ..."
-                    )
-                    self.add(mem)
-            else:
-                raise ValueError
-
-        free_space = self.capacity - len(self.entries)
-        self.decrease_capacity(free_space)
-        self.freeze()
-        logging.info("The semantic memory system is frozen!")
-        logging.info(
-            f"The semantic memory is pretrained and frozen. The remaining space "
-            f"{free_space} will be returned. Now the capacity of the semantic memory "
-            f"system is {self.capacity}"
-        )
+        if freeze:
+            self.freeze()
+            logging.info("The semantic memory system is frozen!")
 
         return free_space
 
-    def get_weakest_memory(self, entries: list = None) -> list:
+    def get_weakest_memory(self, entries: list = None) -> List:
         """Get the weakest memory in the semantic memory system system.
 
         At the moment, this is simply done by looking up the number of generalized
-        episodic memories comparing them. In the end, an RL agent has to learn this
+        memories comparing them. In the end, an RL agent has to learn this
         by itself.
 
         Returns
         -------
-        mem: the weakest memory in a quadruple format (i.e., (head, relation, tail,
-            num_generalized_memories))
+        mem: the weakest memory in a dictionary format
+
+            for semantic:
+            {"object": <OBJECT>, "object_location": <OBJECT_LOCATION>,
+             "num_generalized": <NUM_GENERALIZED>}
 
         """
         if entries is None:
             logging.debug("No entries were specified. We'll use the memory system.")
             entries = self.entries
 
-        # The last element [-1] of memory is num_generalized_memories.
-        mem_candidate = sorted(entries, key=lambda x: x[-1])[0]
-        mem = random.choice([mem for mem in entries if mem_candidate[-1] == mem[-1]])
+        # sorted() is ascending by default.
+        mem_candidate = sorted(entries, key=lambda x: x["num_generalized"])[0]
+        mem = random.choice(
+            [
+                mem
+                for mem in entries
+                if mem_candidate["num_generalized"] == mem["num_generalized"]
+            ]
+        )
         logging.info(f"{mem} is the weakest memory in the entries.")
 
         return mem
 
-    def get_strongest_memory(self, entries: list = None) -> list:
+    def get_strongest_memory(self, entries: list = None) -> List:
         """Get the strongest memory in the semantic memory system system.
 
         At the moment, this is simply done by looking up the number of generalized
-        episodic memories comparing them. In the end, an RL agent has to learn this
-        by itself.
+        memories comparing them.
 
         Returns
         -------
-        mem: the strongest memory in a quadruple format (i.e., (head, relation, tail,
-            num_generalized_memories))
+        mem: the strongest memory in a dictionary format
+
+
+            for semantic:
+            {"object": <OBJECT>, "object_location": <OBJECT_LOCATION>,
+             "num_generalized": <NUM_GENERALIZED>}
 
         """
         if entries is None:
             logging.debug("No entries were specified. We'll use the memory system.")
             entries = self.entries
 
-        # The last element [-1] of memory is num_generalized_memories.
-        mem_candidate = sorted(entries, key=lambda x: x[-1])[-1]
-        mem = random.choice([mem for mem in entries if mem_candidate[-1] == mem[-1]])
+        # sorted() is ascending by default.
+        mem_candidate = sorted(entries, key=lambda x: x["num_generalized"])[-1]
+        mem = random.choice(
+            [
+                mem
+                for mem in entries
+                if mem_candidate["num_generalized"] == mem["num_generalized"]
+            ]
+        )
         logging.info(f"{mem} is the strongest memory in the entries.")
 
         return mem
+
+    def find_similar_memories(self, mem) -> None:
+        """Find similar memories.
+
+        mem: A short memory in a dictionary format
+
+            {"human": <HUMAN>, "object": <OBJECT>, "object_location": <OBJECT_LOCATION>,
+             "timestamp": <TIMESTAMP>}
+
+        """
+        logging.debug("Searching for similar memories in the short memory system...")
+        similar = []
+        for entry in self.entries:
+            if (entry["object"] == mem["object"]) and (
+                entry["object_location"] == mem["object_location"]
+            ):
+                similar.append(entry)
+
+        logging.info(f"{len(similar)} similar short memories found!")
+
+        return similar
 
     def forget_weakest(self) -> None:
         """Forget the weakest entry in the semantic memory system.
 
         At the moment, this is simply done by looking up the number of generalized
-        episodic memories and comparing them. In the end, an RL agent has to learn this
-        by itself.
+        memories and comparing them.
 
         """
         logging.debug("forgetting the weakest memory ...")
@@ -724,13 +843,36 @@ class SemanticMemory(Memory):
         self.forget(mem)
         logging.info(f"{mem} is forgotten!")
 
+    def answer_random(self) -> Tuple[str, int]:
+        """Answer the question with a uniform-randomly chosen memory.
+
+        Returns
+        -------
+        pred: prediction (e.g., desk)
+        num_generalized
+
+        """
+        if self.is_empty:
+            logging.warning("Memory is empty. I can't answer any questions!")
+            pred = None
+            num_generalized = None
+
+        else:
+            mem = random.choice(self.entries)
+            pred = mem["object_location"]
+            num_generalized = mem["num_generalized"]
+
+        logging.info(f"pred: {pred}, num_generalized: {num_generalized}")
+
+        return pred, num_generalized
+
     def answer_strongest(self, question: list) -> Tuple[str, int]:
         """Answer the question (Find the head that matches the question, and choose the
         strongest one among them).
 
         Args
         ----
-        question: a double (i.e., (head, relation))
+        question: a dict (i.e., {"human": <HUMAN>, "object": <OBJECT>})
 
         Returns
         -------
@@ -738,8 +880,6 @@ class SemanticMemory(Memory):
         num_generalized: number of generalized samples.
 
         """
-        if not self.is_question_valid(question):
-            raise ValueError
         logging.debug("answering a question with the answer_strongest policy ...")
 
         if self.is_empty:
@@ -748,9 +888,10 @@ class SemanticMemory(Memory):
             num_generalized = None
 
         else:
-            query_head = self.remove_name(question[0])
-            duplicates = self.get_duplicate_heads(query_head, self.entries)
-            if duplicates is None:
+            duplicates = get_duplicate_dicts(
+                {"object": question["object"]}, self.entries
+            )
+            if len(duplicates) == 0:
                 logging.info("no relevant memories found.")
                 pred = None
                 num_generalized = None
@@ -760,134 +901,156 @@ class SemanticMemory(Memory):
                     f"{len(duplicates)} relevant memories were found in the entries!"
                 )
                 mem = self.get_strongest_memory(duplicates)
-                pred = self.remove_name(mem[2])
-                num_generalized = mem[3]
+                pred = mem["object_location"]
+                num_generalized = mem["num_generalized"]
 
         logging.info(f"pred: {pred}, num_generalized: {num_generalized}")
 
         return pred, num_generalized
 
     @staticmethod
-    def ob2sem(ob: list) -> list:
+    def ob2sem(ob: dict) -> dict:
         """Turn an observation into a semantic memory.
 
         At the moment, this is simply done by removing the names from the head and the
-        tail. In the end, an RL agent has to learn this by itself.
+        tail.
 
         Args
         ----
-        ob: An observation in a quadruple format
-            (i.e., (head, relation, tail, timestamp))
+        ob: An observation in a dictionary format
 
-        """
-        assert len(ob) == 4
-        logging.debug(f"Turning an observation {ob} into a semantic memory ...")
-        # split to remove the name
-        head = Memory.remove_name(ob[0])
-        relation = ob[1]
-        tail = Memory.remove_name(ob[2])
+            {"human": <HUMAN>, "object": <OBJECT>,
+            "object_location": <OBJECT_LOCATION>, "current_time": <CURRENT_TIME>}
 
-        # 1 stands for the 1 generalized.
-        mem_sem = [head, relation, tail, 1]
-        logging.info(f"Observation {ob} is now a semantic memory {mem_sem}")
-
-        return mem_sem
-
-    @staticmethod
-    def eq2sq(episodic_question) -> list:
-        """Turn an episodic question to a semantic question.
-
-        At the moment, this is simply done by removing the names from the head and the
-        tail. In the end, an RL agent has to learn this by itself.
-
-        Args
-        ----
-        question: An episodic question in a triple format
-            (i.e., (head, relation, tail))
 
         Returns
         -------
-        semantic_question: A semantic question in a triple format, without names.
-            (i.e., (head, relation, tail))
+        mem: A semantic memory in a dictionary format
+
+            {"human": <HUMAN>, "object": <OBJECT>, "object_location": <OBJECT_LOCATION>,
+             "num_generalized": <NUM_GENERALIZED>}
 
         """
-        if not Memory.is_question_valid(episodic_question):
-            raise ValueError
+        logging.debug(f"Turning an observation {ob} into a semantic memory ...")
+        mem = deepcopy(ob)
 
-        logging.debug(
-            f"Turning an episodic question {episodic_question} into a semantic "
-            f"question ..."
-        )
-        # split to remove the name
-        head = Memory.remove_name(episodic_question[0])
-        relation = episodic_question[1]
-        tail = Memory.remove_name(episodic_question[2])
+        del mem["human"]
+        del mem["current_time"]
 
-        semantic_question = [head, relation, tail]
-        logging.info(
-            f"An episodic question {episodic_question} is now a semantic "
-            f"question {semantic_question}"
-        )
-        return semantic_question
+        # 1 stands for the 1 generalized.
+        mem["num_generalized"] = 1
 
-    def clean_memories(self) -> list:
+        logging.info(f"Observation {ob} is now a semantic memory {mem}")
+
+        return mem
+
+    def clean_same_memories(self) -> List:
         """Find if there are duplicate memories cuz they should be summed out.
 
-        At the moment, this is simply done by matching string values. In the end, an
-        RL agent has to learn this by itself.
+        At the moment, this is simply done by matching string values.
 
         """
         logging.debug("finding if duplicate memories exist ...")
 
-        entries = self.entries
+        entries = deepcopy(self.entries)
         logging.debug(
             f"There are in total of {len(entries)} semantic memories before cleaning"
         )
-        entries = [mem[:-1] for mem in entries]
-        for mem in entries:
-            assert len(mem) == 3
+        for entry in entries:
+            del entry["num_generalized"]
 
-        entries = ["^".join(mem) for mem in entries]  # to make list hashable
+        entries = [str(mem) for mem in entries]  # to make list hashable
         uniques = set(entries)
-
-        def list_duplicates_of(seq, item):
-            # https://stackoverflow.com/questions/5419204/index-of-duplicates-items-in-a-python-list
-            start_at = -1
-            locs = []
-            while True:
-                try:
-                    loc = seq.index(item, start_at + 1)
-                except ValueError:
-                    break
-                else:
-                    locs.append(loc)
-                    start_at = loc
-            return locs
 
         locs_all = [
             list_duplicates_of(entries, unique_entry) for unique_entry in uniques
         ]
         locs_all.sort(key=len)
         entries_cleaned = []
+
         for locs in locs_all:
-            mem_sem = self.entries[locs[0]]
-            mem_sem[-1] = sum([self.entries[loc][-1] for loc in locs])
-            entries_cleaned.append(mem_sem)
+            mem = self.entries[locs[0]]
+            mem["num_generalized"] = sum(
+                [self.entries[loc]["num_generalized"] for loc in locs]
+            )
+            entries_cleaned.append(mem)
 
         self.entries = entries_cleaned
         logging.debug(
             f"There are now in total of {len(self.entries)} semantic memories after cleaning"
         )
 
-    def add(self, mem: list):
+    def add(self, mem: dict):
         """Append a memory to the semantic memory system.
 
         Args
         ----
-        mem: A memory in a quadruple format (i.e., (head, relation, tail,
-            num_generalized_memories))
+        mem: A memory in a dictionary format
+
+            {"object": <OBJECT>, "object_location": <OBJECT_LOCATION>,
+             "num_generalized": <NUM_GENERALIZED>}
 
         """
-        super().add(mem)
-        self.clean_memories()
-        self.sort_memories_ascending()
+        if self._frozen:
+            error_msg = "The memory system is frozen!"
+            logging.error(error_msg)
+            raise ValueError(error_msg)
+
+        logging.debug(f"Adding a new memory entry {mem} ...")
+        self.entries.append(mem)
+        logging.info(
+            f"memory entry {mem} added. Now there are in total of "
+            f"{len(self.entries)} memories!"
+        )
+        self.clean_same_memories()
+
+        # sort ascending
+        self.entries.sort(key=lambda x: x["num_generalized"])
+
+        assert self.size <= self.capacity
+
+    def find_same_memory(self, mem) -> dict:
+        """Find a semantic memory that's almost the same as the query memory.
+
+        Args
+        ----
+        mem: A semantic memory in a dictionary format
+
+            {"object": <OBJECT>, "object_location": <OBJECT_LOCATION>,
+             "num_generalized": <NUM_GENERALIZED>}
+
+        Returns
+        -------
+        A semantic memory if it exists. Otherwise return None.
+
+        """
+        for entry in self.entries:
+            if (entry["object"] == mem["object"]) and (
+                entry["object_location"] == mem["object_location"]
+            ):
+                return entry
+
+        return None
+
+    def find_same_object_memory(self, mem) -> dict:
+        """Find a semantic memory whose object is the same as the query memory.
+
+        Args
+        ----
+        mem: A semantic memory in a dictionary format
+
+            {"object": <OBJECT>, "object_location": <OBJECT_LOCATION>,
+             "num_generalized": <NUM_GENERALIZED>}
+
+        Returns
+        -------
+        A semantic memory if it exists. Otherwise return None.
+
+        """
+        for entry in self.entries:
+            if (entry["object"] == mem["object"]) and (
+                entry["object_location"] != mem["object_location"]
+            ):
+                return entry
+
+        return None

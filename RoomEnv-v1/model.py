@@ -1,7 +1,6 @@
 """Deep Q-network architecture. Currently only LSTM is implemented."""
 import ast
 from copy import deepcopy
-from multiprocessing.sharedctypes import Value
 
 import torch
 from torch import nn

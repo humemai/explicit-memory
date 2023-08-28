@@ -1,4 +1,7 @@
-"""This is only used for RoomEnv-v0"""
+"""This is only used for RoomEnv-v0.
+This should be compatible with memory.py. It's a TOOD. This file shouldn't exist. 
+
+"""
 import logging
 import os
 import random
@@ -61,7 +64,6 @@ class Memory:
         return True
 
     def __repr__(self):
-
         return pformat(vars(self), indent=4, width=1)
 
     def is_answerable(self, question: list) -> bool:

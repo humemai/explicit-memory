@@ -1,8 +1,8 @@
 import random
 from itertools import count
 
-from ..memory0 import EpisodicMemory, SemanticMemory
-from ..utils import argmax, seed_everything
+from explicit_memory.memory0 import EpisodicMemory, SemanticMemory
+from explicit_memory.utils import argmax, seed_everything
 
 
 class HandcraftedAgent:
@@ -258,7 +258,6 @@ class HandcraftedAgent:
             for i in range(self.env.num_agents):
                 if self.M_e[i].is_full:
                     if self.forget_policy == "generalize":
-
                         mem_epi = self.M_e[i].find_mem_for_semantic()
                         self.M_e[i].forget(mem_epi)
                         mem_sem = SemanticMemory.ob2sem(mem_epi)

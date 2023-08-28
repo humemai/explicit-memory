@@ -152,19 +152,28 @@ class Memory:
             f"{self.capacity}!"
         )
 
+    def return_as_dicts(self) -> dict:
+        """
+        Return the memories as dicts, not as the Memory object.
+        """
+        return deepcopy(self.entries)
+
 
 class EpisodicMemory(Memory):
     """Episodic memory class."""
 
-    def __init__(self, capacity: int) -> None:
+    def __init__(self, capacity: int, remove_duplicates: bool = False) -> None:
         """Init an episodic memory system.
 
         Args
         ----
         capacity: capacity of the memory system (i.e., number of entries)
+        remove_duplicates: if True, it'll remove the same memories with the older
+            timestamps.
 
         """
         super().__init__("episodic", capacity)
+        self.remove_duplicates = remove_duplicates
 
     def can_be_added(self, mem: dict) -> bool:
         """Checks if a memory can be added to the system or not.
@@ -209,7 +218,8 @@ class EpisodicMemory(Memory):
             f"memory entry {mem} added. Now there are in total of "
             f"{len(self.entries)} memories!"
         )
-        self.clean_old_memories()
+        if self.remove_duplicates:
+            self.clean_old_memories()
 
         # sort ascending
         self.entries.sort(key=lambda x: x["timestamp"])
@@ -581,7 +591,7 @@ class ShortMemory(Memory):
         mem = deepcopy(ob)
         mem["timestamp"] = mem.pop("current_time")
 
-        logging.info(f"Observation {ob} is now a episodic memory {mem}")
+        logging.info(f"Observation {ob} is now a short-term memory {mem}")
 
         return mem
 

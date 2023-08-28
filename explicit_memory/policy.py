@@ -5,27 +5,22 @@ The trained neural network policies are not implemented yet.
 import random
 from typing import List
 
-from ..memory import ShortMemory
+from .memory import ShortMemory
 
 
-def encode_observation(memory_systems: dict, policy: str, obs: dict) -> None:
+def encode_observation(memory_systems: dict, obs: dict) -> None:
     """Non RL policy of encoding an observation into a short-term memory.
 
     Args
     ----
     memory_systems: {"episodic": EpisodicMemory, "semantic": SemanticMemory,
                      "short": ShortMemory}
-    policy: "argmax" or "neural"
     obs: observation = {"human": <human>,
                         "object": <obj>,
                         "object_location": <obj_loc>}
 
     """
-    if policy.lower() == "argmax":
-        mem_short = ShortMemory.ob2short(obs)
-    else:
-        raise NotImplementedError
-
+    mem_short = ShortMemory.ob2short(obs)
     memory_systems["short"].add(mem_short)
 
 

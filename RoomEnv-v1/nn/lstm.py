@@ -1,7 +1,7 @@
 """Deep Q-network architecture. Currently only LSTM is implemented."""
-import ast
 from copy import deepcopy
 
+import numpy as np
 import torch
 from torch import nn
 
@@ -19,9 +19,8 @@ class LSTM(nn.Module):
         entities: dict,
         include_human: str,
         batch_first: bool = True,
-        memory_systems: list = ["episodic", "semantic", "short"],
         human_embedding_on_object_location: bool = False,
-        accelerator: str = "cpu",
+        device: str = "cpu",
         **kwargs,
     ) -> None:
         """Initialize the LSTM.
@@ -45,10 +44,9 @@ class LSTM(nn.Module):
             "cocnat": concatenate the human embeddings to object / object_location
                 embeddings.
         batch_first: Should the batch dimension be the first or not.
-        memory_systems: memory systems to be included as input
         human_embedding_on_object_location: whether to superposition the human embedding
             on the tail (object location entity).
-        accelerator: "cpu", "gpu", or "auto"
+        device: "cpu" or "cuda"
 
         """
         super().__init__()
@@ -56,32 +54,26 @@ class LSTM(nn.Module):
         self.capacity = capacity
         self.entities = entities
         self.include_human = include_human
-        self.memory_systems = [ms.lower() for ms in set(memory_systems)]
+        self.memory_of_interest = list(self.capacity.keys())
         self.human_embedding_on_object_location = human_embedding_on_object_location
-
-        if accelerator == "gpu":
-            self.device = "cuda"
-        elif accelerator == "cpu":
-            self.device = "cpu"
-        else:
-            raise ValueError
+        self.device = device
 
         self.create_embeddings()
-        if "episodic" in self.memory_systems:
+        if "episodic" in self.memory_of_interest:
             self.lstm_e = nn.LSTM(
                 self.input_size_e, hidden_size, num_layers, batch_first=batch_first
             )
             self.fc_e0 = nn.Linear(hidden_size, hidden_size)
             self.fc_e1 = nn.Linear(hidden_size, hidden_size)
 
-        if "semantic" in self.memory_systems:
+        if "semantic" in self.memory_of_interest:
             self.lstm_s = nn.LSTM(
                 self.input_size_s, hidden_size, num_layers, batch_first=batch_first
             )
             self.fc_s0 = nn.Linear(hidden_size, hidden_size)
             self.fc_s1 = nn.Linear(hidden_size, hidden_size)
 
-        if "short" in self.memory_systems:
+        if "short" in self.memory_of_interest:
             self.lstm_o = nn.LSTM(
                 self.input_size_o, hidden_size, num_layers, batch_first=batch_first
             )
@@ -90,10 +82,12 @@ class LSTM(nn.Module):
             self.fc_o1 = nn.Linear(hidden_size, hidden_size)
 
         self.fc_final0 = nn.Linear(
-            hidden_size * len(self.memory_systems),
-            hidden_size * len(self.memory_systems),
+            hidden_size * len(self.memory_of_interest),
+            hidden_size * len(self.memory_of_interest),
         )
-        self.fc_final1 = nn.Linear(hidden_size * len(self.memory_systems), n_actions)
+        self.fc_final1 = nn.Linear(
+            hidden_size * len(self.memory_of_interest), n_actions
+        )
         self.relu = nn.ReLU()
 
     def create_embeddings(self) -> None:
@@ -178,13 +172,12 @@ class LSTM(nn.Module):
 
         return final_embedding
 
-    def create_batch(self, x: list, max_len: int, memory_type: str) -> torch.Tensor:
+    def create_batch(self, x: list, memory_type: str) -> torch.Tensor:
         """Create one batch from data.
 
         Args
         ----
         x: a batch of episodic, semantic, or short memories.
-        max_len: maximum length (memory capacity)
         memory_type: "episodic", "semantic", or "short"
 
         Returns
@@ -192,63 +185,59 @@ class LSTM(nn.Module):
         batch of embeddings.
 
         """
-        batch = []
-        for mems_str in x:
-            entries = ast.literal_eval(mems_str)
 
-            if memory_type == "semantic":
-                mem_pad = {
-                    "object": "<PAD>",
-                    "object_location": "<PAD>",
-                    "num_generalized": "<PAD>",
-                }
-            elif memory_type in ["episodic", "short"]:
-                mem_pad = {
-                    "human": "<PAD>",
-                    "object": "<PAD>",
-                    "object_location": "<PAD>",
-                    "timestamp": "<PAD>",
-                }
-            else:
-                raise ValueError
+        if memory_type == "semantic":
+            mem_pad = {
+                "object": "<PAD>",
+                "object_location": "<PAD>",
+                "num_generalized": "<PAD>",
+            }
+        elif memory_type in ["episodic", "short"]:
+            mem_pad = {
+                "human": "<PAD>",
+                "object": "<PAD>",
+                "object_location": "<PAD>",
+                "timestamp": "<PAD>",
+            }
+        else:
+            raise ValueError
 
-            for _ in range(max_len - len(entries)):
+        mems_batch = deepcopy(x)
+        for mems in mems_batch:
+            for _ in range(self.capacity[memory_type] - len(mems)):
                 # this is a dummy entry for padding.
-                entries.append(mem_pad)
-            mems = []
-            for entry in entries:
-                mem_emb = self.make_embedding(entry, memory_type)
-                mems.append(mem_emb)
-            mems = torch.stack(mems)
-            batch.append(mems)
-        batch = torch.stack(batch)
+                mems.append(mem_pad)
 
-        return batch
+        batch_embeddings = []
+        for mems in mems_batch:
+            embeddings = []
+            for mem in mems:
+                mem_emb = self.make_embedding(mem, memory_type)
+                embeddings.append(mem_emb)
+            embeddings = torch.stack(embeddings)
+            batch_embeddings.append(embeddings)
 
-    def forward(self, x: list) -> torch.Tensor:
+        batch_embeddings = torch.stack(batch_embeddings)
+        # print(batch_embeddings.shape)
+
+        return batch_embeddings
+
+    def forward(self, x: np.ndarray) -> torch.Tensor:
         """Forward-pass.
 
         Args
         ----
-        x[0]: episodic batch
-            the length of this is batch size
-        x[1]: semantic batch
-            the length of this is batch size
-        x[2]: short batch
-            the length of this is batch size
+        x is a batch of memories. Each element of the batch is a np.ndarray of dict
+        memories.
 
         """
-        x_ = deepcopy(x)
-        for i in range(3):
-            if isinstance(x_[i], str):
-                # bug fix. This happens when batch_size=1. I don't even know why
-                # batch size 1 happens.
-                x_[i] = [x_[i]]
-
         to_concat = []
-        if "episodic" in self.memory_systems:
+        if isinstance(x, dict):
+            x = np.array([x])
+        if "episodic" in self.memory_of_interest:
             batch_e = self.create_batch(
-                x_[0], self.capacity["episodic"], memory_type="episodic"
+                [sample["episodic"] for sample in x],
+                memory_type="episodic",
             )
             lstm_out_e, _ = self.lstm_e(batch_e)
             fc_out_e = self.relu(
@@ -256,9 +245,10 @@ class LSTM(nn.Module):
             )
             to_concat.append(fc_out_e)
 
-        if "semantic" in self.memory_systems:
+        if "semantic" in self.memory_of_interest:
             batch_s = self.create_batch(
-                x_[1], self.capacity["semantic"], memory_type="semantic"
+                [sample["semantic"] for sample in x],
+                memory_type="semantic",
             )
             lstm_out_s, _ = self.lstm_s(batch_s)
             fc_out_s = self.relu(
@@ -266,9 +256,10 @@ class LSTM(nn.Module):
             )
             to_concat.append(fc_out_s)
 
-        if "short" in self.memory_systems:
+        if "short" in self.memory_of_interest:
             batch_o = self.create_batch(
-                x_[2], self.capacity["short"], memory_type="short"
+                [sample["short"] for sample in x],
+                memory_type="short",
             )
             lstm_out_o, _ = self.lstm_o(batch_o)
             fc_out_o = self.relu(

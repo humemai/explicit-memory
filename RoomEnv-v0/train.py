@@ -12,7 +12,7 @@ import gymnasium as gym
 import matplotlib.pyplot as plt
 import yaml
 
-from explicit_memory.agent import HandcraftedAgent
+from agent import HandcraftedAgent
 
 parser = argparse.ArgumentParser(description="train")
 parser.add_argument(

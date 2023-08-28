@@ -61,32 +61,44 @@ class LSTM(nn.Module):
         self.create_embeddings()
         if "episodic" in self.memory_of_interest:
             self.lstm_e = nn.LSTM(
-                self.input_size_e, hidden_size, num_layers, batch_first=batch_first
+                self.input_size_e,
+                hidden_size,
+                num_layers,
+                batch_first=batch_first,
+                device=self.device,
             )
-            self.fc_e0 = nn.Linear(hidden_size, hidden_size)
-            self.fc_e1 = nn.Linear(hidden_size, hidden_size)
+            self.fc_e0 = nn.Linear(hidden_size, hidden_size, device=self.device)
+            self.fc_e1 = nn.Linear(hidden_size, hidden_size, device=self.device)
 
         if "semantic" in self.memory_of_interest:
             self.lstm_s = nn.LSTM(
-                self.input_size_s, hidden_size, num_layers, batch_first=batch_first
+                self.input_size_s,
+                hidden_size,
+                num_layers,
+                batch_first=batch_first,
+                device=self.device,
             )
-            self.fc_s0 = nn.Linear(hidden_size, hidden_size)
-            self.fc_s1 = nn.Linear(hidden_size, hidden_size)
+            self.fc_s0 = nn.Linear(hidden_size, hidden_size, device=self.device)
+            self.fc_s1 = nn.Linear(hidden_size, hidden_size, device=self.device)
 
         if "short" in self.memory_of_interest:
             self.lstm_o = nn.LSTM(
-                self.input_size_o, hidden_size, num_layers, batch_first=batch_first
+                self.input_size_o,
+                hidden_size,
+                num_layers,
+                batch_first=batch_first,
+                device=self.device,
             )
-            self.fc_o0 = nn.Linear(hidden_size, hidden_size)
-            # self.fc_o0 = nn.Linear(self.input_size_o, hidden_size)
-            self.fc_o1 = nn.Linear(hidden_size, hidden_size)
+            self.fc_o0 = nn.Linear(hidden_size, hidden_size, device=self.device)
+            self.fc_o1 = nn.Linear(hidden_size, hidden_size, device=self.device)
 
         self.fc_final0 = nn.Linear(
             hidden_size * len(self.memory_of_interest),
             hidden_size * len(self.memory_of_interest),
+            device=self.device,
         )
         self.fc_final1 = nn.Linear(
-            hidden_size * len(self.memory_of_interest), n_actions
+            hidden_size * len(self.memory_of_interest), n_actions, device=self.device
         )
         self.relu = nn.ReLU()
 

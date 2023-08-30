@@ -1,46 +1,27 @@
-allow_random_human: false
-allow_random_question: false
-pretrain_semantic: false
-varying_rewards: false
-seed: 0
-num_eval_iter: 10
-max_epochs: 16
-batch_size: 1024
-epoch_length: 131072
-replay_size: 131072
-warm_start_size: 131072
-eps_end: 0
-eps_last_step: 2048
-eps_start: 1.0
-gamma: 0.65
-lr: 0.001
-sync_rate: 10
-loss_function: huber
-optimizer: adam
-des_size: l
+num_iterations: 4096
+replay_buffer_size: 16
+batch_size: 4
 capacity:
   episodic: 16
   semantic: 16
   short: 1
-question_prob: 1.0
-observation_params: perfect
+env_str: room_env:RoomEnv-v1
+epsilon_decay_until: 32
+gamma: 0.65
+max_epsilon: 1.0
+min_epsilon: 0.1
 nn_params:
-  architecture: lstm
   embedding_dim: 32
   hidden_size: 64
   include_human: sum
-  memory_systems:
-    - episodic
-    - semantic
-    - short
+  n_actions: 3
   num_layers: 2
-  human_embedding_on_object_location: false
-log_every_n_steps: 1
-early_stopping_patience: 1000 # number of epochs, not episodes! Atm, I don't do this.
-precision: 32
-accelerator: cpu
-dqn_type: double
-# num_steps_per_epoch = ceil(epoch_length / batch_size)
-# total_number_of_steps = num_steps_per_epoch * max_epochs
-# total_number_of_episodes = total_number_of_steps / last_time_step
-# number of epochs per episode = max_epochs / total_number_of_episodes
+num_samples_for_results: 10
+plotting_interval: 10
+pretrain_semantic: false
+run_test: true
+run_validation: true
+target_update_rate: 10
+test_seed: 42
+train_seed: 42
+device: cpu

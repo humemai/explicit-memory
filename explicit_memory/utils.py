@@ -198,11 +198,34 @@ def rename_training_dirs(root_dir: str = "./training_results/"):
 
 
 class ReplayBuffer:
-    """A simple numpy replay buffer."""
+    """A simple numpy replay buffer.
 
-    def __init__(self, size: int, batch_size: int = 32):
-        self.obs_buf = np.array([{}] * size)
-        self.next_obs_buf = np.array([{}] * size)
+    numpy replay buffer is faster than deque or list.
+
+    """
+
+    def __init__(
+        self,
+        observation_type: str,
+        size: int,
+        obs_dim: tuple = None,
+        batch_size: int = 32,
+    ):
+        """Initialize replay buffer.
+
+        Args
+        ----
+        observation_type: "dict" or "tensor"
+        size: size of the buffer
+        batch_size: batch size to sample
+
+        """
+        if observation_type == "dict":
+            self.obs_buf = np.array([{}] * size)
+            self.next_obs_buf = np.array([{}] * size)
+        else:
+            self.obs_buf = np.zeros([size, *obs_dim], dtype=np.float32)
+            self.next_obs_buf = np.zeros([size, *obs_dim], dtype=np.float32)
         self.acts_buf = np.zeros([size], dtype=np.float32)
         self.rews_buf = np.zeros([size], dtype=np.float32)
         self.done_buf = np.zeros(size, dtype=np.float32)
@@ -242,4 +265,18 @@ class ReplayBuffer:
         )
 
     def __len__(self) -> int:
-        return self.size
+        return self.size + 1
+
+
+def is_running_notebook() -> bool:
+    """See if the code is running in a notebook or not."""
+    try:
+        shell = get_ipython().__class__.__name__
+        if shell == "ZMQInteractiveShell":
+            return True  # Jupyter notebook or qtconsole
+        elif shell == "TerminalInteractiveShell":
+            return False  # Terminal running IPython
+        else:
+            return False  # Other type (?)
+    except NameError:
+        return False  # Probably standard Python interpreter

@@ -1,5 +1,9 @@
 """Matplotlib functions."""
 import logging
+
+logger = logging.getLogger()
+logger.disabled = True
+
 import os
 from copy import deepcopy
 from glob import glob
@@ -16,10 +20,6 @@ from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 
 from train import DQNLightning, RLAgent
-from memory.utils import read_yaml
-
-logger = logging.getLogger()
-logger.disabled = True
 
 
 def load_training_val_test_results(
@@ -90,7 +90,6 @@ def load_episodic_semantic_random_scratch_pretrained(
     allow_random_human: str = False,
     allow_random_question: str = False,
 ) -> dict:
-
     results = get_handcrafted(
         env="RoomEnv-v1",
         des_size=des_size,
@@ -324,7 +323,6 @@ def plot_test_results_all_capacities(
     allow_random_human: str = False,
     allow_random_question: str = False,
 ) -> None:
-
     capacities = [2, 4, 8, 16, 32, 64]
     width = 0.17
 

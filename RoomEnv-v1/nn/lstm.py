@@ -4,6 +4,9 @@ from copy import deepcopy
 import numpy as np
 import torch
 from torch import nn
+import torch.nn.functional as F
+
+from explicit_memory.nn import NoisyLinear
 
 
 class LSTM(nn.Module):
@@ -18,6 +21,8 @@ class LSTM(nn.Module):
         capacity: dict,
         entities: dict,
         include_human: str,
+        atom_size: int,
+        support: torch.Tensor,
         batch_first: bool = True,
         human_embedding_on_object_location: bool = False,
         device: str = "cpu",
@@ -43,6 +48,8 @@ class LSTM(nn.Module):
             "sum": sum up the human embeddings with object / object_location embeddings.
             "cocnat": concatenate the human embeddings to object / object_location
                 embeddings.
+        atom_size: parameter for NoisyNet, DuelingNet, and CategoricalDQN.
+        support: parameter for NoisyNet, DuelingNet, and CategoricalDQN.
         batch_first: Should the batch dimension be the first or not.
         human_embedding_on_object_location: whether to superposition the human embedding
             on the tail (object location entity).
@@ -57,6 +64,9 @@ class LSTM(nn.Module):
         self.memory_of_interest = list(self.capacity.keys())
         self.human_embedding_on_object_location = human_embedding_on_object_location
         self.device = device
+        self.atom_size = atom_size
+        self.support = support
+        self.n_actions = n_actions
 
         self.create_embeddings()
         if "episodic" in self.memory_of_interest:
@@ -92,15 +102,93 @@ class LSTM(nn.Module):
             self.fc_o0 = nn.Linear(hidden_size, hidden_size, device=self.device)
             self.fc_o1 = nn.Linear(hidden_size, hidden_size, device=self.device)
 
-        self.fc_final0 = nn.Linear(
-            hidden_size * len(self.memory_of_interest),
-            hidden_size * len(self.memory_of_interest),
-            device=self.device,
+        self.hidden_size_last = hidden_size * len(self.memory_of_interest)
+
+        # self.fc_final0 = nn.Linear(
+        #     self.hidden_size_last, self.hidden_size_last, device=self.device
+        # )
+        # self.fc_final1 = nn.Linear(self.hidden_size_last, self.n_actions, device=self.device)
+
+        # set advantage layer
+        self.advantage_hidden_layer = NoisyLinear(
+            self.hidden_size_last, self.hidden_size_last, device=self.device
         )
-        self.fc_final1 = nn.Linear(
-            hidden_size * len(self.memory_of_interest), n_actions, device=self.device
+        self.advantage_layer = NoisyLinear(
+            self.hidden_size_last, self.n_actions * self.atom_size, device=self.device
         )
+
+        # set value layer
+        self.value_hidden_layer = NoisyLinear(
+            self.hidden_size_last, self.hidden_size_last, device=self.device
+        )
+        self.value_layer = NoisyLinear(
+            self.hidden_size_last, self.atom_size, device=self.device
+        )
+
         self.relu = nn.ReLU()
+
+    def dist(self, x: torch.Tensor) -> torch.Tensor:
+        """Get distribution for atoms."""
+        # feature = self.feature_layer(x)
+        to_concat = []
+        if isinstance(x, dict):
+            x = np.array([x])
+        if "episodic" in self.memory_of_interest:
+            batch_e = self.create_batch(
+                [sample["episodic"] for sample in x],
+                memory_type="episodic",
+            )
+            lstm_out_e, _ = self.lstm_e(batch_e)
+            fc_out_e = self.relu(
+                self.fc_e1(self.relu(self.fc_e0(lstm_out_e[:, -1, :])))
+            )
+            to_concat.append(fc_out_e)
+
+        if "semantic" in self.memory_of_interest:
+            batch_s = self.create_batch(
+                [sample["semantic"] for sample in x],
+                memory_type="semantic",
+            )
+            lstm_out_s, _ = self.lstm_s(batch_s)
+            fc_out_s = self.relu(
+                self.fc_s1(self.relu(self.fc_s0(lstm_out_s[:, -1, :])))
+            )
+            to_concat.append(fc_out_s)
+
+        if "short" in self.memory_of_interest:
+            batch_o = self.create_batch(
+                [sample["short"] for sample in x],
+                memory_type="short",
+            )
+            lstm_out_o, _ = self.lstm_o(batch_o)
+            fc_out_o = self.relu(
+                self.fc_o1(self.relu(self.fc_o0(lstm_out_o[:, -1, :])))
+            )
+            to_concat.append(fc_out_o)
+
+        # dim=-1 is the feature dimension
+        feature = torch.concat(to_concat, dim=-1)
+
+        adv_hid = F.relu(self.advantage_hidden_layer(feature))
+        val_hid = F.relu(self.value_hidden_layer(feature))
+
+        advantage = self.advantage_layer(adv_hid).view(
+            -1, self.n_actions, self.atom_size
+        )
+        value = self.value_layer(val_hid).view(-1, 1, self.atom_size)
+        q_atoms = value + advantage - advantage.mean(dim=1, keepdim=True)
+
+        dist = F.softmax(q_atoms, dim=-1)
+        dist = dist.clamp(min=1e-3)  # for avoiding nans
+
+        return dist
+
+    def reset_noise(self):
+        """Reset all noisy layers."""
+        self.advantage_hidden_layer.reset_noise()
+        self.advantage_layer.reset_noise()
+        self.value_hidden_layer.reset_noise()
+        self.value_layer.reset_noise()
 
     def create_embeddings(self) -> None:
         """Create learnable embeddings."""
@@ -243,46 +331,50 @@ class LSTM(nn.Module):
         memories.
 
         """
-        to_concat = []
-        if isinstance(x, dict):
-            x = np.array([x])
-        if "episodic" in self.memory_of_interest:
-            batch_e = self.create_batch(
-                [sample["episodic"] for sample in x],
-                memory_type="episodic",
-            )
-            lstm_out_e, _ = self.lstm_e(batch_e)
-            fc_out_e = self.relu(
-                self.fc_e1(self.relu(self.fc_e0(lstm_out_e[:, -1, :])))
-            )
-            to_concat.append(fc_out_e)
+        # to_concat = []
+        # if isinstance(x, dict):
+        #     x = np.array([x])
+        # if "episodic" in self.memory_of_interest:
+        #     batch_e = self.create_batch(
+        #         [sample["episodic"] for sample in x],
+        #         memory_type="episodic",
+        #     )
+        #     lstm_out_e, _ = self.lstm_e(batch_e)
+        #     fc_out_e = self.relu(
+        #         self.fc_e1(self.relu(self.fc_e0(lstm_out_e[:, -1, :])))
+        #     )
+        #     to_concat.append(fc_out_e)
 
-        if "semantic" in self.memory_of_interest:
-            batch_s = self.create_batch(
-                [sample["semantic"] for sample in x],
-                memory_type="semantic",
-            )
-            lstm_out_s, _ = self.lstm_s(batch_s)
-            fc_out_s = self.relu(
-                self.fc_s1(self.relu(self.fc_s0(lstm_out_s[:, -1, :])))
-            )
-            to_concat.append(fc_out_s)
+        # if "semantic" in self.memory_of_interest:
+        #     batch_s = self.create_batch(
+        #         [sample["semantic"] for sample in x],
+        #         memory_type="semantic",
+        #     )
+        #     lstm_out_s, _ = self.lstm_s(batch_s)
+        #     fc_out_s = self.relu(
+        #         self.fc_s1(self.relu(self.fc_s0(lstm_out_s[:, -1, :])))
+        #     )
+        #     to_concat.append(fc_out_s)
 
-        if "short" in self.memory_of_interest:
-            batch_o = self.create_batch(
-                [sample["short"] for sample in x],
-                memory_type="short",
-            )
-            lstm_out_o, _ = self.lstm_o(batch_o)
-            fc_out_o = self.relu(
-                self.fc_o1(self.relu(self.fc_o0(lstm_out_o[:, -1, :])))
-            )
-            to_concat.append(fc_out_o)
+        # if "short" in self.memory_of_interest:
+        #     batch_o = self.create_batch(
+        #         [sample["short"] for sample in x],
+        #         memory_type="short",
+        #     )
+        #     lstm_out_o, _ = self.lstm_o(batch_o)
+        #     fc_out_o = self.relu(
+        #         self.fc_o1(self.relu(self.fc_o0(lstm_out_o[:, -1, :])))
+        #     )
+        #     to_concat.append(fc_out_o)
 
-        # dim=-1 is the feature dimension
-        fc_out_all = torch.concat(to_concat, dim=-1)
+        # # dim=-1 is the feature dimension
+        # fc_out_all = torch.concat(to_concat, dim=-1)
 
         # fc_out has the dimension of (batch_size, 2)
-        fc_out = self.fc_final1(self.relu(self.fc_final0(fc_out_all)))
+        # fc_out = self.fc_final1(self.relu(self.fc_final0(fc_out_all)))
 
-        return fc_out
+        # return fc_out
+
+        dist = self.dist(x)
+        q = torch.sum(dist * self.support, dim=2)
+        return q

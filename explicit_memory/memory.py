@@ -4,7 +4,7 @@ import os
 import random
 from copy import deepcopy
 from pprint import pformat
-from typing import List, Tuple
+from typing import List, Tuple, Dict, Union
 
 from .utils import get_duplicate_dicts, list_duplicates_of
 
@@ -42,20 +42,14 @@ class Memory:
     def __repr__(self):
         return pformat(vars(self), indent=4, width=1)
 
-    def forget(self, mem: dict) -> None:
+    def forget(self, mem: List) -> None:
         """forget the given memory.
 
         Args
         ----
-        mem: A memory in a dictionary format.
-
-            for episodic and short:
-            {"human": <HUMAN>, "object": <OBJECT>, "object_location": <OBJECT_LOCATION>,
-             "timestamp": <TIMESTAMP>}
-
-            for semantic:
-            {"object": <OBJECT>, "object_location": <OBJECT_LOCATION>,
-             "num_generalized": <NUM_GENERALIZED>}
+        mem: A memory as a quadraple: [head, relation, tail, num], where `num` is
+            either a timestamp or num generalized, for episodic / short and semantic,
+            respectively.
 
         """
         if self._frozen:
@@ -75,9 +69,9 @@ class Memory:
     def forget_all(self) -> None:
         """Forget everything in the memory system!"""
         if self.is_frozen:
-            logging.warning(
-                "The memory system is frozen. Can't forget all. Unfreeze first."
-            )
+            error_msg = "The memory system is frozen. Can't forget all. Unfreeze first."
+            logging.warning(error_msg)
+            raise ValueError(error_msg)
         else:
             logging.warning("EVERYTHING IN THE MEMORY SYSTEM WILL BE FORGOTTEN!")
             self.entries = []
@@ -111,8 +105,8 @@ class Memory:
         self._frozen = False
 
     def forget_random(self) -> None:
-        """Forget a memory in the memory system in a uniform distribution manner."""
-        logging.warning("forgetting a random memory using a uniform distribution ...")
+        """Forget a memory in the memory system in a uniform-randomly."""
+        logging.warning("forgetting a memory uniformly at random ...")
         mem = random.choice(self.entries)
         self.forget(mem)
 
@@ -152,9 +146,9 @@ class Memory:
             f"{self.capacity}!"
         )
 
-    def return_as_dicts(self) -> dict:
+    def return_as_lists(self) -> List[list]:
         """
-        Return the memories as dicts, not as the Memory object.
+        Return the memories as a list of lists.
         """
         return deepcopy(self.entries)
 
@@ -175,15 +169,8 @@ class EpisodicMemory(Memory):
         super().__init__("episodic", capacity)
         self.remove_duplicates = remove_duplicates
 
-    def can_be_added(self, mem: dict) -> bool:
+    def can_be_added(self) -> bool:
         """Checks if a memory can be added to the system or not.
-
-        Args
-        ----
-        mem: An episodic memory in a dictionary format
-
-            {"human": <HUMAN>, "object": <OBJECT>, "object_location": <OBJECT_LOCATION>,
-             "timestamp": <TIMESTAMP>}
 
         Returns
         -------
@@ -196,15 +183,12 @@ class EpisodicMemory(Memory):
         else:
             return True
 
-    def add(self, mem: dict) -> None:
+    def add(self, mem: List) -> None:
         """Append a memory to the episodic memory system.
 
         Args
         ----
-        mem: An episodic memory in a dictionary format
-
-            {"human": <HUMAN>, "object": <OBJECT>, "object_location": <OBJECT_LOCATION>,
-             "timestamp": <TIMESTAMP>}
+        mem: An episodic memory as a qua
 
         """
         if self._frozen:

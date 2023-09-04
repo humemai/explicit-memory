@@ -39,7 +39,7 @@ class HandcraftedAgent:
 
     def __init__(
         self,
-        env_str: str = "room_env:RoomEnv1-v1",
+        env_str: str = "room_env:RoomEnv-v1",
         policy: str = "random",
         num_samples_for_results: int = 10,
         test_seed: int = 42,
@@ -48,12 +48,12 @@ class HandcraftedAgent:
             "semantic": 16,
             "short": 1,
         },
-    ):
+    ) -> None:
         """Initialization.
 
         Args
         ----
-        env_str: This has to be "room_env:RoomEnv1-v1"
+        env_str: This has to be "room_env:RoomEnv-v1"
         policy: The memory management policy. Choose one of "random", "episodic_only",
                 or "semantic_only".
         num_samples_for_results: The number of samples to validate / test the agent.

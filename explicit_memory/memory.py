@@ -183,12 +183,12 @@ class EpisodicMemory(Memory):
         else:
             return True
 
-    def add(self, mem: List) -> None:
+    def add(self, mem: list) -> None:
         """Append a memory to the episodic memory system.
 
         Args
         ----
-        mem: An episodic memory as a qua
+        mem: An episodic memory as a quadraple: [head, relation, tail, timestamp]
 
         """
         if self._frozen:
@@ -206,62 +206,49 @@ class EpisodicMemory(Memory):
             self.clean_old_memories()
 
         # sort ascending
-        self.entries.sort(key=lambda x: x["timestamp"])
+        self.entries.sort(key=lambda x: x[-1])
 
         assert self.size <= self.capacity
 
-    def get_oldest_memory(self, entries: list = None) -> List:
+    def get_oldest_memory(self) -> List:
         """Get the oldest memory in the episodic memory system.
 
         At the moment, this is simply done by looking up the timestamps and comparing
-        them.
+        them. If there are more than one memory with the same timestamp, then it'll
+        choose one of them uniformly at random.
 
         Returns
         -------
-        mem: the oldest memory in a dictionary format
-
-            {"human": <HUMAN>, "object": <OBJECT>, "object_location": <OBJECT_LOCATION>,
-             "timestamp": <TIMESTAMP>}
+        mem: the oldest memory as a quadraple
 
         """
-        if entries is None:
-            logging.debug("No entries were specified. We'll use the memory system.")
-            entries = self.entries
-
         # sorted() is ascending by default.
-        mem_candidate = sorted(entries, key=lambda x: x["timestamp"])[0]
+        mem_candidate = sorted(self.entries, key=lambda x: x[-1])[0]
         mem = random.choice(
-            [mem for mem in entries if mem_candidate["timestamp"] == mem["timestamp"]]
+            [mem for mem in self.entries if mem_candidate[-1] == mem[-1]]
         )
-        logging.info(f"{mem} is the oldest memory in the entries.")
+        logging.info(f"{mem} is the oldest memory in the system.")
 
         return mem
 
-    def get_latest_memory(self, entries: list = None) -> dict:
+    def get_latest_memory(self) -> dict:
         """Get the latest memory in the episodic memory system.
 
         At the moment, this is simply done by looking up the timestamps and comparing
-        them.
+        them. If there are more than one memory with the same timestamp, then it'll
+        choose one of them uniformly at random.
 
         Returns
         -------
-        mem: the latest memory in a dictionary format
-
-            for episodic:
-            {"human": <HUMAN>, "object": <OBJECT>, "object_location": <OBJECT_LOCATION>,
-             "timestamp": <TIMESTAMP>}
+        mem: An episodic memory as a quadraple
 
         """
-        if entries is None:
-            logging.debug("No entries were specified. We'll use the memory system.")
-            entries = self.entries
-
         # sorted() is ascending by default.
-        mem_candidate = sorted(entries, key=lambda x: x["timestamp"])[-1]
+        mem_candidate = sorted(self.entries, key=lambda x: x[-1])[-1]
         mem = random.choice(
-            [mem for mem in entries if mem_candidate["timestamp"] == mem["timestamp"]]
+            [mem for mem in self.entries if mem_candidate[-1] == mem[-1]]
         )
-        logging.info(f"{mem} is the oldest memory in the entries.")
+        logging.info(f"{mem} is the oldest memory in the system.")
 
         return mem
 
@@ -277,8 +264,13 @@ class EpisodicMemory(Memory):
         mem = self.get_oldest_memory()
         self.forget(mem)
 
-    def answer_random(self) -> Tuple[str, int]:
+    def answer_random(self, query: List) -> Tuple[str, int]:
         """Answer the question with a uniform-randomly chosen memory.
+
+        Args
+        ----
+        query: e.g., ["bob", "atlocation", "?", 42],
+            ["?", "atlocation", "officeroom", 42], ["bob", "?", "officeroom", 42]
 
         Returns
         -------
@@ -293,14 +285,15 @@ class EpisodicMemory(Memory):
 
         else:
             mem = random.choice(self.entries)
-            pred = mem["object_location"]
-            timestamp = mem["timestamp"]
+            pred_idx = query.index("?")
+            pred = mem[pred_idx]
+            timestamp = mem[-1]
 
         logging.info(f"pred: {pred}, timestamp: {timestamp}")
 
         return pred, timestamp
 
-    def answer_latest(self, question: dict) -> Tuple[str, int]:
+    def answer_latest(self, query: List) -> Tuple[str, int]:
         """Answer the question with the latest relevant memory.
 
         If object X was found at Y and then later on found Z, then this strategy answers
@@ -308,7 +301,8 @@ class EpisodicMemory(Memory):
 
         Args
         ----
-        question: a dict (i.e., {"human": <HUMAN>, "object": <OBJECT>})
+        query: e.g., ["bob", "atlocation", "?", 42],
+            ["?", "atlocation", "officeroom", 42], ["bob", "?", "officeroom", 42]
 
         Returns
         -------
@@ -323,30 +317,37 @@ class EpisodicMemory(Memory):
             pred = None
             timestamp = None
 
+        candidates = []
+
+        for target in self.entries:
+            assert len(query) == len(target) == 4
+            count = 0
+            for s, t in zip(query[:-1], target[:-1]):
+                if s == t:
+                    count += 1
+            if count == 2:
+                candidates.append(target)
+
+        if len(candidates) == 0:
+            logging.info("no relevant memories found.")
+            pred = None
+            timestamp = None
         else:
-            duplicates = get_duplicate_dicts(
-                {"human": question["human"], "object": question["object"]}, self.entries
+            logging.info(
+                f"{len(candidates)} relevant memories were found in the entries!"
             )
-
-            if len(duplicates) == 0:
-                logging.info("no relevant memories found.")
-                pred = None
-                timestamp = None
-
-            else:
-                logging.info(
-                    f"{len(duplicates)} relevant memories were found in the entries!"
-                )
-                mem = self.get_latest_memory(duplicates)
-                pred = mem["object_location"]
-                timestamp = mem["timestamp"]
+            candidates.sort(key=lambda x: x[-1])
+            candidate = candidates[-1]
+            pred_idx = query.index("?")
+            pred = candidate[pred_idx]
+            timestamp = candidate[-1]
 
         logging.info(f"pred: {pred}, timestamp: {timestamp}")
 
         return pred, timestamp
 
     @staticmethod
-    def ob2epi(ob: dict) -> dict:
+    def ob2epi(ob: list) -> dict:
         """Turn an observation into an episodic memory.
 
         At the moment, the observation format is the same as an episodic memory
@@ -354,63 +355,52 @@ class EpisodicMemory(Memory):
 
         Args
         ----
-        ob: An observation in a dictionary format
-
-            {"human": <HUMAN>, "object": <OBJECT>,
-            "object_location": <OBJECT_LOCATION>, "current_time": <CURRENT_TIME>}
+        ob: An observation as a quadruple: [head, relation, tail, timestamp]
 
         Returns
         -------
-        mem: An episodic memory in a dictionary format
+        mem: An episodic memory as a quadruple: [head, relation, tail, timestamp]
 
-            {"human": <HUMAN>, "object": <OBJECT>, "object_location": <OBJECT_LOCATION>,
-             "timestamp": <TIMESTAMP>}
 
         """
         logging.debug(f"Turning an observation {ob} into a episodic memory ...")
 
         mem = deepcopy(ob)
-        mem["timestamp"] = mem.pop("current_time")
 
         logging.info(f"Observation {ob} is now a episodic memory {mem}")
 
         return mem
 
-    def find_same_memory(self, mem) -> dict:
+    def find_same_memory(self, mem: list) -> list:
         """Find an episodic memory that's almost the same as the query memory.
 
         Args
         ----
-        mem: An episodic memory in a dictionary format
-
-            {"human": <HUMAN>, "object": <OBJECT>,
-             "object_location": <OBJECT_LOCATION>, "timestamp": <TIMESTAMP>}
+        mem: An episodic memory as a quadruple: [head, relation, tail, timestamp]
 
         Returns
         -------
-        an episodic memory if it exists. Otherwise return None.
+        An episodic memory. If it doesn't exist, then return None. If there are more
+        than one, then return one of them uniformly at random.
 
         """
-        for entry in self.entries:
-            if (
-                (entry["human"] == mem["human"])
-                and (entry["object"] == mem["object"])
-                and (entry["object_location"] == mem["object_location"])
-            ):
-                return entry
+        candidates = [entry for entry in self.entries if mem[:-1] == entry[:-1]]
 
-        return None
+        if len(candidates) == 0:
+            return None
+
+        else:
+            return random.choice(candidates)
 
     def clean_old_memories(self) -> List:
         """Find if there are duplicate memories with different timestamps."""
         logging.debug("finding if duplicate memories exist ...")
 
-        entries = deepcopy(self.entries)
-        logging.debug(f"There are {len(entries)} episdoic memories before cleaning")
-        for entry in entries:
-            del entry["timestamp"]
+        entries = ["".join(target[:-1]) for target in self.entries]
 
-        entries = [str(mem) for mem in entries]  # to make list hashable
+        logging.debug(f"There are {len(entries)} episodic memories before cleaning")
+
+        entries = ["".join(mem) for mem in entries]  # to make list hashable
         uniques = set(entries)
 
         locs_all = [
@@ -421,11 +411,11 @@ class EpisodicMemory(Memory):
 
         for locs in locs_all:
             mem = self.entries[locs[0]]
-            mem["timestamp"] = max([self.entries[loc]["timestamp"] for loc in locs])
+            mem[-1] = max([self.entries[loc][-1] for loc in locs])
             entries_cleaned.append(mem)
 
         self.entries = entries_cleaned
-        logging.debug(f"There are {len(self.entries)} episdoic memories after cleaning")
+        logging.debug(f"There are {len(self.entries)} episodic memories after cleaning")
 
 
 class ShortMemory(Memory):
@@ -434,13 +424,12 @@ class ShortMemory(Memory):
     def __init__(self, capacity: int) -> None:
         super().__init__("short", capacity)
 
-    def add(self, mem: dict) -> None:
+    def add(self, mem: list) -> None:
         """Append a memory to the short memory system.
 
-        mem: A short memory in a dictionary format
-
-            {"human": <HUMAN>, "object": <OBJECT>, "object_location": <OBJECT_LOCATION>,
-             "timestamp": <TIMESTAMP>}
+        Args
+        ----
+        mem: An episodic memory as a quadraple: [head, relation, tail, timestamp]
 
         """
         if self._frozen:
@@ -457,61 +446,49 @@ class ShortMemory(Memory):
             f"{len(self.entries)} memories!"
         )
         # sort ascending
-        self.entries.sort(key=lambda x: x["timestamp"])
+        self.entries.sort(key=lambda x: x[-1])
 
         assert self.size <= self.capacity
 
-    def get_oldest_memory(self, entries: list = None) -> List:
-        """Get the oldest memory in the episodic memory system.
+    def get_oldest_memory(self) -> list:
+        """Get the oldest memory in the short-term memory system.
 
         At the moment, this is simply done by looking up the timestamps and comparing
-        them.
+        them. If there are more than one memory with the same timestamp, then it'll
+        choose one of them uniformly at random.
 
         Returns
         -------
-        mem: the oldest memory in a dictionary format
-
-            {"human": <HUMAN>, "object": <OBJECT>, "object_location": <OBJECT_LOCATION>,
-             "timestamp": <TIMESTAMP>}
+        mem: the oldest memory as a quadraple
 
         """
-        if entries is None:
-            logging.debug("No entries were specified. We'll use the memory system.")
-            entries = self.entries
-
         # sorted() is ascending by default.
-        mem_candidate = sorted(entries, key=lambda x: x["timestamp"])[0]
+        mem_candidate = sorted(self.entries, key=lambda x: x[-1])[0]
         mem = random.choice(
-            [mem for mem in entries if mem_candidate["timestamp"] == mem["timestamp"]]
+            [mem for mem in self.entries if mem_candidate[-1] == mem[-1]]
         )
-        logging.info(f"{mem} is the oldest memory in the entries.")
+        logging.info(f"{mem} is the oldest memory in the system.")
 
         return mem
 
-    def get_latest_memory(self, entries: list = None) -> dict:
-        """Get the latest memory in the episodic memory system.
+    def get_latest_memory(self) -> list:
+        """Get the latest memory in the short-term memory system.
 
         At the moment, this is simply done by looking up the timestamps and comparing
-        them.
+        them. If there are more than one memory with the same timestamp, then it'll
+        choose one of them uniformly at random.
 
         Returns
         -------
-        mem: the latest memory in a dictionary format
-
-            {"human": <HUMAN>, "object": <OBJECT>, "object_location": <OBJECT_LOCATION>,
-             "timestamp": <TIMESTAMP>}
+        mem: An episodic memory as a quadraple
 
         """
-        if entries is None:
-            logging.debug("No entries were specified. We'll use the memory system.")
-            entries = self.entries
-
         # sorted() is ascending by default.
-        mem_candidate = sorted(entries, key=lambda x: x["timestamp"])[-1]
+        mem_candidate = sorted(self.entries, key=lambda x: x[-1])[-1]
         mem = random.choice(
-            [mem for mem in entries if mem_candidate["timestamp"] == mem["timestamp"]]
+            [mem for mem in self.entries if mem_candidate[-1] == mem[-1]]
         )
-        logging.info(f"{mem} is the oldest memory in the entries.")
+        logging.info(f"{mem} is the oldest memory in the system.")
 
         return mem
 
@@ -530,17 +507,16 @@ class ShortMemory(Memory):
     def find_similar_memories(self, mem) -> None:
         """Find similar memories.
 
-        mem: A short memory in a dictionary format
-
-            {"human": <HUMAN>, "object": <OBJECT>, "object_location": <OBJECT_LOCATION>,
-             "timestamp": <TIMESTAMP>}
+        mem: A short memory as a quadruple
 
         """
         logging.debug("Searching for similar memories in the short memory system...")
         similar = []
         for entry in self.entries:
-            if (entry["object"] == mem["object"]) and (
-                entry["object_location"] == mem["object_location"]
+            if (
+                (entry[0].split("'s")[-1] == mem[0].split("'s")[-1])
+                and (entry[1] == mem[1])
+                and (entry[2] == mem[2])
             ):
                 similar.append(entry)
 
@@ -549,7 +525,7 @@ class ShortMemory(Memory):
         return similar
 
     @staticmethod
-    def ob2short(ob: dict) -> dict:
+    def ob2short(ob: list) -> list:
         """Turn an observation into an short memory.
 
         At the moment, the observation format is almost the same as an episodic memory
@@ -557,102 +533,77 @@ class ShortMemory(Memory):
 
         Args
         ----
-        ob: An observation in a dictionary format
-
-            {"human": <HUMAN>, "object": <OBJECT>,
-            "object_location": <OBJECT_LOCATION>, "current_time": <CURRENT_TIME>}
+        ob: An observation as a quadruple: [head, relation, tail, timestamp]
 
         Returns
         -------
-        mem: An episodic memory in a dictionary format
-
-            {"human": <HUMAN>, "object": <OBJECT>, "object_location": <OBJECT_LOCATION>,
-             "timestamp": <TIMESTAMP>}
+        mem: A short-term memory as a quadruple: [head, relation, tail, timestamp]
 
         """
         logging.debug(f"Turning an observation {ob} into a short memory ...")
 
         mem = deepcopy(ob)
-        mem["timestamp"] = mem.pop("current_time")
 
         logging.info(f"Observation {ob} is now a short-term memory {mem}")
 
         return mem
 
     @staticmethod
-    def short2epi(short: dict) -> dict:
+    def short2epi(short: list) -> list:
         """Turn a short memory into a episodic memory.
 
         Args
         ----
-        short: A short memory in a dictionary format
-
-            {"human": <HUMAN>, "object": <OBJECT>, "object_location": <OBJECT_LOCATION>,
-             "timestamp": <TIMESTAMP>}
+        short: A short memory as a quadruple: [head, relation, tail, timestamp]
 
         Returns
         -------
-        epi: An episodic memory in a dictionary format
-
-            {"human": <HUMAN>,
-             "object": <OBJECT>, "object_location": <OBJECT_LOCATION>,
-             "timestamp": <TIMESTAMP>}
-
+        epi: An episodic memory as a quadruple: [head, relation, tail, timestamp]
         """
         epi = deepcopy(short)
         return epi
 
     @staticmethod
-    def short2sem(short: dict) -> dict:
+    def short2sem(short: list) -> list:
         """Turn a short memory into a episodic memory.
 
         Args
         ----
-        short: A short memory in a dictionary format
+        short: A short memory as a quadruple: [head, relation, tail, timestamp]
 
-            {"human": <HUMAN>, "object": <OBJECT>, "object_location": <OBJECT_LOCATION>,
-             "timestamp": <TIMESTAMP>}
 
         Returns
         -------
-        sem: A semantic memory in a dictionary format
+        sem: A semantic memory as a quadruple: [head, relation, tail, NUM_GENERALIZED]
 
-            {"object": <OBJECT>, "object_location": <OBJECT_LOCATION>,
-             "num_generalized": <NUM_GENERALIZED>}
 
         """
         sem = deepcopy(short)
 
-        del sem["human"]
-        del sem["timestamp"]
-        sem["num_generalized"] = 1
+        sem[0] = sem[0].split("'s")[-1]
+        sem[-1] = 1
 
         return sem
 
-    def find_same_memory(self, mem) -> dict:
+    def find_same_memory(self, mem: list) -> list:
         """Find a short memory that's almost the same as the query memory.
 
         Args
         ----
-        mem: A short memory in a dictionary format
-
-            {"human": <HUMAN>, "object": <OBJECT>,
-             "object_location": <OBJECT_LOCATION>, "timestamp": <TIMESTAMP>}
+        mem: A short memory as a quadruple: [head, relation, tail, timestamp]
 
         Returns
         -------
-        A short memory if it exists. Otherwise return None.
+        A short-term memory. If it doesn't exist, then return None. If there are more
+        than one, then return one of them uniformly at random.
 
         """
-        for entry in self.entries:
-            if (
-                (entry["human"] == mem["human"])
-                and (entry["object"] == mem["object"])
-                and (entry["object_location"] == mem["object_location"])
-            ):
-                return entry
+        candidates = [entry for entry in self.entries if mem[:-1] == entry[:-1]]
 
-        return None
+        if len(candidates) == 0:
+            return None
+        else:
+            return random.choice(candidates)
 
 
 class SemanticMemory(Memory):
@@ -695,15 +646,17 @@ class SemanticMemory(Memory):
 
     def pretrain_semantic(
         self,
-        semantic_knowledge: dict,
+        semantic_knowledge: list,
         return_remaining_space: bool = True,
         freeze: bool = True,
     ) -> int:
-        """Pretrain the semantic memory system from ConceptNet.
+        """Pretrain (prepopulate) the semantic memory system.
 
         Args
         ----
-        semantic_knowledge: from ConceptNet.
+        semantic_knowledge: e.g., [["desk", "atlocation", "officeroom"],
+            ["chair", "atlocation", "officeroom",
+            ["officeroom", "tothenorthof", "livingroom]]
         return_remaining_space: whether or not to return the remaining space from the
             semantic memory system.
         freeze: whether or not to freeze the semantic memory system or not.
@@ -714,10 +667,11 @@ class SemanticMemory(Memory):
             the episodic memory system.
         """
         self.semantic_knowledge = deepcopy(semantic_knowledge)
-        for obj, loc in self.semantic_knowledge.items():
+        for triple in self.semantic_knowledge:
+            assert len(triple) == 3
             if self.is_full:
                 break
-            mem = {"object": obj, "object_location": loc, "num_generalized": 1}
+            mem = [*triple, 1]  # num_generalized = 1
             logging.debug(f"adding a pretrained semantic knowledge {mem}")
             self.add(mem)
 
@@ -738,92 +692,47 @@ class SemanticMemory(Memory):
 
         return free_space
 
-    def get_weakest_memory(self, entries: list = None) -> List:
+    def get_weakest_memory(self) -> List:
         """Get the weakest memory in the semantic memory system system.
 
-        At the moment, this is simply done by looking up the number of generalized
-        memories comparing them. In the end, an RL agent has to learn this
-        by itself.
+        At the moment, this is simply done by looking up num_generalized and comparing
+        them. If there are more than one memory with the same num_generalized, then
+        it'll choose one of them uniformly at random.
 
         Returns
         -------
-        mem: the weakest memory in a dictionary format
-
-            for semantic:
-            {"object": <OBJECT>, "object_location": <OBJECT_LOCATION>,
-             "num_generalized": <NUM_GENERALIZED>}
+        mem: the weakest memory as a quadraple
 
         """
-        if entries is None:
-            logging.debug("No entries were specified. We'll use the memory system.")
-            entries = self.entries
-
         # sorted() is ascending by default.
-        mem_candidate = sorted(entries, key=lambda x: x["num_generalized"])[0]
+        mem_candidate = sorted(self.entries, key=lambda x: x[-1])[0]
         mem = random.choice(
-            [
-                mem
-                for mem in entries
-                if mem_candidate["num_generalized"] == mem["num_generalized"]
-            ]
+            [mem for mem in self.entries if mem_candidate[-1] == mem[-1]]
         )
-        logging.info(f"{mem} is the weakest memory in the entries.")
+        logging.info(f"{mem} is the weakest memory in the system.")
 
         return mem
 
-    def get_strongest_memory(self, entries: list = None) -> List:
+    def get_strongest_memory(self) -> List:
         """Get the strongest memory in the semantic memory system system.
 
-        At the moment, this is simply done by looking up the number of generalized
-        memories comparing them.
+        At the moment, this is simply done by looking up num_generalized and comparing
+        them. If there are more than one memory with the same num_generalized, then
+        it'll choose one of them uniformly at random.
 
         Returns
         -------
-        mem: the strongest memory in a dictionary format
-
-
-            for semantic:
-            {"object": <OBJECT>, "object_location": <OBJECT_LOCATION>,
-             "num_generalized": <NUM_GENERALIZED>}
+        mem: the strongest memory as a quadraple
 
         """
-        if entries is None:
-            logging.debug("No entries were specified. We'll use the memory system.")
-            entries = self.entries
-
         # sorted() is ascending by default.
-        mem_candidate = sorted(entries, key=lambda x: x["num_generalized"])[-1]
+        mem_candidate = sorted(self.entries, key=lambda x: x[-1])[-1]
         mem = random.choice(
-            [
-                mem
-                for mem in entries
-                if mem_candidate["num_generalized"] == mem["num_generalized"]
-            ]
+            [mem for mem in self.entries if mem_candidate[-1] == mem[-1]]
         )
-        logging.info(f"{mem} is the strongest memory in the entries.")
+        logging.info(f"{mem} is the strongest memory in the system.")
 
         return mem
-
-    def find_similar_memories(self, mem) -> None:
-        """Find similar memories.
-
-        mem: A short memory in a dictionary format
-
-            {"human": <HUMAN>, "object": <OBJECT>, "object_location": <OBJECT_LOCATION>,
-             "timestamp": <TIMESTAMP>}
-
-        """
-        logging.debug("Searching for similar memories in the short memory system...")
-        similar = []
-        for entry in self.entries:
-            if (entry["object"] == mem["object"]) and (
-                entry["object_location"] == mem["object_location"]
-            ):
-                similar.append(entry)
-
-        logging.info(f"{len(similar)} similar short memories found!")
-
-        return similar
 
     def forget_weakest(self) -> None:
         """Forget the weakest entry in the semantic memory system.
@@ -837,8 +746,13 @@ class SemanticMemory(Memory):
         self.forget(mem)
         logging.info(f"{mem} is forgotten!")
 
-    def answer_random(self) -> Tuple[str, int]:
+    def answer_random(self, query: List) -> Tuple[str, int]:
         """Answer the question with a uniform-randomly chosen memory.
+
+        Args
+        ----
+        query: e.g., ["bob", "atlocation", "?", 42],
+            ["?", "atlocation", "officeroom", 42], ["bob", "?", "officeroom", 42]
 
         Returns
         -------
@@ -853,20 +767,21 @@ class SemanticMemory(Memory):
 
         else:
             mem = random.choice(self.entries)
-            pred = mem["object_location"]
-            num_generalized = mem["num_generalized"]
+            pred_idx = query.index("?")
+            pred = mem[pred_idx]
+            num_generalized = mem[-1]
 
         logging.info(f"pred: {pred}, num_generalized: {num_generalized}")
 
         return pred, num_generalized
 
-    def answer_strongest(self, question: list) -> Tuple[str, int]:
-        """Answer the question (Find the head that matches the question, and choose the
-        strongest one among them).
+    def answer_strongest(self, query: List) -> Tuple[str, int]:
+        """Answer the question with the strongest relevant memory.
 
         Args
         ----
-        question: a dict (i.e., {"human": <HUMAN>, "object": <OBJECT>})
+        query: e.g., ["bob", "atlocation", "?", 42],
+            ["?", "atlocation", "officeroom", 42], ["bob", "?", "officeroom", 42]
 
         Returns
         -------
@@ -881,29 +796,37 @@ class SemanticMemory(Memory):
             pred = None
             num_generalized = None
 
-        else:
-            duplicates = get_duplicate_dicts(
-                {"object": question["object"]}, self.entries
-            )
-            if len(duplicates) == 0:
-                logging.info("no relevant memories found.")
-                pred = None
-                num_generalized = None
+        candidates = []
 
-            else:
-                logging.info(
-                    f"{len(duplicates)} relevant memories were found in the entries!"
-                )
-                mem = self.get_strongest_memory(duplicates)
-                pred = mem["object_location"]
-                num_generalized = mem["num_generalized"]
+        for target in self.entries:
+            assert len(query) == len(target) == 4
+            count = 0
+            for s, t in zip(query[:-1], target[:-1]):
+                if s == t:
+                    count += 1
+            if count == 2:
+                candidates.append(target)
+
+        if len(candidates) == 0:
+            logging.info("no relevant memories found.")
+            pred = None
+            num_generalized = None
+        else:
+            logging.info(
+                f"{len(candidates)} relevant memories were found in the entries!"
+            )
+            candidates.sort(key=lambda x: x[-1])
+            candidate = candidates[-1]
+            pred_idx = query.index("?")
+            pred = candidate[pred_idx]
+            num_generalized = candidate[-1]
 
         logging.info(f"pred: {pred}, num_generalized: {num_generalized}")
 
         return pred, num_generalized
 
     @staticmethod
-    def ob2sem(ob: dict) -> dict:
+    def ob2sem(ob: list) -> dict:
         """Turn an observation into a semantic memory.
 
         At the moment, this is simply done by removing the names from the head and the
@@ -911,28 +834,17 @@ class SemanticMemory(Memory):
 
         Args
         ----
-        ob: An observation in a dictionary format
-
-            {"human": <HUMAN>, "object": <OBJECT>,
-            "object_location": <OBJECT_LOCATION>, "current_time": <CURRENT_TIME>}
-
+        ob: An observation as a quadruple: [head, relation, tail, timestamp]
 
         Returns
         -------
-        mem: A semantic memory in a dictionary format
-
-            {"human": <HUMAN>, "object": <OBJECT>, "object_location": <OBJECT_LOCATION>,
-             "num_generalized": <NUM_GENERALIZED>}
+        mem: A semantic memory as a quadruple: [head, relation, tail, timestamp]
 
         """
         logging.debug(f"Turning an observation {ob} into a semantic memory ...")
         mem = deepcopy(ob)
-
-        del mem["human"]
-        del mem["current_time"]
-
-        # 1 stands for the 1 generalized.
-        mem["num_generalized"] = 1
+        mem[0] = mem.split("'s")[-1]
+        mem[-1] = 1  # 1 stands for the 1 generalized.
 
         logging.info(f"Observation {ob} is now a semantic memory {mem}")
 
@@ -946,14 +858,11 @@ class SemanticMemory(Memory):
         """
         logging.debug("finding if duplicate memories exist ...")
 
-        entries = deepcopy(self.entries)
-        logging.debug(
-            f"There are in total of {len(entries)} semantic memories before cleaning"
-        )
-        for entry in entries:
-            del entry["num_generalized"]
+        entries = ["".join(target[:-1]) for target in self.entries]
 
-        entries = [str(mem) for mem in entries]  # to make list hashable
+        logging.debug(f"There are {len(entries)} semantic memories before cleaning")
+
+        entries = ["".join(mem) for mem in entries]  # to make list hashable
         uniques = set(entries)
 
         locs_all = [
@@ -964,25 +873,18 @@ class SemanticMemory(Memory):
 
         for locs in locs_all:
             mem = self.entries[locs[0]]
-            mem["num_generalized"] = sum(
-                [self.entries[loc]["num_generalized"] for loc in locs]
-            )
+            mem[-1] = sum([self.entries[loc][-1] for loc in locs])
             entries_cleaned.append(mem)
 
         self.entries = entries_cleaned
-        logging.debug(
-            f"There are now in total of {len(self.entries)} semantic memories after cleaning"
-        )
+        logging.debug(f"There are {len(self.entries)} episodic memories after cleaning")
 
     def add(self, mem: dict):
         """Append a memory to the semantic memory system.
 
         Args
         ----
-        mem: A memory in a dictionary format
-
-            {"object": <OBJECT>, "object_location": <OBJECT_LOCATION>,
-             "num_generalized": <NUM_GENERALIZED>}
+        mem: A memory as a quadruple: [head, relation, tail, num_generalized]
 
         """
         if self._frozen:
@@ -999,7 +901,7 @@ class SemanticMemory(Memory):
         self.clean_same_memories()
 
         # sort ascending
-        self.entries.sort(key=lambda x: x["num_generalized"])
+        self.entries.sort(key=lambda x: x[-1])
 
         assert self.size <= self.capacity
 
@@ -1008,43 +910,18 @@ class SemanticMemory(Memory):
 
         Args
         ----
-        mem: A semantic memory in a dictionary format
-
-            {"object": <OBJECT>, "object_location": <OBJECT_LOCATION>,
-             "num_generalized": <NUM_GENERALIZED>}
+        mem: A semantic memory in a quadruple: [head, relation, tail, num_generalized]
 
         Returns
         -------
-        A semantic memory if it exists. Otherwise return None.
+        An semantic memory. If it doesn't exist, then return None. If there are more
+        than one, then return one of them uniformly at random.
 
         """
-        for entry in self.entries:
-            if (entry["object"] == mem["object"]) and (
-                entry["object_location"] == mem["object_location"]
-            ):
-                return entry
+        candidates = [entry for entry in self.entries if mem[:-1] == entry[:-1]]
 
-        return None
+        if len(candidates) == 0:
+            return None
 
-    def find_same_object_memory(self, mem) -> dict:
-        """Find a semantic memory whose object is the same as the query memory.
-
-        Args
-        ----
-        mem: A semantic memory in a dictionary format
-
-            {"object": <OBJECT>, "object_location": <OBJECT_LOCATION>,
-             "num_generalized": <NUM_GENERALIZED>}
-
-        Returns
-        -------
-        A semantic memory if it exists. Otherwise return None.
-
-        """
-        for entry in self.entries:
-            if (entry["object"] == mem["object"]) and (
-                entry["object_location"] != mem["object_location"]
-            ):
-                return entry
-
-        return None
+        else:
+            return random.choice(candidates)

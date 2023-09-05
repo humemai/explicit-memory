@@ -18,4 +18,4 @@ style:
 
 # Run python unittests
 test:
-	python -m unittest discover ./test
+	python -m pytest ./test

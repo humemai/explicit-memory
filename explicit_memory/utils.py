@@ -1,14 +1,14 @@
 """utility functions"""
-import json
 import csv
+import json
 import logging
 import os
 import pickle
 import random
 import shutil
-from glob import glob
-from typing import List, Dict, Tuple, Deque
 from collections import deque
+from glob import glob
+from typing import Deque, Dict, List, Tuple
 
 import numpy as np
 import torch
@@ -21,6 +21,42 @@ logging.basicConfig(
     format="%(asctime)s.%(msecs)03d %(levelname)s %(module)s - %(funcName)s: %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
 )
+
+
+def remove_timestamp(entry: list) -> list:
+    """Remove the timestamp from a given observation/episodic memory.
+
+    Args
+    ----
+    entry: An observation / episodic memory in a quadruple format
+        (i.e., (head, relation, tail, timestamp))
+
+    Returns
+    -------
+    entry_without_timestamp: i.e., (head, relation, tail)
+
+    """
+    assert len(entry) == 4
+    logging.debug(f"Removing timestamp from {entry} ...")
+    entry_without_timestamp = entry[:-1]
+    logging.info(f"Timestamp is removed from {entry}: {entry_without_timestamp}")
+
+    return entry_without_timestamp
+
+
+def remove_posession(entity: str) -> str:
+    """Remove name from the entity.
+
+    Args
+    ----
+    entity: e.g., bob's laptop
+
+    Returns
+    -------
+    e.g., laptop
+
+    """
+    return entity.split("'s ")[-1]
 
 
 def seed_everything(seed: int) -> None:

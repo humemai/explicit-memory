@@ -1,33 +1,24 @@
+import datetime
 import os
-from typing import Dict, List, Tuple
 import random
 from copy import deepcopy
-import datetime
+from typing import Dict, List, Tuple
 
 import gymnasium as gym
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
 import torch.optim as optim
-from torch.nn.utils import clip_grad_norm_
 from IPython.display import clear_output
+from nn import LSTM
+from torch.nn.utils import clip_grad_norm_
 from tqdm.auto import tqdm, trange
 
 from explicit_memory.memory import EpisodicMemory, SemanticMemory, ShortMemory
-from explicit_memory.policy import (
-    answer_question,
-    encode_observation,
-    manage_memory,
-)
-
-
-from explicit_memory.utils import (
-    ReplayBufferNStep,
-    write_yaml,
-    is_running_notebook,
-    PrioritizedReplayBuffer,
-)
-from nn import LSTM
+from explicit_memory.policy import (answer_question, encode_observation,
+                                    manage_memory)
+from explicit_memory.utils import (PrioritizedReplayBuffer, ReplayBufferNStep,
+                                   is_running_notebook, write_yaml)
 
 
 class HandcraftedAgent:

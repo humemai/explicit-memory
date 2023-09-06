@@ -1,7 +1,7 @@
 import random
 from itertools import count
 
-from explicit_memory.memory0 import EpisodicMemory, SemanticMemory
+from explicit_memory.memory import EpisodicMemory, SemanticMemory
 from explicit_memory.utils import argmax, seed_everything
 
 
@@ -98,7 +98,7 @@ class HandcraftedAgent:
             for _ in range(self.env.num_agents):
                 me = EpisodicMemory(capacity=self.episodic_capacity)
                 ms = SemanticMemory(capacity=self.semantic_capacity)
-                free_space = ms.pretrain_semantic(self.env)
+                free_space = ms.pretrain_semantic_deprecated(self.env)
                 me.increase_capacity(free_space)
 
                 assert (
@@ -282,11 +282,10 @@ class HandcraftedAgent:
                 preds_ = []
                 num_gens = []
                 for i in range(self.env.num_agents):
-                    if self.M_e[i].is_answerable(question):
-                        pred, timestamp = self.M_e[i].answer_latest(question)
-                        if pred is not None and timestamp is not None:
-                            preds.append(pred)
-                            timestamps.append(timestamp)
+                    pred, timestamp = self.M_e[i].answer_latest(question)
+                    if pred is not None and timestamp is not None:
+                        preds.append(pred)
+                        timestamps.append(timestamp)
                     else:
                         pred, num_gen = self.M_s[i].answer_strongest(question)
                         if pred is not None and num_gen is not None:
@@ -361,11 +360,10 @@ class HandcraftedAgent:
                 preds_ = []
                 num_gens = []
                 for i in range(self.env.num_agents):
-                    if self.M_e[i].is_answerable(question):
-                        pred, timestamp = self.M_e[i].answer_latest(question)
-                        if pred is not None and timestamp is not None:
-                            preds.append(pred)
-                            timestamps.append(timestamp)
+                    pred, timestamp = self.M_e[i].answer_latest(question)
+                    if pred is not None and timestamp is not None:
+                        preds.append(pred)
+                        timestamps.append(timestamp)
                     else:
                         pred, num_gen = self.M_s[i].answer_strongest(question)
                         if pred is not None and num_gen is not None:

@@ -8,6 +8,8 @@ import random
 from pprint import pformat
 from typing import List, Tuple
 
+from .utils import remove_posession, remove_timestamp
+
 logging.basicConfig(
     level=os.environ.get("LOGLEVEL", "INFO").upper(),
     format="%(asctime)s.%(msecs)03d %(levelname)s %(module)s - %(funcName)s: %(message)s",
@@ -166,7 +168,7 @@ class Memory:
 
         Args
         ----
-        head: (e.g., Tae's laptop)
+        head: (e.g., tae's laptop)
 
         Returns
         -------
@@ -200,21 +202,6 @@ class Memory:
         logging.warning("forgetting a random memory using a uniform distribution ...")
         mem = random.choice(self.entries)
         self.forget(mem)
-
-    @staticmethod
-    def remove_name(entity: str) -> str:
-        """Remove name from the entity.
-
-        Args
-        ----
-        entity: e.g., Tae's laptop
-
-        Returns
-        -------
-        e.g., laptop
-
-        """
-        return entity.split()[-1]
 
     @staticmethod
     def is_question_valid(question) -> bool:
@@ -263,7 +250,7 @@ class Memory:
 
         else:
             mem = random.choice(self.entries)
-            pred = self.remove_name(mem[2])
+            pred = remove_posession(mem[2])
             num = mem[3]
 
         logging.info(f"pred: {pred}, timestamp or num_generalized: {num}")
@@ -440,7 +427,7 @@ class EpisodicMemory(Memory):
                     f"{len(duplicates)} relevant memories were found in the entries!"
                 )
                 mem = self.get_latest_memory(duplicates)
-                pred = self.remove_name(mem[2])
+                pred = remove_posession(mem[2])
                 timestamp = mem[3]
 
         logging.info(f"pred: {pred}")
@@ -468,45 +455,24 @@ class EpisodicMemory(Memory):
         return mem_epi
 
     @staticmethod
-    def remove_timestamp(entry: list) -> list:
-        """Remove the timestamp from a given observation/episodic memory.
-
-        Args
-        ----
-        entry: An observation / episodic memory in a quadruple format
-            (i.e., (head, relation, tail, timestamp))
-
-        Returns
-        -------
-        entry_without_timestamp: i.e., (head, relation, tail)
-
-        """
-        assert len(entry) == 4
-        logging.debug(f"Removing timestamp from {entry} ...")
-        entry_without_timestamp = entry[:-1]
-        logging.info(f"Timestamp is removed from {entry}: {entry_without_timestamp}")
-
-        return entry_without_timestamp
-
-    @staticmethod
-    def split_name_entity(name_entity: str) -> Tuple[str, str]:
+    def split_by_possessive(name_entity: str) -> Tuple[str, str]:
         """Separate name and entity from the given string.
 
         Args
         ----
-        name_entity: e.g., "Tae's laptop"
+        name_entity: e.g., "tae's laptop"
 
         Returns
         -------
-        name: e.g., Tae
+        name: e.g., tae
         entity: e.g., laptop
 
         """
         logging.debug(f"spliting name and entity from {name_entity}")
-        splitted = name_entity.split()
-        assert len(splitted) == 2 and "'" in splitted[0]
-        name = splitted[0].split("'")[0]
-        entity = splitted[1]
+        if "'s " in name_entity:
+            name, entity = name_entity.split("'s ")
+        else:
+            name, entity = None, None
 
         return name, entity
 
@@ -531,7 +497,7 @@ class EpisodicMemory(Memory):
 
         # -1 removes the timestamps from the quadruples
         semantic_possibles = [
-            [self.remove_name(e) for e in self.remove_timestamp(entry)]
+            [remove_posession(e) for e in self.remove_timestamp(entry)]
             for entry in entries
         ]
         # "^" is to allow hashing.
@@ -581,10 +547,10 @@ class EpisodicMemory(Memory):
         best_semantic_possibles = []
         for mem in self.entries:
             head = mem[0]
-            head = self.remove_name(head)
+            head = remove_posession(head)
             relation = mem[1]
             tail = mem[2]
-            tail = self.remove_name(tail)
+            tail = remove_posession(tail)
 
             best_semantic_possibles.append([head, relation, tail])
 
@@ -751,7 +717,7 @@ class SemanticMemory(Memory):
             num_generalized = None
 
         else:
-            query_head = self.remove_name(question[0])
+            query_head = remove_posession(question[0])
             duplicates = self.get_duplicate_heads(query_head, self.entries)
             if duplicates is None:
                 logging.info("no relevant memories found.")
@@ -763,7 +729,7 @@ class SemanticMemory(Memory):
                     f"{len(duplicates)} relevant memories were found in the entries!"
                 )
                 mem = self.get_strongest_memory(duplicates)
-                pred = self.remove_name(mem[2])
+                pred = remove_posession(mem[2])
                 num_generalized = mem[3]
 
         logging.info(f"pred: {pred}, num_generalized: {num_generalized}")
@@ -786,9 +752,9 @@ class SemanticMemory(Memory):
         assert len(ob) == 4
         logging.debug(f"Turning an observation {ob} into a semantic memory ...")
         # split to remove the name
-        head = Memory.remove_name(ob[0])
+        head = Memory.remove_posession(ob[0])
         relation = ob[1]
-        tail = Memory.remove_name(ob[2])
+        tail = Memory.remove_posession(ob[2])
 
         # 1 stands for the 1 generalized.
         mem_sem = [head, relation, tail, 1]
@@ -822,9 +788,9 @@ class SemanticMemory(Memory):
             f"question ..."
         )
         # split to remove the name
-        head = Memory.remove_name(episodic_question[0])
+        head = Memory.remove_posession(episodic_question[0])
         relation = episodic_question[1]
-        tail = Memory.remove_name(episodic_question[2])
+        tail = Memory.remove_posession(episodic_question[2])
 
         semantic_question = [head, relation, tail]
         logging.info(

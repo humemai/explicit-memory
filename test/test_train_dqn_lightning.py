@@ -2,7 +2,6 @@ import shutil
 import unittest
 
 from pytorch_lightning import Trainer
-
 from train import DQNLightning, EarlyStopping, ModelCheckpoint
 
 

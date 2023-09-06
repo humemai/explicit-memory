@@ -4,9 +4,10 @@ import os
 import random
 from copy import deepcopy
 from pprint import pformat
-from typing import List, Tuple, Dict, Union
+from typing import Dict, List, Tuple, Union
 
-from .utils import get_duplicate_dicts, list_duplicates_of
+from .utils import (get_duplicate_dicts, list_duplicates_of, remove_posession,
+                    remove_timestamp)
 
 logging.basicConfig(
     level=os.environ.get("LOGLEVEL", "INFO").upper(),
@@ -231,7 +232,7 @@ class EpisodicMemory(Memory):
 
         return mem
 
-    def get_latest_memory(self) -> dict:
+    def get_latest_memory(self) -> list:
         """Get the latest memory in the episodic memory system.
 
         At the moment, this is simply done by looking up the timestamps and comparing
@@ -240,7 +241,7 @@ class EpisodicMemory(Memory):
 
         Returns
         -------
-        mem: An episodic memory as a quadraple
+        mem: An episodic memory as a quadraple: [head, relation, tail, timestamp]
 
         """
         # sorted() is ascending by default.
@@ -417,6 +418,96 @@ class EpisodicMemory(Memory):
         self.entries = entries_cleaned
         logging.debug(f"There are {len(self.entries)} episodic memories after cleaning")
 
+    def get_similar(self):
+        """Find N episodic memories that can be compressed into one semantic.
+
+        At the moment, this is simply done by matching string values. If there are more
+        than one group of similar episodic memories, it'll return the one with the
+        largest number of memories.
+
+        Returns
+        -------
+        episodic_memories: similar episodic memories
+        semantic_memory: encoded (compressed) semantic memory in a quadruple format
+            (i.e., (head, relation, tail, num_generalized_memories))
+
+        """
+        logging.debug("looking for episodic entries that can be compressed ...")
+        MARKER = "^^^"
+
+        # -1 removes the timestamps from the quadruples
+        semantic_possibles = [
+            [remove_posession(e) for e in self.remove_timestamp(entry)]
+            for entry in self.entries
+        ]
+        # "^" is to allow hashing.
+        semantic_possibles = [MARKER.join(elem) for elem in semantic_possibles]
+
+        def duplicates(mylist, item):
+            return [i for i, x in enumerate(mylist) if x == item]
+
+        semantic_possibles = dict(
+            (x, duplicates(semantic_possibles, x)) for x in set(semantic_possibles)
+        )
+
+        if len(semantic_possibles) == len(self.entries):
+            logging.info("no episodic memories found to be compressible.")
+            return None, None
+        elif len(semantic_possibles) < len(self.entries):
+            logging.debug("some episodic memories found to be compressible.")
+
+            max_key = max(semantic_possibles, key=lambda k: len(semantic_possibles[k]))
+            indexes = semantic_possibles[max_key]
+
+            episodic_memories = map(self.entries.__getitem__, indexes)
+            episodic_memories = list(episodic_memories)
+            # sort from the oldest to the latest
+            episodic_memories = sorted(episodic_memories, key=lambda x: x[-1])
+            semantic_memory = max_key.split(MARKER)
+            # num_generalized_memories is the number of compressed episodic memories.
+            semantic_memory.append(len(indexes))
+            assert (len(semantic_memory)) == 4
+            for mem in episodic_memories:
+                assert len(mem) == 4
+
+            logging.info(
+                f"{len(indexes)} episodic memories can be compressed "
+                f"into one semantic memory: {semantic_memory}."
+            )
+
+            return episodic_memories, semantic_memory
+        else:
+            raise ValueError("Something is wrong!")
+
+    def find_mem_for_semantic(self):
+        """Find the best episodic memory that can be compressed into one semantic."""
+        best_semantic_possibles = []
+        for mem in self.entries:
+            head, relation, tail = (
+                remove_posession(mem[0]),
+                remove_posession(mem[1]),
+                remove_posession(mem[2]),
+            )
+            best_semantic_possibles.append([head, relation, tail])
+
+        best_semantic_possibles = [
+            (i, elem, best_semantic_possibles.count(elem))
+            for i, elem in enumerate(best_semantic_possibles)
+        ]
+
+        highest_freq = max([elem[2] for elem in best_semantic_possibles])
+
+        best_semantic_possibles = [
+            elem for elem in best_semantic_possibles if elem[2] == highest_freq
+        ]
+
+        mem_sem = random.choice(best_semantic_possibles)
+        idx = mem_sem[0]
+
+        mem_selected = self.entries[idx]
+
+        return mem_selected
+
 
 class ShortMemory(Memory):
     """Short-term memory class."""
@@ -504,22 +595,32 @@ class ShortMemory(Memory):
         mem = self.get_oldest_memory()
         self.forget(mem)
 
-    def find_similar_memories(self, mem) -> None:
+    def find_similar_memories(self, mem: list, split_possessive: bool = True) -> None:
         """Find similar memories.
 
-        mem: A short memory as a quadruple
+        Args
+        ----
+        mem: A short-term memory as a quadruple
+        split_possessive: whether to split the possessive, i.e., 's, or not.
 
         """
         logging.debug("Searching for similar memories in the short memory system...")
         similar = []
         for entry in self.entries:
-            if (
-                (entry[0].split("'s")[-1] == mem[0].split("'s")[-1])
-                and (entry[1] == mem[1])
-                and (entry[2] == mem[2])
-            ):
-                similar.append(entry)
-
+            if split_possessive:
+                if (
+                    (entry[0].split("'s ")[-1] == mem[0].split("'s ")[-1])
+                    and (entry[1].split("'s ")[-1] == mem[1].split("'s ")[-1])
+                    and (entry[2].split("'s ")[-1] == mem[2].split("'s ")[-1])
+                ):
+                    similar.append(entry)
+            else:
+                if (
+                    (entry[0] == mem[0])
+                    and (entry[1] == mem[1])
+                    and (entry[2] == mem[2])
+                ):
+                    similar.append(entry)
         logging.info(f"{len(similar)} similar short memories found!")
 
         return similar
@@ -564,13 +665,13 @@ class ShortMemory(Memory):
         return epi
 
     @staticmethod
-    def short2sem(short: list) -> list:
+    def short2sem(short: list, split_possessive: bool = True) -> list:
         """Turn a short memory into a episodic memory.
 
         Args
         ----
         short: A short memory as a quadruple: [head, relation, tail, timestamp]
-
+        split_possessive: whether to split the possessive, i.e., 's, or not.
 
         Returns
         -------
@@ -580,7 +681,10 @@ class ShortMemory(Memory):
         """
         sem = deepcopy(short)
 
-        sem[0] = sem[0].split("'s")[-1]
+        if split_possessive:
+            sem[0] = sem[0].split("'s ")[-1]
+        else:
+            sem[0] = sem[0]
         sem[-1] = 1
 
         return sem
@@ -692,6 +796,64 @@ class SemanticMemory(Memory):
 
         return free_space
 
+    def pretrain_semantic_deprecated(
+        self,
+        env,
+    ) -> int:
+        """Pretrain the semantic memory system from ConceptNet. This is for the
+        RoomEnv-v0. I should remove this later
+
+        Args
+        ----
+        env: the gymnasium environment
+
+        Returns
+        -------
+        free_space: free space that was not used, if any, so that it can be added to
+            the episodic memory system.
+
+        """
+
+        for head, relation_tails in env.semantic_knowledge.items():
+            if self.is_full:
+                break
+
+            if env.weighting_mode == "weighted":
+                for relation, tails in relation_tails.items():
+                    for tail in tails:
+                        mem = [head, relation, tail["tail"], tail["weight"]]
+
+                        logging.debug(
+                            f"weighting mode: {env.weighting_mode}: adding {mem} to the "
+                            "semantic memory system ..."
+                        )
+                        self.add(mem)
+
+            elif env.weighting_mode == "highest":
+                for relation, tails in relation_tails.items():
+                    tail = sorted(tails, key=lambda x: x["weight"])[-1]
+                    mem = [head, relation, tail["tail"], tail["weight"]]
+
+                    logging.debug(
+                        f"weighting mode: {env.weighting_mode}: adding {mem} to the "
+                        "semantic memory system ..."
+                    )
+                    self.add(mem)
+            else:
+                raise ValueError
+
+        free_space = self.capacity - len(self.entries)
+        self.decrease_capacity(free_space)
+        self.freeze()
+        logging.info("The semantic memory system is frozen!")
+        logging.info(
+            f"The semantic memory is pretrained and frozen. The remaining space "
+            f"{free_space} will be returned. Now the capacity of the semantic memory "
+            f"system is {self.capacity}"
+        )
+
+        return free_space
+
     def get_weakest_memory(self) -> List:
         """Get the weakest memory in the semantic memory system system.
 
@@ -775,7 +937,9 @@ class SemanticMemory(Memory):
 
         return pred, num_generalized
 
-    def answer_strongest(self, query: List) -> Tuple[str, int]:
+    def answer_strongest(
+        self, query: List, split_possessive: bool = True
+    ) -> Tuple[str, int]:
         """Answer the question with the strongest relevant memory.
 
         Args
@@ -802,8 +966,12 @@ class SemanticMemory(Memory):
             assert len(query) == len(target) == 4
             count = 0
             for s, t in zip(query[:-1], target[:-1]):
-                if s == t:
-                    count += 1
+                if split_possessive:
+                    if remove_posession(s) == t:
+                        count += 1
+                else:
+                    if s == t:
+                        count += 1
             if count == 2:
                 candidates.append(target)
 
@@ -826,7 +994,7 @@ class SemanticMemory(Memory):
         return pred, num_generalized
 
     @staticmethod
-    def ob2sem(ob: list) -> dict:
+    def ob2sem(ob: list, split_possessive: bool = True) -> dict:
         """Turn an observation into a semantic memory.
 
         At the moment, this is simply done by removing the names from the head and the
@@ -835,17 +1003,28 @@ class SemanticMemory(Memory):
         Args
         ----
         ob: An observation as a quadruple: [head, relation, tail, timestamp]
+        split_possessive: whether to split the possessive, i.e., 's, or not.
 
         Returns
         -------
         mem: A semantic memory as a quadruple: [head, relation, tail, timestamp]
 
         """
-        logging.debug(f"Turning an observation {ob} into a semantic memory ...")
-        mem = deepcopy(ob)
-        mem[0] = mem.split("'s")[-1]
-        mem[-1] = 1  # 1 stands for the 1 generalized.
 
+        assert len(ob) == 4
+        logging.debug(f"Turning an observation {ob} into a semantic memory ...")
+        # split to remove the name
+        if split_possessive:
+            head, relation, tail = (
+                remove_posession(ob[0]),
+                remove_posession(ob[1]),
+                remove_posession(ob[2]),
+            )
+        else:
+            head, relation, tail = ob[0], ob[1], ob[2]
+
+        # 1 stands for the 1 generalized.
+        mem = [head, relation, tail, 1]
         logging.info(f"Observation {ob} is now a semantic memory {mem}")
 
         return mem

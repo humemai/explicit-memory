@@ -3,16 +3,15 @@ import logging
 logger = logging.getLogger()
 logger.disabled = True
 
-import os
 import argparse
+import os
 
-from tqdm import tqdm
-import numpy as np
 import gymnasium as gym
 import matplotlib.pyplot as plt
+import numpy as np
 import yaml
-
 from agent import HandcraftedAgent
+from tqdm import tqdm
 
 parser = argparse.ArgumentParser(description="train")
 parser.add_argument(

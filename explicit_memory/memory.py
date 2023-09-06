@@ -796,64 +796,6 @@ class SemanticMemory(Memory):
 
         return free_space
 
-    def pretrain_semantic_deprecated(
-        self,
-        env,
-    ) -> int:
-        """Pretrain the semantic memory system from ConceptNet. This is for the
-        RoomEnv-v0. I should remove this later
-
-        Args
-        ----
-        env: the gymnasium environment
-
-        Returns
-        -------
-        free_space: free space that was not used, if any, so that it can be added to
-            the episodic memory system.
-
-        """
-
-        for head, relation_tails in env.semantic_knowledge.items():
-            if self.is_full:
-                break
-
-            if env.weighting_mode == "weighted":
-                for relation, tails in relation_tails.items():
-                    for tail in tails:
-                        mem = [head, relation, tail["tail"], tail["weight"]]
-
-                        logging.debug(
-                            f"weighting mode: {env.weighting_mode}: adding {mem} to the "
-                            "semantic memory system ..."
-                        )
-                        self.add(mem)
-
-            elif env.weighting_mode == "highest":
-                for relation, tails in relation_tails.items():
-                    tail = sorted(tails, key=lambda x: x["weight"])[-1]
-                    mem = [head, relation, tail["tail"], tail["weight"]]
-
-                    logging.debug(
-                        f"weighting mode: {env.weighting_mode}: adding {mem} to the "
-                        "semantic memory system ..."
-                    )
-                    self.add(mem)
-            else:
-                raise ValueError
-
-        free_space = self.capacity - len(self.entries)
-        self.decrease_capacity(free_space)
-        self.freeze()
-        logging.info("The semantic memory system is frozen!")
-        logging.info(
-            f"The semantic memory is pretrained and frozen. The remaining space "
-            f"{free_space} will be returned. Now the capacity of the semantic memory "
-            f"system is {self.capacity}"
-        )
-
-        return free_space
-
     def get_weakest_memory(self) -> List:
         """Get the weakest memory in the semantic memory system system.
 

@@ -98,7 +98,7 @@ class HandcraftedAgent:
             for _ in range(self.env.num_agents):
                 me = EpisodicMemory(capacity=self.episodic_capacity)
                 ms = SemanticMemory(capacity=self.semantic_capacity)
-                free_space = ms.pretrain_semantic_deprecated(self.env)
+                free_space = ms.pretrain_semantic(self.env.semantic_knowledge)
                 me.increase_capacity(free_space)
 
                 assert (

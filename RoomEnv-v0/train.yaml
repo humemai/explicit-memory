@@ -1,5 +1,4 @@
 room_size: small
-weighting_mode: highest
 probs:
   commonsense: 0.7
   new_location: 0.1
@@ -9,7 +8,7 @@ limits:
   heads: null
   tails: null
   names: null
-  allow_spaces: False
+  allow_spaces: True
 max_step: 1000
 disjoint_entities: True
 num_agents: 1

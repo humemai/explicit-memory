@@ -6,8 +6,7 @@ from copy import deepcopy
 from pprint import pformat
 from typing import Dict, List, Tuple, Union
 
-from .utils import (get_duplicate_dicts, list_duplicates_of, remove_posession,
-                    remove_timestamp)
+from .utils import list_duplicates_of, remove_posession, remove_timestamp
 
 logging.basicConfig(
     level=os.environ.get("LOGLEVEL", "INFO").upper(),
@@ -437,7 +436,7 @@ class EpisodicMemory(Memory):
 
         # -1 removes the timestamps from the quadruples
         semantic_possibles = [
-            [remove_posession(e) for e in self.remove_timestamp(entry)]
+            [remove_posession(e) for e in remove_timestamp(entry)]
             for entry in self.entries
         ]
         # "^" is to allow hashing.
@@ -609,11 +608,12 @@ class ShortMemory(Memory):
         for entry in self.entries:
             if split_possessive:
                 if (
-                    (entry[0].split("'s ")[-1] == mem[0].split("'s ")[-1])
-                    and (entry[1].split("'s ")[-1] == mem[1].split("'s ")[-1])
-                    and (entry[2].split("'s ")[-1] == mem[2].split("'s ")[-1])
+                    (remove_posession(entry[0]) == remove_posession(mem[0]))
+                    and (remove_posession(entry[1]) == remove_posession(mem[1]))
+                    and (remove_posession(entry[2]) == remove_posession(mem[2]))
                 ):
                     similar.append(entry)
+
             else:
                 if (
                     (entry[0] == mem[0])
@@ -682,7 +682,7 @@ class ShortMemory(Memory):
         sem = deepcopy(short)
 
         if split_possessive:
-            sem[0] = sem[0].split("'s ")[-1]
+            sem[0] = remove_posession(sem[0])
         else:
             sem[0] = sem[0]
         sem[-1] = 1

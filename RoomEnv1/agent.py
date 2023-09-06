@@ -15,10 +15,13 @@ from torch.nn.utils import clip_grad_norm_
 from tqdm.auto import tqdm, trange
 
 from explicit_memory.memory import EpisodicMemory, SemanticMemory, ShortMemory
-from explicit_memory.policy import (answer_question, encode_observation,
-                                    manage_memory)
-from explicit_memory.utils import (PrioritizedReplayBuffer, ReplayBufferNStep,
-                                   is_running_notebook, write_yaml)
+from explicit_memory.policy import answer_question, encode_observation, manage_memory
+from explicit_memory.utils import (
+    PrioritizedReplayBuffer,
+    ReplayBufferNStep,
+    is_running_notebook,
+    write_yaml,
+)
 
 
 class HandcraftedAgent:
@@ -74,6 +77,17 @@ class HandcraftedAgent:
             "episodic": EpisodicMemory(capacity=self.capacity["episodic"]),
             "semantic": SemanticMemory(capacity=self.capacity["semantic"]),
             "short": ShortMemory(capacity=self.capacity["short"]),
+        }
+
+    def get_memory_state(self) -> dict:
+        """Return the current state of the memory systems. This is NOT what the gym env
+        gives you. This is made by the agent.
+        """
+
+        return {
+            "episodic": self.memory_systems["episodic"].return_as_lists(),
+            "semantic": self.memory_systems["semantic"].return_as_lists(),
+            "short": self.memory_systems["short"].return_as_lists(),
         }
 
     def find_answer(self) -> str:
@@ -134,6 +148,10 @@ class HandcraftedAgent:
         }
         write_yaml(results, os.path.join(self.default_root_dir, "results.yaml"))
         write_yaml(self.all_params, os.path.join(self.default_root_dir, "train.yaml"))
+        write_yaml(
+            self.get_memory_state(),
+            os.path.join(self.default_root_dir, "last_memory_state.yaml"),
+        )
 
 
 class DQNAgent:
@@ -324,9 +342,9 @@ class DQNAgent:
         """
 
         return {
-            "episodic": self.memory_systems["episodic"].return_as_dicts(),
-            "semantic": self.memory_systems["semantic"].return_as_dicts(),
-            "short": self.memory_systems["short"].return_as_dicts(),
+            "episodic": self.memory_systems["episodic"].return_as_lists(),
+            "semantic": self.memory_systems["semantic"].return_as_lists(),
+            "short": self.memory_systems["short"].return_as_lists(),
         }
 
     def select_action(self, state: dict) -> np.ndarray:
@@ -615,6 +633,10 @@ class DQNAgent:
         }
         write_yaml(results, os.path.join(self.default_root_dir, "results.yaml"))
         write_yaml(self.all_params, os.path.join(self.default_root_dir, "train.yaml"))
+        write_yaml(
+            self.get_memory_state(),
+            os.path.join(self.default_root_dir, "last_memory_state.yaml"),
+        )
 
         self._plot()
         self.env.close()

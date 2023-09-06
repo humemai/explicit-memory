@@ -44,6 +44,28 @@ def remove_timestamp(entry: list) -> list:
     return entry_without_timestamp
 
 
+def split_by_possessive(name_entity: str) -> Tuple[str, str]:
+    """Separate name and entity from the given string.
+
+    Args
+    ----
+    name_entity: e.g., "tae's laptop"
+
+    Returns
+    -------
+    name: e.g., tae
+    entity: e.g., laptop
+
+    """
+    logging.debug(f"spliting name and entity from {name_entity}")
+    if "'s " in name_entity:
+        name, entity = name_entity.split("'s ")
+    else:
+        name, entity = None, None
+
+    return name, entity
+
+
 def remove_posession(entity: str) -> str:
     """Remove name from the entity.
 

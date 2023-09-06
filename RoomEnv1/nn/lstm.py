@@ -7,6 +7,7 @@ import torch.nn.functional as F
 from torch import nn
 
 from explicit_memory.nn import NoisyLinear
+from explicit_memory.utils import split_by_possessive
 
 
 class LSTM(nn.Module):
@@ -103,11 +104,6 @@ class LSTM(nn.Module):
             self.fc_o1 = nn.Linear(hidden_size, hidden_size, device=self.device)
 
         self.hidden_size_last = hidden_size * len(self.memory_of_interest)
-
-        # self.fc_final0 = nn.Linear(
-        #     self.hidden_size_last, self.hidden_size_last, device=self.device
-        # )
-        # self.fc_final1 = nn.Linear(self.hidden_size_last, self.n_actions, device=self.device)
 
         # set advantage layer
         self.advantage_hidden_layer = NoisyLinear(
@@ -217,14 +213,12 @@ class LSTM(nn.Module):
                 f"but {self.include_human} was given!"
             )
 
-    def make_embedding(self, mem: dict, memory_type: str) -> torch.Tensor:
+    def make_embedding(self, mem: list, memory_type: str) -> torch.Tensor:
         """Create one embedding vector with summation and concatenation.
 
         Args
         ----
-        mem: memory
-            e.g, {"human": "Bob", "object": "laptop",
-                  "object_location": "desk", "timestamp": 1}
+        mem: memory as a quadruple: [head, relation, tail, num]
         memory_type: "episodic", "semantic", or "short"
 
         Returns
@@ -232,11 +226,21 @@ class LSTM(nn.Module):
         one embedding vector made from one memory element.
 
         """
+        if mem == ["<PAD>", "<PAD>", "<PAD>", "<PAD>"]:
+            human, obj, obj_loc = "<PAD>", "<PAD>", "<PAD>"
+        else:
+            if memory_type == "semantic":
+                obj = mem[0]
+            else:
+                human, obj = split_by_possessive(mem[0])
+
+            obj_loc = mem[2]
+
         object_embedding = self.embeddings(
-            torch.tensor(self.word2idx[mem["object"]], device=self.device)
+            torch.tensor(self.word2idx[obj], device=self.device)
         )
         object_location_embedding = self.embeddings(
-            torch.tensor(self.word2idx[mem["object_location"]], device=self.device)
+            torch.tensor(self.word2idx[obj_loc], device=self.device)
         )
 
         if memory_type.lower() == "semantic":
@@ -246,7 +250,7 @@ class LSTM(nn.Module):
 
         elif memory_type.lower() in ["episodic", "short"]:
             human_embedding = self.embeddings(
-                torch.tensor(self.word2idx[mem["human"]], device=self.device)
+                torch.tensor(self.word2idx[human], device=self.device)
             )
 
             if self.include_human is None:
@@ -285,22 +289,7 @@ class LSTM(nn.Module):
         batch of embeddings.
 
         """
-
-        if memory_type == "semantic":
-            mem_pad = {
-                "object": "<PAD>",
-                "object_location": "<PAD>",
-                "num_generalized": "<PAD>",
-            }
-        elif memory_type in ["episodic", "short"]:
-            mem_pad = {
-                "human": "<PAD>",
-                "object": "<PAD>",
-                "object_location": "<PAD>",
-                "timestamp": "<PAD>",
-            }
-        else:
-            raise ValueError
+        mem_pad = ["<PAD>", "<PAD>", "<PAD>", "<PAD>"]
 
         mems_batch = deepcopy(x)
         for mems in mems_batch:
@@ -318,7 +307,6 @@ class LSTM(nn.Module):
             batch_embeddings.append(embeddings)
 
         batch_embeddings = torch.stack(batch_embeddings)
-        # print(batch_embeddings.shape)
 
         return batch_embeddings
 
@@ -331,50 +319,6 @@ class LSTM(nn.Module):
         memories.
 
         """
-        # to_concat = []
-        # if isinstance(x, dict):
-        #     x = np.array([x])
-        # if "episodic" in self.memory_of_interest:
-        #     batch_e = self.create_batch(
-        #         [sample["episodic"] for sample in x],
-        #         memory_type="episodic",
-        #     )
-        #     lstm_out_e, _ = self.lstm_e(batch_e)
-        #     fc_out_e = self.relu(
-        #         self.fc_e1(self.relu(self.fc_e0(lstm_out_e[:, -1, :])))
-        #     )
-        #     to_concat.append(fc_out_e)
-
-        # if "semantic" in self.memory_of_interest:
-        #     batch_s = self.create_batch(
-        #         [sample["semantic"] for sample in x],
-        #         memory_type="semantic",
-        #     )
-        #     lstm_out_s, _ = self.lstm_s(batch_s)
-        #     fc_out_s = self.relu(
-        #         self.fc_s1(self.relu(self.fc_s0(lstm_out_s[:, -1, :])))
-        #     )
-        #     to_concat.append(fc_out_s)
-
-        # if "short" in self.memory_of_interest:
-        #     batch_o = self.create_batch(
-        #         [sample["short"] for sample in x],
-        #         memory_type="short",
-        #     )
-        #     lstm_out_o, _ = self.lstm_o(batch_o)
-        #     fc_out_o = self.relu(
-        #         self.fc_o1(self.relu(self.fc_o0(lstm_out_o[:, -1, :])))
-        #     )
-        #     to_concat.append(fc_out_o)
-
-        # # dim=-1 is the feature dimension
-        # fc_out_all = torch.concat(to_concat, dim=-1)
-
-        # fc_out has the dimension of (batch_size, 2)
-        # fc_out = self.fc_final1(self.relu(self.fc_final0(fc_out_all)))
-
-        # return fc_out
-
         dist = self.dist(x)
         q = torch.sum(dist * self.support, dim=2)
         return q

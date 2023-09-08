@@ -1,27 +1,31 @@
-num_iterations: 4096
-replay_buffer_size: 16
-batch_size: 4
+env_str: room_env:RoomEnv-v1
+gamma: 0.65
 capacity:
   episodic: 16
   semantic: 16
   short: 1
-env_str: room_env:RoomEnv-v1
-epsilon_decay_until: 32
-gamma: 0.65
-max_epsilon: 1.0
-min_epsilon: 0.1
 nn_params:
-  embedding_dim: 32
   hidden_size: 64
-  include_human: sum
-  n_actions: 3
   num_layers: 2
-num_samples_for_results: 10
-plotting_interval: 10
-pretrain_semantic: false
-run_test: true
-run_validation: true
+  n_actions: 3
+  embedding_dim: 32
+  include_human: sum
+num_iterations: 1024
+replay_buffer_size: 512
+batch_size: 128
 target_update_rate: 10
-test_seed: 42
-train_seed: 42
+pretrain_semantic: false
+run_validation: true
+run_test: true
+num_samples_for_results: 10
+train_seed: 5
+plotting_interval: 10
 device: cpu
+test_seed: 0
+alpha: 0.2
+beta: 0.6
+prior_eps: 1.0e-06
+v_min: 0.0
+v_max: 200.0
+atom_size: 51
+n_step: 3

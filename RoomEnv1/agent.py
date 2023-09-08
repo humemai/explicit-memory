@@ -79,16 +79,26 @@ class HandcraftedAgent:
             "short": ShortMemory(capacity=self.capacity["short"]),
         }
 
-    def get_memory_state(self) -> dict:
+    def get_memory_state(self, as_numpy: bool = True) -> np.array:
         """Return the current state of the memory systems. This is NOT what the gym env
         gives you. This is made by the agent.
-        """
 
-        return {
+        Args
+        ----
+        as_numpy: Whether or not to return the state as a numpy array. Otherwise, it
+            will be returned as a dictionary.
+        """
+        state_as_dict = {
             "episodic": self.memory_systems["episodic"].return_as_lists(),
             "semantic": self.memory_systems["semantic"].return_as_lists(),
             "short": self.memory_systems["short"].return_as_lists(),
         }
+        state_as_numpy = np.array([state_as_dict])
+
+        if as_numpy:
+            return state_as_numpy
+        else:
+            return state_as_dict
 
     def find_answer(self) -> str:
         """Find an answer to the question, by looking up the memory systems."""
@@ -149,7 +159,7 @@ class HandcraftedAgent:
         write_yaml(results, os.path.join(self.default_root_dir, "results.yaml"))
         write_yaml(self.all_params, os.path.join(self.default_root_dir, "train.yaml"))
         write_yaml(
-            self.get_memory_state(),
+            self.get_memory_state(as_numpy=False),
             os.path.join(self.default_root_dir, "last_memory_state.yaml"),
         )
 
@@ -336,18 +346,30 @@ class DQNAgent:
 
         return str(answer).lower()
 
-    def get_memory_state(self) -> dict:
+    def get_memory_state(self, as_numpy: bool = True) -> np.array:
         """Return the current state of the memory systems. This is NOT what the gym env
         gives you. This is made by the agent.
-        """
 
-        return {
+        Args
+        ----
+        as_numpy: Whether or not to return the state as a numpy array. Otherwise, it
+            will be returned as a dictionary.
+        """
+        state_as_dict = {
             "episodic": self.memory_systems["episodic"].return_as_lists(),
             "semantic": self.memory_systems["semantic"].return_as_lists(),
             "short": self.memory_systems["short"].return_as_lists(),
         }
+        state_as_numpy = np.array([state_as_dict])
 
-    def select_action(self, state: dict) -> np.ndarray:
+        if as_numpy:
+            return state_as_numpy
+        else:
+            return state_as_dict
+
+    def select_action(
+        self, state: dict, force_uniform_random: bool = False
+    ) -> np.ndarray:
         """Select an action from the input state.
 
         NoisyNet: no epsilon greedy action selection
@@ -356,10 +378,14 @@ class DQNAgent:
         ----
         state: The current state of the memory systems. This is NOT what the gym env
         gives you. This is made by our agent.
+        force_uniform_random: Whether or not to force uniform random action selection.
 
         """
-        selected_action = self.dqn(state).argmax()
-        selected_action = selected_action.detach().cpu().numpy()
+        if force_uniform_random:
+            selected_action = self.action_space.sample()
+        else:
+            selected_action = self.dqn(state).argmax()
+            selected_action = selected_action.detach().cpu().numpy()
 
         if not self.is_test:
             self.transition = [state, selected_action]
@@ -469,7 +495,7 @@ class DQNAgent:
             done = False
             while not done and len(self.replay_buffer) < self.batch_size:
                 state = self.get_memory_state()
-                action = self.select_action(state)
+                action = self.select_action(state, force_uniform_random=True)
                 reward, done = self.step(action)
 
         self.dqn.train()
@@ -634,7 +660,7 @@ class DQNAgent:
         write_yaml(results, os.path.join(self.default_root_dir, "results.yaml"))
         write_yaml(self.all_params, os.path.join(self.default_root_dir, "train.yaml"))
         write_yaml(
-            self.get_memory_state(),
+            self.get_memory_state(as_numpy=False),
             os.path.join(self.default_root_dir, "last_memory_state.yaml"),
         )
 

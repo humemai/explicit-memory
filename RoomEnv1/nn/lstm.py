@@ -123,17 +123,17 @@ class LSTM(nn.Module):
 
         self.relu = nn.ReLU()
 
-    def dist(self, x: torch.Tensor) -> torch.Tensor:
+    def dist(self, x: np.ndarray) -> torch.Tensor:
         """Get distribution for atoms."""
-        # feature = self.feature_layer(x)
         to_concat = []
-        if isinstance(x, dict):
-            x = np.array([x])
         if "episodic" in self.memory_of_interest:
-            batch_e = self.create_batch(
-                [sample["episodic"] for sample in x],
-                memory_type="episodic",
-            )
+            batch_e = [
+                sample.item()["episodic"]
+                if isinstance(sample, np.ndarray)
+                else sample["episodic"]
+                for sample in x
+            ]
+            batch_e = self.create_batch(batch_e, memory_type="episodic")
             lstm_out_e, _ = self.lstm_e(batch_e)
             fc_out_e = self.relu(
                 self.fc_e1(self.relu(self.fc_e0(lstm_out_e[:, -1, :])))
@@ -141,10 +141,13 @@ class LSTM(nn.Module):
             to_concat.append(fc_out_e)
 
         if "semantic" in self.memory_of_interest:
-            batch_s = self.create_batch(
-                [sample["semantic"] for sample in x],
-                memory_type="semantic",
-            )
+            batch_s = [
+                sample.item()["semantic"]
+                if isinstance(sample, np.ndarray)
+                else sample["semantic"]
+                for sample in x
+            ]
+            batch_s = self.create_batch(batch_s, memory_type="semantic")
             lstm_out_s, _ = self.lstm_s(batch_s)
             fc_out_s = self.relu(
                 self.fc_s1(self.relu(self.fc_s0(lstm_out_s[:, -1, :])))
@@ -152,16 +155,18 @@ class LSTM(nn.Module):
             to_concat.append(fc_out_s)
 
         if "short" in self.memory_of_interest:
-            batch_o = self.create_batch(
-                [sample["short"] for sample in x],
-                memory_type="short",
-            )
+            batch_o = [
+                sample.item()["short"]
+                if isinstance(sample, np.ndarray)
+                else sample["short"]
+                for sample in x
+            ]
+            batch_o = self.create_batch(batch_o, memory_type="short")
             lstm_out_o, _ = self.lstm_o(batch_o)
             fc_out_o = self.relu(
                 self.fc_o1(self.relu(self.fc_o0(lstm_out_o[:, -1, :])))
             )
             to_concat.append(fc_out_o)
-
         # dim=-1 is the feature dimension
         feature = torch.concat(to_concat, dim=-1)
 
@@ -235,7 +240,6 @@ class LSTM(nn.Module):
                 human, obj = split_by_possessive(mem[0])
 
             obj_loc = mem[2]
-
         object_embedding = self.embeddings(
             torch.tensor(self.word2idx[obj], device=self.device)
         )
@@ -291,14 +295,14 @@ class LSTM(nn.Module):
         """
         mem_pad = ["<PAD>", "<PAD>", "<PAD>", "<PAD>"]
 
-        mems_batch = deepcopy(x)
-        for mems in mems_batch:
+        # mems_batch = deepcopy(x)
+        for mems in x:
             for _ in range(self.capacity[memory_type] - len(mems)):
                 # this is a dummy entry for padding.
                 mems.append(mem_pad)
 
         batch_embeddings = []
-        for mems in mems_batch:
+        for mems in x:
             embeddings = []
             for mem in mems:
                 mem_emb = self.make_embedding(mem, memory_type)
@@ -319,6 +323,7 @@ class LSTM(nn.Module):
         memories.
 
         """
+        assert isinstance(x, np.ndarray)
         dist = self.dist(x)
         q = torch.sum(dist * self.support, dim=2)
         return q

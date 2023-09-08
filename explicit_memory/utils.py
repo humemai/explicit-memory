@@ -341,7 +341,7 @@ class ReplayBuffer:
         )
 
     def __len__(self) -> int:
-        return self.size + 1
+        return self.size
 
 
 class ReplayBufferNStep:
@@ -457,7 +457,7 @@ class ReplayBufferNStep:
         return rew, next_obs, done
 
     def __len__(self) -> int:
-        return self.size + 1
+        return self.size
 
 
 class PrioritizedReplayBuffer(ReplayBufferNStep):

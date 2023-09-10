@@ -151,6 +151,7 @@ class DQNAgent(HandcraftedAgent):
         env_str: str = "room_env:RoomEnv1-v1",
         num_iterations: int = 1280,
         replay_buffer_size: int = 1024,
+        warm_start: int = 1024,
         batch_size: int = 1024,
         target_update_rate: int = 10,
         epsilon_decay_until: float = 128 * 16,
@@ -185,6 +186,8 @@ class DQNAgent(HandcraftedAgent):
         env_str: This has to be "room_env:RoomEnv1-v1"
         num_iterations: The number of iterations to train the agent.
         replay_buffer_size: The size of the replay buffer.
+        warm_start: The number of samples to fill the replay buffer with, before 
+            starting
         batch_size: The batch size for training This is the amount of samples sampled
             from the replay buffer.
         target_update_rate: The rate to update the target network.
@@ -234,6 +237,8 @@ class DQNAgent(HandcraftedAgent):
         self.epsilon_decay_until = epsilon_decay_until
         self.target_update_rate = target_update_rate
         self.gamma = gamma
+        self.warm_start = warm_start
+        assert self.batch_size <= self.warm_start <= self.replay_buffer_size
 
         self.nn_params = nn_params
         self.nn_params["capacity"] = self.capacity
@@ -345,13 +350,14 @@ class DQNAgent(HandcraftedAgent):
 
         self.is_test = False
         self.dqn.eval()
-        while len(self.replay_buffer) < self.batch_size:
+
+        while len(self.replay_buffer) < self.warm_start:
             self.init_memory_systems()
             (observation, self.question), info = self.env.reset()
             encode_observation(self.memory_systems, observation)
 
             done = False
-            while not done and len(self.replay_buffer) < self.batch_size:
+            while not done and len(self.replay_buffer) < self.warm_start:
                 state = self.get_memory_state()
                 action = self.select_action(state)
                 reward, done = self.step(action)

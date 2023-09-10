@@ -8,20 +8,16 @@ import gymnasium as gym
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
+import torch.nn.functional as F
 import torch.optim as optim
 from IPython.display import clear_output
 from nn import LSTM
-from torch.nn.utils import clip_grad_norm_
 from tqdm.auto import tqdm, trange
 
 from explicit_memory.memory import EpisodicMemory, SemanticMemory, ShortMemory
-from explicit_memory.policy import answer_question, encode_observation, manage_memory
-from explicit_memory.utils import (
-    PrioritizedReplayBuffer,
-    ReplayBufferNStep,
-    is_running_notebook,
-    write_yaml,
-)
+from explicit_memory.policy import (answer_question, encode_observation,
+                                    manage_memory)
+from explicit_memory.utils import ReplayBuffer, is_running_notebook, write_yaml
 
 
 class HandcraftedAgent:
@@ -36,7 +32,7 @@ class HandcraftedAgent:
         env_str: str = "room_env:RoomEnv-v1",
         policy: str = "random",
         num_samples_for_results: int = 10,
-        test_seed: int = 42,
+        seed: int = 42,
         capacity: dict = {
             "episodic": 16,
             "semantic": 16,
@@ -51,7 +47,7 @@ class HandcraftedAgent:
         policy: The memory management policy. Choose one of "random", "episodic_only",
                 or "semantic_only".
         num_samples_for_results: The number of samples to validate / test the agent.
-        test_seed: The random seed for test.
+        seed: The random seed for test.
         capacity: The capacity of each human-like memory systems.
 
         """
@@ -59,12 +55,11 @@ class HandcraftedAgent:
         del self.all_params["self"]
         self.env_str = env_str
         self.policy = policy
-        assert self.policy in ["random", "episodic_only", "semantic_only"]
         self.num_samples_for_results = num_samples_for_results
-        self.test_seed = test_seed
+        self.seed = seed
         self.capacity = capacity
 
-        self.env = gym.make(self.env_str, seed=self.test_seed)
+        self.env = gym.make(self.env_str, seed=self.seed)
 
         self.default_root_dir = f"./training_results/{str(datetime.datetime.now())}"
         os.makedirs(self.default_root_dir, exist_ok=True)
@@ -79,41 +74,17 @@ class HandcraftedAgent:
             "short": ShortMemory(capacity=self.capacity["short"]),
         }
 
-    def get_memory_state(self, as_numpy: bool = True) -> np.array:
+    def get_memory_state(self) -> dict:
         """Return the current state of the memory systems. This is NOT what the gym env
         gives you. This is made by the agent.
 
-        Args
-        ----
-        as_numpy: Whether or not to return the state as a numpy array. Otherwise, it
-            will be returned as a dictionary.
         """
         state_as_dict = {
             "episodic": self.memory_systems["episodic"].return_as_lists(),
             "semantic": self.memory_systems["semantic"].return_as_lists(),
             "short": self.memory_systems["short"].return_as_lists(),
         }
-        state_as_numpy = np.array([state_as_dict])
-
-        if as_numpy:
-            return state_as_numpy
-        else:
-            return state_as_dict
-
-    def find_answer(self) -> str:
-        """Find an answer to the question, by looking up the memory systems."""
-        if self.policy.lower() == "random":
-            qa_policy = "episodic_semantic"
-        elif self.policy.lower() == "episodic_only":
-            qa_policy = "episodic"
-        elif self.policy.lower() == "semantic_only":
-            qa_policy = "semantic"
-        else:
-            raise ValueError("Unknown policy.")
-
-        answer = answer_question(self.memory_systems, qa_policy, self.question)
-
-        return str(answer).lower()
+        return state_as_dict
 
     def test(self):
         """Test the agent. There is no training for this agent, since it is
@@ -130,14 +101,19 @@ class HandcraftedAgent:
                 if self.policy.lower() == "random":
                     selected_action = random.choice(["episodic", "semantic", "forget"])
                     manage_memory(self.memory_systems, selected_action)
+                    qa_policy = "episodic_semantic"
                 elif self.policy.lower() == "episodic_only":
                     manage_memory(self.memory_systems, "episodic")
+                    qa_policy = "episodic"
                 elif self.policy.lower() == "semantic_only":
+                    qa_policy = "semantic"
                     manage_memory(self.memory_systems, "semantic")
                 else:
                     raise ValueError("Unknown policy.")
 
-                answer = self.find_answer()
+                answer = str(
+                    answer_question(self.memory_systems, qa_policy, self.question)
+                ).lower()
                 (
                     (observation, self.question),
                     reward,
@@ -159,15 +135,15 @@ class HandcraftedAgent:
         write_yaml(results, os.path.join(self.default_root_dir, "results.yaml"))
         write_yaml(self.all_params, os.path.join(self.default_root_dir, "train.yaml"))
         write_yaml(
-            self.get_memory_state(as_numpy=False),
+            self.get_memory_state(),
             os.path.join(self.default_root_dir, "last_memory_state.yaml"),
         )
 
 
-class DQNAgent:
+class DQNAgent(HandcraftedAgent):
     """DQN Agent interacting with environment.
 
-    Based on https://github.com/Curt-Park/rainbow-is-all-you-need/blob/master/08.rainbow.ipynb
+    Based on https://github.com/Curt-Park/rainbow-is-all-you-need/blob/master/01.dqn.ipynb
     """
 
     def __init__(
@@ -177,6 +153,9 @@ class DQNAgent:
         replay_buffer_size: int = 1024,
         batch_size: int = 1024,
         target_update_rate: int = 10,
+        epsilon_decay_until: float = 128 * 16,
+        max_epsilon: float = 1.0,
+        min_epsilon: float = 0.1,
         gamma: float = 0.65,
         capacity: dict = {
             "episodic": 16,
@@ -198,16 +177,6 @@ class DQNAgent:
         train_seed: int = 42,
         test_seed: int = 42,
         device: str = "cpu",
-        # PER parameters
-        alpha: float = 0.2,
-        beta: float = 0.6,
-        prior_eps: float = 1e-6,
-        # Categorical DQN parameters
-        v_min: float = 0.0,
-        v_max: float = 200.0,
-        atom_size: int = 51,
-        # N-step Learning
-        n_step: int = 3,
     ):
         """Initialization.
 
@@ -219,6 +188,9 @@ class DQNAgent:
         batch_size: The batch size for training This is the amount of samples sampled
             from the replay buffer.
         target_update_rate: The rate to update the target network.
+        epsilon_decay_until: The iteration index until which to decay epsilon.
+        max_epsilon: The maximum epsilon.
+        min_epsilon: The minimum epsilon.
         gamma: The discount factor.
         capacity: The capacity of each human-like memory systems.
         pretrain_semantic: Whether or not to pretrain the semantic memory system.
@@ -230,81 +202,39 @@ class DQNAgent:
         train_seed: The random seed for train.
         test_seed: The random seed for test.
         device: The device to run the agent on. This is either "cpu" or "cuda".
-        alpha: The alpha parameter for PER.
-        beta: The beta parameter for PER.
-        prior_eps: The epsilon parameter for PER.
-        v_min: The minimum value for the categorical DQN.
-        v_max: The maximum value for the categorical DQN.
-        atom_size: The number of atoms for the categorical DQN.
-        n_step: The number of steps for N-step Learning.
 
         """
+        super().__init__(
+            env_str=env_str,
+            policy=None,
+            num_samples_for_results=num_samples_for_results,
+            seed=train_seed,
+            capacity=capacity,
+        )
         self.all_params = deepcopy(locals())
         del self.all_params["self"]
-
-        self.is_notebook = is_running_notebook()
-        self.env_str = env_str
-        self.num_iterations = num_iterations
-        self.plotting_interval = plotting_interval
+        del self.all_params["__class__"]
         self.train_seed = train_seed
         self.test_seed = test_seed
+
+        self.val_filenames = []
+        self.is_notebook = is_running_notebook()
+        self.num_iterations = num_iterations
+        self.plotting_interval = plotting_interval
         self.run_validation = run_validation
-        if self.run_validation:
-            self.default_root_dir = f"./training_results/{str(datetime.datetime.now())}"
-            os.makedirs(self.default_root_dir, exist_ok=True)
-            self.val_filenames = []
         self.run_test = run_test
-        self.num_samples_for_results = num_samples_for_results
         self.device = torch.device(device)
         print(f"Running on {self.device}")
 
-        self.env = gym.make(self.env_str, seed=self.train_seed)
         self.replay_buffer_size = replay_buffer_size
         self.batch_size = batch_size
+        self.epsilon = max_epsilon
+        self.max_epsilon = max_epsilon
+        self.min_epsilon = min_epsilon
+        self.epsilon_decay_until = epsilon_decay_until
         self.target_update_rate = target_update_rate
         self.gamma = gamma
 
-        # NoisyNet: All attributes related to epsilon are removed
-
-        # PER
-        # memory for 1-step Learning
-        self.alpha = alpha
-        self.beta = beta
-        self.prior_eps = prior_eps
-
-        # N-step Learning
-        self.n_step = n_step
-
-        self.replay_buffer = PrioritizedReplayBuffer(
-            observation_type="dict",
-            size=self.replay_buffer_size,
-            batch_size=self.batch_size,
-            alpha=self.alpha,
-            n_step=self.n_step,
-            gamma=self.gamma,
-        )
-
-        # memory for N-step Learning
-        self.use_n_step = True if n_step > 1 else False
-        if self.use_n_step:
-            self.n_step = n_step
-            self.replay_buffer_n = ReplayBufferNStep(
-                observation_type="dict",
-                size=self.replay_buffer_size,
-                batch_size=self.batch_size,
-                n_step=self.n_step,
-                gamma=self.gamma,
-            )
-
-        # Categorical DQN parameters
-        self.v_min = v_min
-        self.v_max = v_max
-        self.atom_size = atom_size
-        self.support = torch.linspace(self.v_min, self.v_max, self.atom_size).to(
-            self.device
-        )
-
-        self.capacity = capacity
         self.nn_params = nn_params
         self.nn_params["capacity"] = self.capacity
         self.nn_params["device"] = self.device
@@ -313,14 +243,16 @@ class DQNAgent:
             "objects": self.env.des.objects,
             "object_locations": self.env.des.object_locations,
         }
-        self.nn_params["atom_size"] = self.atom_size
-        self.nn_params["support"] = self.support
 
         # networks: dqn, dqn_target
         self.dqn = LSTM(**self.nn_params)
         self.dqn_target = LSTM(**self.nn_params)
         self.dqn_target.load_state_dict(self.dqn.state_dict())
         self.dqn_target.eval()
+
+        self.replay_buffer = ReplayBuffer(
+            observation_type="dict", size=replay_buffer_size, batch_size=batch_size
+        )
 
         # optimizer
         self.optimizer = optim.Adam(self.dqn.parameters())
@@ -333,58 +265,21 @@ class DQNAgent:
 
         self.pretrain_semantic = pretrain_semantic
 
-    def find_answer(self) -> str:
-        """Find an answer to the question.
-
-        This is hard coded. It's a "symbolic" reasoner. It first looks up the episodic
-        memory systems, and if it cannot find the answer, it looks up the semantic
-        memory systems.
-        """
-        answer = answer_question(
-            self.memory_systems, "episodic_semantic", self.question
-        )
-
-        return str(answer).lower()
-
-    def get_memory_state(self, as_numpy: bool = True) -> np.array:
-        """Return the current state of the memory systems. This is NOT what the gym env
-        gives you. This is made by the agent.
-
-        Args
-        ----
-        as_numpy: Whether or not to return the state as a numpy array. Otherwise, it
-            will be returned as a dictionary.
-        """
-        state_as_dict = {
-            "episodic": self.memory_systems["episodic"].return_as_lists(),
-            "semantic": self.memory_systems["semantic"].return_as_lists(),
-            "short": self.memory_systems["short"].return_as_lists(),
-        }
-        state_as_numpy = np.array([state_as_dict])
-
-        if as_numpy:
-            return state_as_numpy
-        else:
-            return state_as_dict
-
-    def select_action(
-        self, state: dict, force_uniform_random: bool = False
-    ) -> np.ndarray:
+    def select_action(self, state: dict) -> np.ndarray:
         """Select an action from the input state.
-
-        NoisyNet: no epsilon greedy action selection
 
         Args
         ----
         state: The current state of the memory systems. This is NOT what the gym env
-        gives you. This is made by our agent.
-        force_uniform_random: Whether or not to force uniform random action selection.
+        gives you. This is made by the agent.
 
         """
-        if force_uniform_random:
+        # epsilon greedy policy
+        if self.epsilon > np.random.random() and not self.is_test:
             selected_action = self.action_space.sample()
+
         else:
-            selected_action = self.dqn(state).argmax()
+            selected_action = self.dqn(np.array([state])).argmax()
             selected_action = selected_action.detach().cpu().numpy()
 
         if not self.is_test:
@@ -415,7 +310,9 @@ class DQNAgent:
         else:
             raise ValueError
 
-        answer = self.find_answer()
+        answer = str(
+            answer_question(self.memory_systems, "episodic_semantic", self.question)
+        ).lower()
 
         (observation, self.question), reward, done, truncated, info = self.env.step(
             answer
@@ -426,58 +323,19 @@ class DQNAgent:
 
         if not self.is_test:
             self.transition += [reward, next_state, done]
-
-            # N-step transition
-            if self.use_n_step:
-                one_step_transition = self.replay_buffer_n.store(*self.transition)
-            # 1-step transition
-            else:
-                one_step_transition = self.transition
-
-            # add a single step transition
-            if one_step_transition:
-                self.replay_buffer.store(*one_step_transition)
+            self.replay_buffer.store(*self.transition)
 
         return reward, done
 
     def update_model(self) -> torch.Tensor:
         """Update the model by gradient descent."""
-        # PER needs beta to calculate weights
-        samples = self.replay_buffer.sample_batch(self.beta)
-        weights = torch.FloatTensor(samples["weights"].reshape(-1, 1)).to(self.device)
-        indices = samples["indices"]
+        samples = self.replay_buffer.sample_batch()
 
-        # 1-step Learning loss
-        elementwise_loss = self._compute_dqn_loss(samples, self.gamma)
-
-        # PER: importance sampling before average
-        loss = torch.mean(elementwise_loss * weights)
-
-        # N-step Learning loss
-        # we are gonna combine 1-step loss and n-step loss so as to
-        # prevent high-variance. The original rainbow employs n-step loss only.
-        if self.use_n_step:
-            gamma_ = self.gamma**self.n_step
-            samples = self.replay_buffer_n.sample_batch_from_idxs(indices)
-            elementwise_loss_n_loss = self._compute_dqn_loss(samples, gamma_)
-            elementwise_loss += elementwise_loss_n_loss
-
-            # PER: importance sampling before average
-            loss = torch.mean(elementwise_loss * weights)
+        loss = self._compute_dqn_loss(samples)
 
         self.optimizer.zero_grad()
         loss.backward()
-        clip_grad_norm_(self.dqn.parameters(), 10.0)
         self.optimizer.step()
-
-        # PER: update priorities
-        loss_for_prior = elementwise_loss.detach().cpu().numpy()
-        new_priorities = loss_for_prior + self.prior_eps
-        self.replay_buffer.update_priorities(indices, new_priorities)
-
-        # NoisyNet: reset noise
-        self.dqn.reset_noise()
-        self.dqn_target.reset_noise()
 
         return loss.item()
 
@@ -495,7 +353,7 @@ class DQNAgent:
             done = False
             while not done and len(self.replay_buffer) < self.batch_size:
                 state = self.get_memory_state()
-                action = self.select_action(state, force_uniform_random=True)
+                action = self.select_action(state)
                 reward, done = self.step(action)
 
         self.dqn.train()
@@ -510,6 +368,7 @@ class DQNAgent:
         (observation, self.question), info = self.env.reset()
         encode_observation(self.memory_systems, observation)
 
+        self.epsilons = []
         self.training_loss = []
         self.scores = {"train": [], "validation": [], "test": None}
 
@@ -521,10 +380,6 @@ class DQNAgent:
             reward, done = self.step(action)
 
             score += reward
-
-            # PER: increase beta
-            fraction = min(self.iteration_idx / self.num_iterations, 1.0)
-            self.beta = self.beta + fraction * (1.0 - self.beta)
 
             # if episode ends
             if done:
@@ -540,6 +395,14 @@ class DQNAgent:
 
             loss = self.update_model()
             self.training_loss.append(loss)
+
+            # linearly decrease epsilon
+            self.epsilon = max(
+                self.min_epsilon,
+                self.epsilon
+                - (self.max_epsilon - self.min_epsilon) / self.epsilon_decay_until,
+            )
+            self.epsilons.append(self.epsilon)
 
             # if hard update is needed
             if self.iteration_idx % self.target_update_rate == 0:
@@ -660,7 +523,7 @@ class DQNAgent:
         write_yaml(results, os.path.join(self.default_root_dir, "results.yaml"))
         write_yaml(self.all_params, os.path.join(self.default_root_dir, "train.yaml"))
         write_yaml(
-            self.get_memory_state(as_numpy=False),
+            self.get_memory_state(),
             os.path.join(self.default_root_dir, "last_memory_state.yaml"),
         )
 
@@ -669,9 +532,7 @@ class DQNAgent:
         self.is_test = False
         self.dqn.train()
 
-    def _compute_dqn_loss(
-        self, samples: Dict[str, np.ndarray], gamma: float
-    ) -> torch.Tensor:
+    def _compute_dqn_loss(self, samples: Dict[str, np.ndarray]) -> torch.Tensor:
         """Return dqn loss.
 
         Args
@@ -685,48 +546,21 @@ class DQNAgent:
         """
         state = samples["obs"]
         next_state = samples["next_obs"]
-        action = torch.LongTensor(samples["acts"]).to(self.device)
+        action = torch.LongTensor(samples["acts"].reshape(-1, 1)).to(self.device)
         reward = torch.FloatTensor(samples["rews"].reshape(-1, 1)).to(self.device)
         done = torch.FloatTensor(samples["done"].reshape(-1, 1)).to(self.device)
 
-        # Categorical DQN algorithm
-        delta_z = float(self.v_max - self.v_min) / (self.atom_size - 1)
+        # G_t   = r + gamma * v(s_{t+1})  if state != Terminal
+        #       = r                       otherwise
+        curr_q_value = self.dqn(state).gather(1, action)
+        next_q_value = self.dqn_target(next_state).max(dim=1, keepdim=True)[0].detach()
+        mask = 1 - done
+        target = (reward + self.gamma * next_q_value * mask).to(self.device)
 
-        with torch.no_grad():
-            # Double DQN
-            next_action = self.dqn(next_state).argmax(1)
-            next_dist = self.dqn_target.dist(next_state)
-            next_dist = next_dist[range(self.batch_size), next_action]
+        # calculate dqn loss
+        loss = F.smooth_l1_loss(curr_q_value, target)
 
-            t_z = reward + (1 - done) * gamma * self.support
-            t_z = t_z.clamp(min=self.v_min, max=self.v_max)
-            b = (t_z - self.v_min) / delta_z
-            l = b.floor().long()
-            u = b.ceil().long()
-
-            offset = (
-                torch.linspace(
-                    0, (self.batch_size - 1) * self.atom_size, self.batch_size
-                )
-                .long()
-                .unsqueeze(1)
-                .expand(self.batch_size, self.atom_size)
-                .to(self.device)
-            )
-
-            proj_dist = torch.zeros(next_dist.size(), device=self.device)
-            proj_dist.view(-1).index_add_(
-                0, (l + offset).view(-1), (next_dist * (u.float() - b)).view(-1)
-            )
-            proj_dist.view(-1).index_add_(
-                0, (u + offset).view(-1), (next_dist * (b - l.float())).view(-1)
-            )
-
-        dist = self.dqn.dist(state)
-        log_p = torch.log(dist[range(self.batch_size), action])
-        elementwise_loss = -(proj_dist * log_p).sum(1)
-
-        return elementwise_loss
+        return loss
 
     def _target_hard_update(self):
         """Hard update: target <- local."""
@@ -738,7 +572,7 @@ class DQNAgent:
         plt.figure(figsize=(20, 8))
 
         if self.scores["train"]:
-            plt.subplot(222)
+            plt.subplot(234)
             plt.title(
                 f"iteration {self.iteration_idx} out of {self.num_iterations}. "
                 f"training score: {self.scores['train'][-1]} out of 128"
@@ -747,7 +581,7 @@ class DQNAgent:
             plt.xlabel("episode")
 
         if self.scores["validation"]:
-            plt.subplot(223)
+            plt.subplot(235)
             val_means = [
                 round(np.mean(scores).item()) for scores in self.scores["validation"]
             ]
@@ -756,14 +590,19 @@ class DQNAgent:
             plt.xlabel("episode")
 
         if self.scores["test"]:
-            plt.subplot(224)
+            plt.subplot(236)
             plt.title(f"test score: {np.mean(self.scores['test'])} out of 128")
             plt.plot(round(np.mean(self.scores["test"]).item(), 2))
             plt.xlabel("episode")
 
-        plt.subplot(221)
+        plt.subplot(231)
         plt.title("training loss")
         plt.plot(self.training_loss)
+        plt.xlabel("update counts")
+
+        plt.subplot(232)
+        plt.title("epsilons")
+        plt.plot(self.epsilons)
         plt.xlabel("update counts")
 
         plt.subplots_adjust(hspace=0.5)
@@ -794,7 +633,9 @@ class DQNAgent:
         if self.scores["test"]:
             tqdm.write(f"test score: {np.mean(self.scores['test'])} out of 128")
 
-        tqdm.write(f"training loss: {self.training_loss[-1]}\n")
+        tqdm.write(
+            f"training loss: {self.training_loss[-1]}\nepsilons: {self.epsilons[-1]}\n"
+        )
 
     def init_memory_systems(self, num_actions: int = 3) -> None:
         """Initialize the agent's memory systems. This has nothing to do with the

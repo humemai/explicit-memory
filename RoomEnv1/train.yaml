@@ -1,4 +1,7 @@
 env_str: room_env:RoomEnv-v1
+max_epsilon: 1.0
+min_epsilon: 0.1
+epsilon_decay_until: 2048
 gamma: 0.65
 capacity:
   episodic: 16
@@ -22,10 +25,3 @@ train_seed: 5
 plotting_interval: 10
 device: cpu
 test_seed: 0
-alpha: 0.2
-beta: 0.6
-prior_eps: 1.0e-06
-v_min: 0.0
-v_max: 200.0
-atom_size: 51
-n_step: 3

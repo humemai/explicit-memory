@@ -259,9 +259,12 @@ class HandcraftedAgent:
                 if self.M_e[i].is_full:
                     if self.forget_policy == "generalize":
                         mem_epi = self.M_e[i].find_mem_for_semantic()
-                        self.M_e[i].forget(mem_epi)
-                        mem_sem = SemanticMemory.ob2sem(mem_epi)
-                        self.M_s[i].add(mem_sem)
+                        if mem_epi is None:
+                            self.M_e[i].forget_oldest()
+                        else:
+                            self.M_e[i].forget(mem_epi)
+                            mem_sem = SemanticMemory.ob2sem(mem_epi)
+                            self.M_s[i].add(mem_sem)
 
                         if self.M_s[i].is_full:
                             self.M_s[i].forget_weakest()

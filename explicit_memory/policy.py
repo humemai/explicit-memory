@@ -5,19 +5,17 @@ The trained neural network policies are not implemented yet.
 import random
 from typing import List
 
-from .memory import ShortMemory
+from .memory import ShortMemory, EpisodicMemory, SemanticMemory
 
 
-def encode_observation(memory_systems: dict, obs: dict) -> None:
+def encode_observation(memory_systems: dict, obs: List[List]) -> None:
     """Non RL policy of encoding an observation into a short-term memory.
 
     Args
     ----
     memory_systems: {"episodic": EpisodicMemory, "semantic": SemanticMemory,
                      "short": ShortMemory}
-    obs: observation = {"human": <human>,
-                        "object": <obj>,
-                        "object_location": <obj_loc>}
+    obs: observation as a quadruple: [head, relation, tail, num]
 
     """
     mem_short = ShortMemory.ob2short(obs)
@@ -31,7 +29,7 @@ def manage_memory(memory_systems: dict, policy: str) -> None:
     ----
     memory_systems: {"episodic": EpisodicMemory, "semantic": SemanticMemory,
                      "short": ShortMemory}
-    policy: "episodic", "semantic", "forget", "random", or "neural"
+    policy: "episodic", "semantic", "episodic_semantic", "forget", "random", or "neural"
 
     """
     assert policy.lower() in [
@@ -42,23 +40,40 @@ def manage_memory(memory_systems: dict, policy: str) -> None:
         "neural",
     ]
     if policy.lower() == "episodic":
-        if memory_systems["episodic"].capacity != 0:
-            if memory_systems["episodic"].is_full:
-                memory_systems["episodic"].forget_oldest()
-            mem_short = memory_systems["short"].get_oldest_memory()
-            mem_epi = ShortMemory.short2epi(mem_short)
-            memory_systems["episodic"].add(mem_epi)
+        assert memory_systems["episodic"].capacity != 0
+        if memory_systems["episodic"].is_full:
+            memory_systems["episodic"].forget_oldest()
+        mem_short = memory_systems["short"].get_oldest_memory()
+        mem_epi = ShortMemory.short2epi(mem_short)
+        memory_systems["episodic"].add(mem_epi)
 
     elif policy.lower() == "semantic":
-        if memory_systems["semantic"].capacity != 0:
-            if memory_systems["semantic"].is_full:
-                memory_systems["semantic"].forget_weakest()
-            mem_short = memory_systems["short"].get_oldest_memory()
-            mem_sem = ShortMemory.short2sem(mem_short)
-            memory_systems["semantic"].add(mem_sem)
+        assert memory_systems["semantic"].capacity != 0
+        if memory_systems["semantic"].is_full:
+            memory_systems["semantic"].forget_weakest()
+        mem_short = memory_systems["short"].get_oldest_memory()
+        mem_sem = ShortMemory.short2sem(mem_short)
+        memory_systems["semantic"].add(mem_sem)
 
     elif policy.lower() == "forget":
         pass
+
+    elif policy.lower() == "episodic_semantic":
+        assert (
+            memory_systems["episodic"].capacity != 0
+            and memory_systems["semantic"].capacity != 0
+        )
+        if memory_systems["episodic"].is_full:
+            mem_epi = memory_systems["episodic"].find_mem_for_semantic()
+            if mem_epi is None:
+                memory_systems["episodic"].forget_oldest()
+            else:
+                mem_sem = SemanticMemory.ob2sem(mem_epi)
+                memory_systems["semantic"].add(mem_sem)
+                memory_systems["episodic"].forget(mem_epi)
+
+        if memory_systems["semantic"].is_full:
+            memory_systems["semantic"].forget_weakest()
 
     elif policy.lower() == "random":
         action_number = random.choice([0, 1, 2])

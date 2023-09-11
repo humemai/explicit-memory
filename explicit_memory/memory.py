@@ -496,6 +496,9 @@ class EpisodicMemory(Memory):
 
         highest_freq = max([elem[2] for elem in best_semantic_possibles])
 
+        if highest_freq == 1:
+            return None
+
         best_semantic_possibles = [
             elem for elem in best_semantic_possibles if elem[2] == highest_freq
         ]

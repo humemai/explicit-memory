@@ -5,7 +5,7 @@ The trained neural network policies are not implemented yet.
 import random
 from typing import List
 
-from .memory import ShortMemory, EpisodicMemory, SemanticMemory
+from .memory import EpisodicMemory, SemanticMemory, ShortMemory
 
 
 def encode_observation(memory_systems: dict, obs: List[List]) -> None:

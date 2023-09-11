@@ -186,7 +186,7 @@ class DQNAgent(HandcraftedAgent):
         env_str: This has to be "room_env:RoomEnv1-v1"
         num_iterations: The number of iterations to train the agent.
         replay_buffer_size: The size of the replay buffer.
-        warm_start: The number of samples to fill the replay buffer with, before 
+        warm_start: The number of samples to fill the replay buffer with, before
             starting
         batch_size: The batch size for training This is the amount of samples sampled
             from the replay buffer.

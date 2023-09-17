@@ -239,35 +239,44 @@ class HandcraftedAgent:
     def run_episodic_semantic(self):
         """Run an agent both with the episodic and semantic memory system."""
         self.rewards = 0
-        (ob, question), info = self.env.reset()
-
-        if self.forget_policy == "generalize":
-            for i in range(self.env.num_agents):
-                self.M_e[i].add(EpisodicMemory.ob2epi(ob[i]))
-
-        elif self.forget_policy == "random":
-            for i in range(self.env.num_agents):
-                if random.random() < 0.5:
-                    self.M_e[i].add(EpisodicMemory.ob2epi(ob[i]))
-                else:
-                    self.M_s[i].add(SemanticMemory.ob2sem(ob[i]))
-        else:
-            raise ValueError
+        env_started = False
+        pred = None
 
         for t in count():
+            if env_started:
+                (ob, question), reward, done, truncated, info = self.env.step(pred)
+                self.rewards += reward
+                if done:
+                    break
+
+            else:
+                (ob, question), info = self.env.reset()
+                env_started = True
+
             for i in range(self.env.num_agents):
                 if self.M_e[i].is_full:
                     if self.forget_policy == "generalize":
-                        mem_epi = self.M_e[i].find_mem_for_semantic()
-                        if mem_epi is None:
+                        mems_epi, mem_sem = self.M_e[i].find_similar_memories()
+                        if mems_epi is None and mem_sem is None:
                             self.M_e[i].forget_oldest()
                         else:
-                            self.M_e[i].forget(mem_epi)
-                            mem_sem = SemanticMemory.ob2sem(mem_epi)
-                            self.M_s[i].add(mem_sem)
+                            for mem_epi in mems_epi:
+                                self.M_e[i].forget(mem_epi)
 
-                        if self.M_s[i].is_full:
-                            self.M_s[i].forget_weakest()
+                            mem_sem_same = self.M_s[i].find_same_memory(mem_sem)
+
+                            if mem_sem_same is not None:
+                                self.M_s[i].add(mem_sem)
+                            else:
+                                if self.M_s[i].is_full:
+                                    mem_sem_weakset = self.M_s[i].get_weakest_memory()
+                                    if mem_sem_weakset[-1] <= mem_sem[-1]:
+                                        self.M_s[i].forget_weakest()
+                                        self.M_s[i].add(mem_sem)
+                                    else:
+                                        pass
+                                else:
+                                    self.M_s[i].add(mem_sem)
 
                     elif self.forget_policy == "random":
                         self.M_e[i].forget_random()
@@ -275,9 +284,16 @@ class HandcraftedAgent:
                     else:
                         raise ValueError
 
-                if self.M_s[i].is_full:
-                    assert self.forget_policy == "random"
-                    self.M_s[i].forget_weakest()
+                if self.forget_policy == "generalize":
+                    self.M_e[i].add(EpisodicMemory.ob2epi(ob[i]))
+                elif self.forget_policy == "random":
+                    if random.random() < 0.5:
+                        self.M_e[i].add(EpisodicMemory.ob2epi(ob[i]))
+                    else:
+                        if self.M_s[i].is_full:
+                            assert self.forget_policy == "random"
+                            self.M_s[i].forget_weakest()
+                        self.M_s[i].add(SemanticMemory.ob2sem(ob[i]))
 
             if self.answer_policy == "episem":
                 preds = []
@@ -317,35 +333,22 @@ class HandcraftedAgent:
             else:
                 raise ValueError
 
-            (ob, question), reward, done, truncated, info = self.env.step(pred)
-
-            if self.forget_policy == "generalize":
-                for i in range(self.env.num_agents):
-                    self.M_e[i].add(EpisodicMemory.ob2epi(ob[i]))
-
-            elif self.forget_policy == "random":
-                for i in range(self.env.num_agents):
-                    if random.random() < 0.5:
-                        self.M_e[i].add(EpisodicMemory.ob2epi(ob[i]))
-                    else:
-                        self.M_s[i].add(SemanticMemory.ob2sem(ob[i]))
-            else:
-                raise ValueError
-
-            self.rewards += reward
-
-            if done:
-                break
-
     def run_episodic_semantic_pretrain(self):
         """Run an agent both with the episodic and pretrained semantic memory system."""
         self.rewards = 0
-        (ob, question), info = self.env.reset()
-
-        for i in range(self.env.num_agents):
-            self.M_e[i].add(EpisodicMemory.ob2epi(ob[i]))
+        env_started = False
+        pred = None
 
         for t in count():
+            if env_started:
+                (ob, question), reward, done, truncated, info = self.env.step(pred)
+                self.rewards += reward
+                if done:
+                    break
+            else:
+                (ob, question), info = self.env.reset()
+                env_started = True
+
             for i in range(self.env.num_agents):
                 if self.M_e[i].is_full:
                     if self.forget_policy == "oldest":
@@ -357,6 +360,8 @@ class HandcraftedAgent:
                     else:
                         raise ValueError
 
+                self.M_e[i].add(EpisodicMemory.ob2epi(ob[i]))
+
             if self.answer_policy == "episem":
                 preds = []
                 timestamps = []
@@ -394,13 +399,3 @@ class HandcraftedAgent:
                 pred = random.choice(preds)
             else:
                 raise ValueError
-
-            (ob, question), reward, done, truncated, info = self.env.step(pred)
-
-            for i in range(self.env.num_agents):
-                self.M_e[i].add(EpisodicMemory.ob2epi(ob[i]))
-
-            self.rewards += reward
-
-            if done:
-                break

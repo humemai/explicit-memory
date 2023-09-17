@@ -6,6 +6,8 @@ from copy import deepcopy
 from pprint import pformat
 from typing import Dict, List, Tuple, Union
 
+import numpy as np
+
 from .utils import list_duplicates_of, remove_posession, remove_timestamp
 
 logging.basicConfig(
@@ -214,8 +216,7 @@ class EpisodicMemory(Memory):
         """Get the oldest memory in the episodic memory system.
 
         At the moment, this is simply done by looking up the timestamps and comparing
-        them. If there are more than one memory with the same timestamp, then it'll
-        choose one of them uniformly at random.
+        them.
 
         Returns
         -------
@@ -224,9 +225,10 @@ class EpisodicMemory(Memory):
         """
         # sorted() is ascending by default.
         mem_candidate = sorted(self.entries, key=lambda x: x[-1])[0]
-        mem = random.choice(
-            [mem for mem in self.entries if mem_candidate[-1] == mem[-1]]
-        )
+        mem = mem_candidate
+        # mem = random.choice(
+        #     [mem for mem in self.entries if mem_candidate[-1] == mem[-1]]
+        # )
         logging.info(f"{mem} is the oldest memory in the system.")
 
         return mem
@@ -371,27 +373,6 @@ class EpisodicMemory(Memory):
 
         return mem
 
-    def find_same_memory(self, mem: list) -> list:
-        """Find an episodic memory that's almost the same as the query memory.
-
-        Args
-        ----
-        mem: An episodic memory as a quadruple: [head, relation, tail, timestamp]
-
-        Returns
-        -------
-        An episodic memory. If it doesn't exist, then return None. If there are more
-        than one, then return one of them uniformly at random.
-
-        """
-        candidates = [entry for entry in self.entries if mem[:-1] == entry[:-1]]
-
-        if len(candidates) == 0:
-            return None
-
-        else:
-            return random.choice(candidates)
-
     def clean_old_memories(self) -> List:
         """Find if there are duplicate memories with different timestamps."""
         logging.debug("finding if duplicate memories exist ...")
@@ -417,12 +398,21 @@ class EpisodicMemory(Memory):
         self.entries = entries_cleaned
         logging.debug(f"There are {len(self.entries)} episodic memories after cleaning")
 
-    def get_similar(self):
+    def find_similar_memories(
+        self, split_possessive: bool = True, dont_generalize_agent: bool = True
+    ) -> List:
         """Find N episodic memories that can be compressed into one semantic.
 
         At the moment, this is simply done by matching string values. If there are more
         than one group of similar episodic memories, it'll return the one with the
         largest number of memories.
+
+        Args
+        ----
+        split_possessive: whether to split the possessive, i.e., 's, or not.
+        dont_generalize_agent: if True, the agent-related memories are not generalized,
+            i.e., they are not put into the semantic memory system.
+
 
         Returns
         -------
@@ -432,14 +422,24 @@ class EpisodicMemory(Memory):
 
         """
         logging.debug("looking for episodic entries that can be compressed ...")
-        MARKER = "^^^"
+        MARKER = "^^^"  # to allow hashing.
 
-        # -1 removes the timestamps from the quadruples
-        semantic_possibles = [
-            [remove_posession(e) for e in remove_timestamp(entry)]
-            for entry in self.entries
-        ]
-        # "^" is to allow hashing.
+        if split_possessive:
+            semantic_possibles = [
+                [remove_posession(e) for e in remove_timestamp(entry)]
+                for entry in self.entries
+            ]
+        else:
+            semantic_possibles = [
+                [e for e in remove_timestamp(entry)] for entry in self.entries
+            ]
+        if dont_generalize_agent:
+            semantic_possibles = [
+                entry
+                for entry in semantic_possibles
+                if entry[0] != "agent" and entry[1] != "agent" and entry[2] != "agent"
+            ]
+
         semantic_possibles = [MARKER.join(elem) for elem in semantic_possibles]
 
         def duplicates(mylist, item):
@@ -455,7 +455,12 @@ class EpisodicMemory(Memory):
         elif len(semantic_possibles) < len(self.entries):
             logging.debug("some episodic memories found to be compressible.")
 
-            max_key = max(semantic_possibles, key=lambda k: len(semantic_possibles[k]))
+            lens = [len(foo) for foo in list(semantic_possibles.values())]
+            selected = np.argwhere(lens == np.max(lens)).flatten().tolist()
+
+            max_keys = [list(semantic_possibles.keys())[i] for i in selected]
+            max_key = random.choice(max_keys)  # if there is more than one
+
             indexes = semantic_possibles[max_key]
 
             episodic_memories = map(self.entries.__getitem__, indexes)
@@ -473,42 +478,9 @@ class EpisodicMemory(Memory):
                 f"{len(indexes)} episodic memories can be compressed "
                 f"into one semantic memory: {semantic_memory}."
             )
-
             return episodic_memories, semantic_memory
         else:
             raise ValueError("Something is wrong!")
-
-    def find_mem_for_semantic(self):
-        """Find the best episodic memory that can be compressed into one semantic."""
-        best_semantic_possibles = []
-        for mem in self.entries:
-            head, relation, tail = (
-                remove_posession(mem[0]),
-                remove_posession(mem[1]),
-                remove_posession(mem[2]),
-            )
-            best_semantic_possibles.append([head, relation, tail])
-
-        best_semantic_possibles = [
-            (i, elem, best_semantic_possibles.count(elem))
-            for i, elem in enumerate(best_semantic_possibles)
-        ]
-
-        highest_freq = max([elem[2] for elem in best_semantic_possibles])
-
-        if highest_freq == 1:
-            return None
-
-        best_semantic_possibles = [
-            elem for elem in best_semantic_possibles if elem[2] == highest_freq
-        ]
-
-        mem_sem = random.choice(best_semantic_possibles)
-        idx = mem_sem[0]
-
-        mem_selected = self.entries[idx]
-
-        return mem_selected
 
 
 class ShortMemory(Memory):
@@ -547,8 +519,7 @@ class ShortMemory(Memory):
         """Get the oldest memory in the short-term memory system.
 
         At the moment, this is simply done by looking up the timestamps and comparing
-        them. If there are more than one memory with the same timestamp, then it'll
-        choose one of them uniformly at random.
+        them.
 
         Returns
         -------
@@ -557,9 +528,10 @@ class ShortMemory(Memory):
         """
         # sorted() is ascending by default.
         mem_candidate = sorted(self.entries, key=lambda x: x[-1])[0]
-        mem = random.choice(
-            [mem for mem in self.entries if mem_candidate[-1] == mem[-1]]
-        )
+        mem = mem_candidate
+        # mem = random.choice(
+        #     [mem for mem in self.entries if mem_candidate[-1] == mem[-1]]
+        # )
         logging.info(f"{mem} is the oldest memory in the system.")
 
         return mem
@@ -596,37 +568,6 @@ class ShortMemory(Memory):
 
         mem = self.get_oldest_memory()
         self.forget(mem)
-
-    def find_similar_memories(self, mem: list, split_possessive: bool = True) -> None:
-        """Find similar memories.
-
-        Args
-        ----
-        mem: A short-term memory as a quadruple
-        split_possessive: whether to split the possessive, i.e., 's, or not.
-
-        """
-        logging.debug("Searching for similar memories in the short memory system...")
-        similar = []
-        for entry in self.entries:
-            if split_possessive:
-                if (
-                    (remove_posession(entry[0]) == remove_posession(mem[0]))
-                    and (remove_posession(entry[1]) == remove_posession(mem[1]))
-                    and (remove_posession(entry[2]) == remove_posession(mem[2]))
-                ):
-                    similar.append(entry)
-
-            else:
-                if (
-                    (entry[0] == mem[0])
-                    and (entry[1] == mem[1])
-                    and (entry[2] == mem[2])
-                ):
-                    similar.append(entry)
-        logging.info(f"{len(similar)} similar short memories found!")
-
-        return similar
 
     @staticmethod
     def ob2short(ob: list) -> list:
@@ -692,26 +633,6 @@ class ShortMemory(Memory):
 
         return sem
 
-    def find_same_memory(self, mem: list) -> list:
-        """Find a short memory that's almost the same as the query memory.
-
-        Args
-        ----
-        mem: A short memory as a quadruple: [head, relation, tail, timestamp]
-
-        Returns
-        -------
-        A short-term memory. If it doesn't exist, then return None. If there are more
-        than one, then return one of them uniformly at random.
-
-        """
-        candidates = [entry for entry in self.entries if mem[:-1] == entry[:-1]]
-
-        if len(candidates) == 0:
-            return None
-        else:
-            return random.choice(candidates)
-
 
 class SemanticMemory(Memory):
     """Semantic memory class."""
@@ -729,7 +650,7 @@ class SemanticMemory(Memory):
         """
         super().__init__("semantic", capacity)
 
-    def can_be_added(self, mem: dict) -> bool:
+    def can_be_added(self, mem: List[List[str]]) -> bool:
         """Checks if a memory can be added to the system or not.
 
         Args
@@ -763,7 +684,7 @@ class SemanticMemory(Memory):
         ----
         semantic_knowledge: e.g., [["desk", "atlocation", "officeroom"],
             ["chair", "atlocation", "officeroom",
-            ["officeroom", "tothenorthof", "livingroom]]
+            ["officeroom", "north", "livingroom]]
         return_remaining_space: whether or not to return the remaining space from the
             semantic memory system.
         freeze: whether or not to freeze the semantic memory system or not.
@@ -1029,8 +950,8 @@ class SemanticMemory(Memory):
 
         assert self.size <= self.capacity
 
-    def find_same_memory(self, mem) -> dict:
-        """Find a semantic memory that's almost the same as the query memory.
+    def find_same_memory(self, mem: List[List[str]]) -> List[List[str]]:
+        """Find a semantic memory that's the same as the query memory.
 
         Args
         ----
@@ -1038,14 +959,15 @@ class SemanticMemory(Memory):
 
         Returns
         -------
-        An semantic memory. If it doesn't exist, then return None. If there are more
-        than one, then return one of them uniformly at random.
+        A semantic memory. If it doesn't exist, then return None.
 
         """
-        candidates = [entry for entry in self.entries if mem[:-1] == entry[:-1]]
+        candidate = [entry for entry in self.entries if mem[:-1] == entry[:-1]]
 
-        if len(candidates) == 0:
+        if len(candidate) == 0:
             return None
 
+        elif len(candidate) == 1:
+            return candidate[0]
         else:
-            return random.choice(candidates)
+            raise ValueError("Something is wrong!")

@@ -8,7 +8,7 @@ The agent is trained with DQN. See the paper ["A Machine with Short-Term, Episod
 1. A unix or unix-like x86 machine
 1. python 3.8 or higher.
 1. Running in a virtual environment (e.g., conda, virtualenv, etc.) is highly recommended so that you don't mess up with the system python.
-1. Make sure you are in the same directory where this README is located, i.e., `RoomEnv-v0`
+1. Make sure you are in the same directory where this README is located, i.e., `RoomEnv1`
 1. Install the `explicit_memory` python package, by running `pip install ..`
 1. `pip install -r requirements.txt`
 

@@ -22,14 +22,22 @@ def encode_observation(memory_systems: dict, obs: List[List]) -> None:
     memory_systems["short"].add(mem_short)
 
 
-def manage_memory(memory_systems: dict, policy: str) -> None:
+def manage_memory(
+    memory_systems: dict,
+    policy: str,
+    dont_generalize_agent: bool = True,
+    split_possessive: bool = True,
+) -> None:
     """Non RL memory management policy.
 
     Args
     ----
     memory_systems: {"episodic": EpisodicMemory, "semantic": SemanticMemory,
                      "short": ShortMemory}
-    policy: "episodic", "semantic", "episodic_semantic", "forget", "random", or "neural"
+    policy: "episodic", "semantic", "generalize", "forget", "random", or "neural"
+    dont_generalize_agent: if True, the agent-related memories are not generalized,
+        i.e., they are not put into the semantic memory system.
+    split_possessive: whether to split the possessive, i.e., 's, or not.
 
     """
     assert policy.lower() in [
@@ -37,6 +45,7 @@ def manage_memory(memory_systems: dict, policy: str) -> None:
         "semantic",
         "forget",
         "random",
+        "generalize",
         "neural",
     ]
     if policy.lower() == "episodic":
@@ -52,28 +61,57 @@ def manage_memory(memory_systems: dict, policy: str) -> None:
         if memory_systems["semantic"].is_full:
             memory_systems["semantic"].forget_weakest()
         mem_short = memory_systems["short"].get_oldest_memory()
-        mem_sem = ShortMemory.short2sem(mem_short)
-        memory_systems["semantic"].add(mem_sem)
+        mem_sem = ShortMemory.short2sem(mem_short, split_possessive=split_possessive)
+
+        if dont_generalize_agent and mem_sem[0] == "agent":
+            if (
+                mem_sem[0] != "agent"
+                and mem_sem[1] != "agent"
+                and mem_sem[2] != "agent"
+            ):
+                memory_systems["semantic"].add(mem_sem)
+        else:
+            memory_systems["semantic"].add(mem_sem)
 
     elif policy.lower() == "forget":
         pass
 
-    elif policy.lower() == "episodic_semantic":
+    elif policy.lower() == "generalize":
         assert (
             memory_systems["episodic"].capacity != 0
             and memory_systems["semantic"].capacity != 0
         )
         if memory_systems["episodic"].is_full:
-            mem_epi = memory_systems["episodic"].find_mem_for_semantic()
-            if mem_epi is None:
+            mems_epi, mem_sem = memory_systems["episodic"].find_similar_memories(
+                split_possessive=split_possessive,
+                dont_generalize_agent=dont_generalize_agent,
+            )
+            if mems_epi is None and mem_sem is None:
                 memory_systems["episodic"].forget_oldest()
             else:
-                mem_sem = SemanticMemory.ob2sem(mem_epi)
-                memory_systems["semantic"].add(mem_sem)
-                memory_systems["episodic"].forget(mem_epi)
+                for mem_epi in mems_epi:
+                    memory_systems["episodic"].forget(mem_epi)
 
-        if memory_systems["semantic"].is_full:
-            memory_systems["semantic"].forget_weakest()
+                mem_sem_same = memory_systems["semantic"].find_same_memory(mem_sem)
+
+                if mem_sem_same is not None:
+                    memory_systems["semantic"].add(mem_sem)
+                else:
+                    if memory_systems["semantic"].is_full:
+                        mem_sem_weakset = memory_systems[
+                            "semantic"
+                        ].get_weakest_memory()
+                        if mem_sem_weakset[-1] <= mem_sem[-1]:
+                            memory_systems["semantic"].forget_weakest()
+                            memory_systems["semantic"].add(mem_sem)
+                        else:
+                            pass
+                    else:
+                        memory_systems["semantic"].add(mem_sem)
+
+        mem_short = memory_systems["short"].get_oldest_memory()
+        mem_epi = ShortMemory.short2epi(mem_short)
+        memory_systems["episodic"].add(mem_epi)
 
     elif policy.lower() == "random":
         action_number = random.choice([0, 1, 2])
@@ -104,7 +142,9 @@ def manage_memory(memory_systems: dict, policy: str) -> None:
     memory_systems["short"].forget_oldest()
 
 
-def answer_question(memory_systems: dict, policy: str, question: dict) -> str:
+def answer_question(
+    memory_systems: dict, policy: str, question: dict, split_possessive: bool = True
+) -> str:
     """Non RL question answering policy.
 
     Args
@@ -115,6 +155,7 @@ def answer_question(memory_systems: dict, policy: str, question: dict) -> str:
     policy: "episodic_semantic", "semantic_episodic", "episodic", "semantic",
             "random", or "neural",
     question: question = {"human": <human>, "object": <obj>}
+    split_possessive: whether to split the possessive, i.e., 's, or not.
 
     Returns
     -------
@@ -130,7 +171,9 @@ def answer_question(memory_systems: dict, policy: str, question: dict) -> str:
         "neural",
     ]
     pred_epi, _ = memory_systems["episodic"].answer_latest(question)
-    pred_sem, _ = memory_systems["semantic"].answer_strongest(question)
+    pred_sem, _ = memory_systems["semantic"].answer_strongest(
+        question, split_possessive
+    )
 
     if policy.lower() == "episodic_semantic":
         if pred_epi is None:

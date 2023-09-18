@@ -11,13 +11,12 @@ import torch
 import torch.nn.functional as F
 import torch.optim as optim
 from IPython.display import clear_output
-from nn import LSTM
 from tqdm.auto import tqdm, trange
 
 from explicit_memory.memory import EpisodicMemory, SemanticMemory, ShortMemory
-from explicit_memory.policy import (answer_question, encode_observation,
-                                    manage_memory)
+from explicit_memory.policy import answer_question, encode_observation, manage_memory
 from explicit_memory.utils import ReplayBuffer, is_running_notebook, write_yaml
+from explicit_memory.nn import LSTM
 
 
 class HandcraftedAgent:
@@ -148,7 +147,7 @@ class DQNAgent(HandcraftedAgent):
 
     def __init__(
         self,
-        env_str: str = "room_env:RoomEnv1-v1",
+        env_str: str = "room_env:RoomEnv-v1",
         num_iterations: int = 1280,
         replay_buffer_size: int = 1024,
         warm_start: int = 1024,
@@ -183,7 +182,7 @@ class DQNAgent(HandcraftedAgent):
 
         Args
         ----
-        env_str: This has to be "room_env:RoomEnv1-v1"
+        env_str: This has to be "room_env:RoomEnv-v1"
         num_iterations: The number of iterations to train the agent.
         replay_buffer_size: The size of the replay buffer.
         warm_start: The number of samples to fill the replay buffer with, before
@@ -243,11 +242,9 @@ class DQNAgent(HandcraftedAgent):
         self.nn_params = nn_params
         self.nn_params["capacity"] = self.capacity
         self.nn_params["device"] = self.device
-        self.nn_params["entities"] = {
-            "humans": self.env.des.humans,
-            "objects": self.env.des.objects,
-            "object_locations": self.env.des.object_locations,
-        }
+        self.nn_params["entities"] = (
+            self.env.des.humans + self.env.des.objects + self.env.des.object_locations
+        )
 
         # networks: dqn, dqn_target
         self.dqn = LSTM(**self.nn_params)

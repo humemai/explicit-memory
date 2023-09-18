@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from RoomEnv1.nn.lstm import LSTM
+from explicit_memory.nn import LSTM
 
 
 class LSTMTest(unittest.TestCase):

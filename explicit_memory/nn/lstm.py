@@ -1,12 +1,9 @@
 """Deep Q-network architecture. Currently only LSTM is implemented."""
-from copy import deepcopy
 
 import numpy as np
 import torch
-import torch.nn.functional as F
 from torch import nn
 
-from explicit_memory.nn import NoisyLinear
 from explicit_memory.utils import split_by_possessive
 
 
@@ -20,8 +17,9 @@ class LSTM(nn.Module):
         n_actions: int,
         embedding_dim: int,
         capacity: dict,
-        entities: dict,
         include_human: str,
+        entities: list,
+        relations: list = [],
         batch_first: bool = True,
         human_embedding_on_object_location: bool = False,
         device: str = "cpu",
@@ -37,11 +35,9 @@ class LSTM(nn.Module):
         embedding_dim: entity embedding dimension (e.g., 32)
         capacity: the capacities of memory systems.
             e.g., {"episodic": 16, "semantic": 16, "short": 1}
-        entities:
-            e,g, {
-            "humans": ["Foo", "Bar"],
-            "objects": ["laptop", "phone"],
-            "object_locations": ["desk", "lap"]}
+        entities: list of entities, e.g., ["Foo", "Bar", "laptop", "phone", "desk",
+            "lap"]
+        relations : list of relations, e.g., ["atlocation", "north", "south"]
         include_human:
             None: Don't include humans
             "sum": sum up the human embeddings with object / object_location embeddings.
@@ -57,6 +53,7 @@ class LSTM(nn.Module):
         self.embedding_dim = embedding_dim
         self.capacity = capacity
         self.entities = entities
+        self.relations = relations
         self.include_human = include_human
         self.memory_of_interest = list(self.capacity.keys())
         self.human_embedding_on_object_location = human_embedding_on_object_location
@@ -108,12 +105,7 @@ class LSTM(nn.Module):
 
     def create_embeddings(self) -> None:
         """Create learnable embeddings."""
-        self.word2idx = (
-            ["<PAD>"]
-            + self.entities["humans"]
-            + self.entities["objects"]
-            + self.entities["object_locations"]
-        )
+        self.word2idx = ["<PAD>"] + self.entities + self.relations
         self.word2idx = {word: idx for idx, word in enumerate(self.word2idx)}
         self.embeddings = nn.Embedding(
             len(self.word2idx), self.embedding_dim, device=self.device, padding_idx=0
@@ -124,7 +116,9 @@ class LSTM(nn.Module):
             self.input_size_e = self.embedding_dim * 2
             self.input_size_o = self.embedding_dim * 2
 
-        elif self.include_human.lower() == "concat":
+        elif (self.include_human.lower() == "concat") or (
+            self.include_human.lower() == "v2"
+        ):
             self.input_size_e = self.embedding_dim * 3
             self.input_size_o = self.embedding_dim * 3
         else:
@@ -210,7 +204,6 @@ class LSTM(nn.Module):
         """
         mem_pad = ["<PAD>", "<PAD>", "<PAD>", "<PAD>"]
 
-        # mems_batch = deepcopy(x)
         for mems in x:
             for _ in range(self.capacity[memory_type] - len(mems)):
                 # this is a dummy entry for padding.
@@ -270,7 +263,7 @@ class LSTM(nn.Module):
 
         fc_out_all = torch.concat(to_concat, dim=-1)
 
-        # fc_out has the dimension of (batch_size, 3)
+        # fc_out has the dimension of (batch_size, n_actions)
         fc_out = self.fc_final1(self.relu(self.fc_final0(fc_out_all)))
 
         return fc_out

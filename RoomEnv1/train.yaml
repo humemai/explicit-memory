@@ -1,7 +1,7 @@
 env_str: room_env:RoomEnv-v1
 max_epsilon: 1.0
 min_epsilon: 0.1
-epsilon_decay_until: 2048
+epsilon_decay_until: 1024
 gamma: 0.65
 capacity:
   episodic: 16
@@ -13,9 +13,10 @@ nn_params:
   n_actions: 3
   embedding_dim: 32
   include_human: sum
-num_iterations: 1024
-replay_buffer_size: 512
-batch_size: 128
+num_iterations: 2048
+replay_buffer_size: 2048
+warm_start: 256
+batch_size: 16
 target_update_rate: 10
 pretrain_semantic: false
 run_validation: true

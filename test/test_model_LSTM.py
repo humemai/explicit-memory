@@ -31,18 +31,21 @@ class LSTMTest(unittest.TestCase):
                                                     "semantic": capacity // 2,
                                                     "short": capacity // 2,
                                                 },
-                                                "entities": {
-                                                    "humans": ["Foo", "Bar"],
-                                                    "objects": ["laptop", "phone"],
-                                                    "object_locations": [
-                                                        "desk",
-                                                        "lap",
-                                                    ],
+                                                "entities": [
+                                                    "Foo",
+                                                    "Bar",
+                                                    "laptop",
+                                                    "phone",
+                                                    "desk",
+                                                    "lap",
+                                                ],
+                                                "relations": [],
+                                                "v1_params": {
+                                                    "include_human": include_human,
+                                                    "human_embedding_on_object_location": human_embedding_on_object_location,
                                                 },
-                                                "include_human": include_human,
                                                 "batch_first": batch_first,
                                                 "accelerator": "cpu",
-                                                "human_embedding_on_object_location": human_embedding_on_object_location,
                                             }
                                         )
         for config in configs:
@@ -59,18 +62,21 @@ class LSTMTest(unittest.TestCase):
                 "semantic": 16,
                 "short": 1,
             },
-            "entities": {
-                "humans": ["Foo", "Bar"],
-                "objects": ["laptop", "phone"],
-                "object_locations": [
-                    "desk",
-                    "lap",
-                ],
+            "entities": [
+                "Foo",
+                "Bar",
+                "laptop",
+                "phone",
+                "desk",
+                "lap",
+            ],
+            "relations": [],
+            "v1_params": {
+                "include_human": "sum",
+                "human_embedding_on_object_location": False,
             },
-            "include_human": "sum",
             "batch_first": True,
             "accelerator": "cpu",
-            "human_embedding_on_object_location": False,
         }
         lstm = LSTM(**config)
         lstm.forward(

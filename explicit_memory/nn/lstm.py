@@ -12,53 +12,67 @@ class LSTM(nn.Module):
 
     def __init__(
         self,
-        hidden_size: int,
-        num_layers: int,
-        n_actions: int,
-        embedding_dim: int,
         capacity: dict,
-        include_human: str,
         entities: list,
-        relations: list = [],
+        relations: list,
+        n_actions: int,
+        hidden_size: int = 64,
+        num_layers: int = 2,
+        embedding_dim: int = 32,
         batch_first: bool = True,
-        human_embedding_on_object_location: bool = False,
         device: str = "cpu",
+        v1_params: dict = {
+            "include_human": "sum",
+            "human_embedding_on_object_location": False,
+        },
+        v2_params: dict = None,
         **kwargs,
     ) -> None:
         """Initialize the LSTM.
 
         Args
         ----
-        hidden_size: hidden size of the LSTM
-        num_layers: number of the LSTM layers
-        n_actions: number of actions. This should be 3, at the moment.
-        embedding_dim: entity embedding dimension (e.g., 32)
         capacity: the capacities of memory systems.
             e.g., {"episodic": 16, "semantic": 16, "short": 1}
         entities: list of entities, e.g., ["Foo", "Bar", "laptop", "phone", "desk",
             "lap"]
         relations : list of relations, e.g., ["atlocation", "north", "south"]
-        include_human:
-            None: Don't include humans
-            "sum": sum up the human embeddings with object / object_location embeddings.
-            "cocnat": concatenate the human embeddings to object / object_location
-                embeddings.
+        n_actions: number of actions. This should be 3, at the moment.
+        hidden_size: hidden size of the LSTM
+        num_layers: number of the LSTM layers
+        embedding_dim: entity embedding dimension (e.g., 32)
         batch_first: Should the batch dimension be the first or not.
-        human_embedding_on_object_location: whether to superposition the human embedding
-            on the tail (object location entity).
         device: "cpu" or "cuda"
+        v1_params: parameters for the v1 model.
+            include_human:
+                None: Don't include humans
+                "sum": sum up the human embeddings with object / object_location embeddings.
+                "cocnat": concatenate the human embeddings to object / object_location
+                    embeddings.
+            human_embedding_on_object_location: whether to superposition the human embedding
+                on the tail (object location entity).
 
         """
         super().__init__()
-        self.embedding_dim = embedding_dim
         self.capacity = capacity
+        self.memory_of_interest = list(self.capacity.keys())
         self.entities = entities
         self.relations = relations
-        self.include_human = include_human
-        self.memory_of_interest = list(self.capacity.keys())
-        self.human_embedding_on_object_location = human_embedding_on_object_location
-        self.device = device
         self.n_actions = n_actions
+        self.embedding_dim = embedding_dim
+        self.device = device
+        self.v1_params = v1_params
+        self.v2_params = v2_params
+
+        if self.v1_params is None:
+            assert self.v2_params is not None
+            self.version = "v2"
+            self.make_embedding = self.make_embedding_v2
+
+        if self.v2_params is None:
+            assert self.v1_params is not None
+            self.version = "v1"
+            self.make_embedding = self.make_embedding_v1
 
         self.create_embeddings()
         if "episodic" in self.memory_of_interest:
@@ -110,25 +124,34 @@ class LSTM(nn.Module):
         self.embeddings = nn.Embedding(
             len(self.word2idx), self.embedding_dim, device=self.device, padding_idx=0
         )
-        self.input_size_s = self.embedding_dim * 2
+        if self.version == "v1":
+            self.input_size_s = self.embedding_dim * 2
+            if (self.v1_params["include_human"] is None) or (
+                self.v1_params["include_human"] == "sum"
+            ):
+                self.input_size_e = self.embedding_dim * 2
+                self.input_size_o = self.embedding_dim * 2
 
-        if (self.include_human is None) or (self.include_human.lower() == "sum"):
-            self.input_size_e = self.embedding_dim * 2
-            self.input_size_o = self.embedding_dim * 2
-
-        elif (self.include_human.lower() == "concat") or (
-            self.include_human.lower() == "v2"
-        ):
+            elif self.v1_params["include_human"] == "concat":
+                self.input_size_e = self.embedding_dim * 3
+                self.input_size_o = self.embedding_dim * 3
+            else:
+                raise ValueError(
+                    "include_human should be one of None, 'sum', or 'concat', "
+                    f"but {self.v1_params['include_human']} was given!"
+                )
+        elif self.version == "v2":  # [head, relation, tail]
+            self.input_size_s = self.embedding_dim * 3
             self.input_size_e = self.embedding_dim * 3
             self.input_size_o = self.embedding_dim * 3
-        else:
-            raise ValueError(
-                "include_human should be one of None, 'sum', or 'concat', "
-                f"but {self.include_human} was given!"
-            )
 
-    def make_embedding(self, mem: list, memory_type: str) -> torch.Tensor:
+        else:
+            raise ValueError(f"{self.version} is a wrong version!")
+
+    def make_embedding_v1(self, mem: list, memory_type: str) -> torch.Tensor:
         """Create one embedding vector with summation and concatenation.
+
+        Embeddings for v1
 
         Args
         ----
@@ -156,36 +179,65 @@ class LSTM(nn.Module):
             torch.tensor(self.word2idx[obj_loc], device=self.device)
         )
 
-        if memory_type.lower() == "semantic":
+        if memory_type == "semantic":
             final_embedding = torch.concat(
                 [object_embedding, object_location_embedding]
             )
 
-        elif memory_type.lower() in ["episodic", "short"]:
+        elif memory_type in ["episodic", "short"]:
             human_embedding = self.embeddings(
                 torch.tensor(self.word2idx[human], device=self.device)
             )
 
-            if self.include_human is None:
+            if self.v1_params["include_human"] is None:
                 final_embedding = torch.concat(
                     [object_embedding, object_location_embedding]
                 )
-            elif self.include_human.lower() == "sum":
+            elif self.v1_params["include_human"] == "sum":
                 final_embedding = [object_embedding + human_embedding]
 
-                if self.human_embedding_on_object_location:
+                if self.v1_params["human_embedding_on_object_location"]:
                     final_embedding.append(object_location_embedding + human_embedding)
                 else:
                     final_embedding.append(object_location_embedding)
 
                 final_embedding = torch.concat(final_embedding)
 
-            elif self.include_human.lower() == "concat":
+            elif self.v1_params["include_human"] == "concat":
                 final_embedding = torch.concat(
                     [human_embedding, object_embedding, object_location_embedding]
                 )
         else:
             raise ValueError
+
+        return final_embedding
+
+    def make_embedding_v2(self, mem: list, memory_type: str) -> torch.Tensor:
+        """Create one embedding vector with summation and concatenation.
+
+        Embeddings for v1
+
+        Args
+        ----
+        mem: memory as a quadruple: [head, relation, tail, num]
+
+        Returns
+        -------
+        one embedding vector made from one memory element.
+
+        """
+        head_embedding = self.embeddings(
+            torch.tensor(self.word2idx[mem[0]], device=self.device)
+        )
+        relation_embedding = self.embeddings(
+            torch.tensor(self.word2idx[mem[1]], device=self.device)
+        )
+        tail_embedding = self.embeddings(
+            torch.tensor(self.word2idx[mem[2]], device=self.device)
+        )
+        final_embedding = torch.concat(
+            [head_embedding, relation_embedding, tail_embedding]
+        )
 
         return final_embedding
 

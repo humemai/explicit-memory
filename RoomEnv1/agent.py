@@ -1,6 +1,7 @@
 import datetime
 import os
 import random
+import shutil
 from copy import deepcopy
 from typing import Dict, List, Tuple
 
@@ -14,9 +15,10 @@ from IPython.display import clear_output
 from tqdm.auto import tqdm, trange
 
 from explicit_memory.memory import EpisodicMemory, SemanticMemory, ShortMemory
-from explicit_memory.policy import answer_question, encode_observation, manage_memory
-from explicit_memory.utils import ReplayBuffer, is_running_notebook, write_yaml
 from explicit_memory.nn import LSTM
+from explicit_memory.policy import (answer_question, encode_observation,
+                                    manage_memory)
+from explicit_memory.utils import ReplayBuffer, is_running_notebook, write_yaml
 
 
 class HandcraftedAgent:
@@ -57,16 +59,25 @@ class HandcraftedAgent:
         self.num_samples_for_results = num_samples_for_results
         self.seed = seed
         self.capacity = capacity
+        self.action_space = gym.spaces.Discrete(3)
 
         self.env = gym.make(self.env_str, seed=self.seed)
 
-        self.default_root_dir = f"./training_results/{str(datetime.datetime.now())}"
+        if "RoomEnv1" in os.listdir():
+            self.default_root_dir = (
+                f"./RoomEnv1/training_results/{str(datetime.datetime.now())}"
+            )
+        else:
+            self.default_root_dir = f"./training_results/{str(datetime.datetime.now())}"
         os.makedirs(self.default_root_dir, exist_ok=True)
 
-    def init_memory_systems(self, num_actions: int = 3) -> None:
+    def remove_results_from_disk(self) -> None:
+        """Remove the results from the disk."""
+        shutil.rmtree(self.default_root_dir)
+
+    def init_memory_systems(self) -> None:
         """Initialize the agent's memory systems. This has nothing to do with the
         replay buffer."""
-        self.action_space = gym.spaces.Discrete(num_actions)
         self.memory_systems = {
             "episodic": EpisodicMemory(capacity=self.capacity["episodic"]),
             "semantic": SemanticMemory(capacity=self.capacity["semantic"]),
@@ -168,7 +179,10 @@ class DQNAgent(HandcraftedAgent):
             "num_layers": 2,
             "n_actions": 3,
             "embedding_dim": 32,
-            "include_human": "sum",
+            "v1_params": {
+                "include_human": "sum",
+                "human_embedding_on_object_location": False,
+            },
         },
         run_validation: bool = True,
         run_test: bool = True,
@@ -245,6 +259,8 @@ class DQNAgent(HandcraftedAgent):
         self.nn_params["entities"] = (
             self.env.des.humans + self.env.des.objects + self.env.des.object_locations
         )
+        # there is only one relation in v1, so just ignore it.
+        self.nn_params["relations"] = []
 
         # networks: dqn, dqn_target
         self.dqn = LSTM(**self.nn_params)
@@ -267,7 +283,7 @@ class DQNAgent(HandcraftedAgent):
 
         self.pretrain_semantic = pretrain_semantic
 
-    def select_action(self, state: dict) -> np.ndarray:
+    def select_action(self, state: dict) -> int:
         """Select an action from the input state.
 
         Args
@@ -289,7 +305,7 @@ class DQNAgent(HandcraftedAgent):
 
         return selected_action
 
-    def step(self, action: np.ndarray) -> Tuple[np.ndarray, np.float64, bool]:
+    def step(self, action: np.ndarray) -> Tuple[int, bool]:
         """Take an action and return the response.
 
         Args
@@ -343,7 +359,7 @@ class DQNAgent(HandcraftedAgent):
 
     def fill_replay_buffer(self) -> None:
         """Make the replay buffer full in the beginning with the uniformly-sampled
-        actions. The filling continues until it reaches the batch size."""
+        actions. The filling continues until it reaches the warm start size."""
 
         self.is_test = False
         self.dqn.eval()
@@ -363,17 +379,17 @@ class DQNAgent(HandcraftedAgent):
 
     def train(self):
         """Train the agent."""
-        self.fill_replay_buffer()  # fill up the buffer till batch size
+        self.fill_replay_buffer()  # fill up the buffer till warm start size
         self.is_test = False
         self.num_validation = 0
-
-        self.init_memory_systems()
-        (observation, self.question), info = self.env.reset()
-        encode_observation(self.memory_systems, observation)
 
         self.epsilons = []
         self.training_loss = []
         self.scores = {"train": [], "validation": [], "test": None}
+
+        self.init_memory_systems()
+        (observation, self.question), info = self.env.reset()
+        encode_observation(self.memory_systems, observation)
 
         score = 0
         bar = trange(1, self.num_iterations + 1)
@@ -640,10 +656,9 @@ class DQNAgent(HandcraftedAgent):
             f"training loss: {self.training_loss[-1]}\nepsilons: {self.epsilons[-1]}\n"
         )
 
-    def init_memory_systems(self, num_actions: int = 3) -> None:
+    def init_memory_systems(self) -> None:
         """Initialize the agent's memory systems. This has nothing to do with the
         replay buffer."""
-        self.action_space = gym.spaces.Discrete(num_actions)
         self.memory_systems = {
             "episodic": EpisodicMemory(capacity=self.capacity["episodic"]),
             "semantic": SemanticMemory(capacity=self.capacity["semantic"]),

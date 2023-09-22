@@ -154,6 +154,32 @@ class Memory:
         """
         return deepcopy(self.entries)
 
+    def find_memory(self, head: str, relation: str, tail: str) -> List[List[str]]:
+        """Find memory.
+
+        At least one of the two should be ?
+
+        Args
+        ----
+        head: head
+        relation: relation
+        tail: tail
+
+        Returns
+        -------
+        mem: A memory as a quadraple: [head, relation, tail, num]
+
+        """
+        assert (head != "?") or (relation != "?") or (tail != "?")
+        mems_found = []
+        for mem in self.entries:
+            if (head == mem[0]) or (head == "?"):
+                if (relation == mem[1]) or (relation == "?"):
+                    if (tail == mem[2]) or (tail == "?"):
+                        mems_found.append(mem)
+
+        return mems_found
+
 
 class EpisodicMemory(Memory):
     """Episodic memory class."""

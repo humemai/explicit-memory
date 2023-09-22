@@ -169,36 +169,63 @@ class HandcraftedAgent:
             action = random.choice(["north", "east", "south", "west", "stay"])
         elif self.explore_policy == "avoid_walls":
             if self.memory_management_policy == "generalize":
-                memories_rooms = []
-                MARKER = "^^^"  # to allow hashing
-
-                for memory_type in ["episodic", "semantic"]:
-                    memories_rooms += [
-                        MARKER.join(entry[:-1])
-                        for entry in self.get_memory_state()[memory_type]
-                        if entry[1] in ["north", "east", "south", "west"]
-                        and entry[2] != "wall"
-                    ]
-
-                memories_rooms = [
-                    mem.split(MARKER) for mem in list(set(memories_rooms))
-                ]
-
                 assert (
                     self.memory_systems["episodic"].entries[-1][0] == "agent"
                 ), f"{self.memory_systems['episodic'].entries[-1]}"
                 agent_current_location = self.memory_systems["episodic"].entries[-1][2]
 
-                memories_rooms = [
-                    mem for mem in memories_rooms if mem[0] == agent_current_location
+            elif self.memory_management_policy == "random":
+                agent_memories_episodic = []
+                agent_memories_semantic = []
+
+                agent_memories_episodic += self.memory_systems["episodic"].find_memory(
+                    "agent", "?", "?"
+                )
+                agent_memories_semantic += self.memory_systems["semantic"].find_memory(
+                    "agent", "?", "?"
+                )
+
+                agent_memories_episodic.sort(key=lambda x: x[-1])
+                agent_memories_semantic.sort(key=lambda x: x[-1])
+
+                if (
+                    len(agent_memories_episodic) == 0
+                    and len(agent_memories_semantic) == 0
+                ):
+                    agent_current_location = None
+
+                else:
+                    if len(agent_memories_episodic) > 0:
+                        agent_memories_episodic = agent_memories_episodic[-1]
+
+                    elif len(agent_memories_semantic) > 0:
+                        agent_memories_semantic = agent_memories_semantic[-1]
+
+                    agent_current_location = random.choice(
+                        agent_memories_episodic + agent_memories_semantic
+                    )
+
+            memories_rooms = []
+            MARKER = "^^^"  # to allow hashing
+
+            for memory_type in ["episodic", "semantic"]:
+                memories_rooms += [
+                    MARKER.join(entry[:-1])
+                    for entry in self.get_memory_state()[memory_type]
+                    if entry[1] in ["north", "east", "south", "west"]
+                    and entry[2] != "wall"
                 ]
 
-                if len(memories_rooms) == 0:
-                    action = random.choice(["north", "east", "south", "west", "stay"])
-                else:
-                    action = random.choice(memories_rooms)[1]
-            elif self.memory_management_policy == "random":
+            memories_rooms = [mem.split(MARKER) for mem in list(set(memories_rooms))]
+
+            memories_rooms = [
+                mem for mem in memories_rooms if mem[0] == agent_current_location
+            ]
+
+            if len(memories_rooms) == 0:
                 action = random.choice(["north", "east", "south", "west", "stay"])
+            else:
+                action = random.choice(memories_rooms)[1]
         else:
             raise ValueError("Unknown exploration policy.")
 

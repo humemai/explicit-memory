@@ -17,8 +17,7 @@ from tqdm.auto import tqdm, trange
 
 from explicit_memory.memory import EpisodicMemory, SemanticMemory, ShortMemory
 from explicit_memory.nn import LSTM
-from explicit_memory.policy import (answer_question, encode_observation,
-                                    manage_memory)
+from explicit_memory.policy import answer_question, encode_observation, manage_memory
 from explicit_memory.utils import ReplayBuffer, is_running_notebook, write_yaml
 
 
@@ -69,14 +68,13 @@ class HandcraftedAgent:
         self.env_str = env_str
         self.env_config = env_config
         self.memory_management_policy = memory_management_policy
-        assert self.memory_management_policy in ["random", "generalize"]
+        assert self.memory_management_policy in ["random", "generalize", "rl", "neural"]
         self.qa_policy = qa_policy
-        assert self.qa_policy in ["episodic_semantic", "random"]
+        assert self.qa_policy in ["episodic_semantic", "random", "rl", "neural"]
         self.explore_policy = explore_policy
-        assert self.explore_policy in ["random", "avoid_walls", "rl"]
+        assert self.explore_policy in ["random", "avoid_walls", "rl", "neural"]
         self.num_samples_for_results = num_samples_for_results
         self.capacity = capacity
-        self.action_space = gym.spaces.Discrete(5)
 
         self.env = gym.make(self.env_str, **env_config)
 
@@ -139,7 +137,7 @@ class HandcraftedAgent:
                     dont_generalize_agent,
                     split_possessive,
                 )
-            elif self.memory_management_policy.lower() == "generalize":
+            elif self.memory_management_policy == "generalize":
                 manage_memory(
                     self.memory_systems,
                     "generalize",
@@ -155,7 +153,7 @@ class HandcraftedAgent:
             answer_question(
                 self.memory_systems, self.qa_policy, question, split_possessive
             )
-        ).lower()
+        )
 
     def _explore_room(self) -> str:
         """Explore the room (sub-graph).
@@ -325,6 +323,12 @@ class DQNAgent(HandcraftedAgent):
         train_seed: int = 5,
         test_seed: int = 0,
         device: str = "cpu",
+        memory_management_policy: str = "generalize",
+        qa_policy: str = "episodic_semantic",
+        explore_policy: str = "avoid_walls",
+        room_size: str = "dev",
+        question_prob: float = 1.0,
+        terminates_at: int = 99,
     ):
         """Initialization.
 
@@ -352,21 +356,54 @@ class DQNAgent(HandcraftedAgent):
         train_seed: The random seed for train.
         test_seed: The random seed for test.
         device: The device to run the agent on. This is either "cpu" or "cuda".
+        memory_management_policy: Memory management policy. Choose one of "generalize",
+            "random", "rl", or "neural"
+        qa_policy: question answering policy Choose one of "episodic_semantic",
+            "random", "rl", or "neural"
+        explore_policy: The room exploration policy. Choose one of "random",
+            "avoid_walls", "rl", or "neural"
+        room_size: The room configuration to use. Choose one of "dev", "xxs", "xs",
+            "s", "m", or "l".
+        question_prob: The probability of a question being asked at every observation.
+        terminates_at: The maximum number of steps to take in an episode.
 
         """
-        env_config = {"seed": train_seed, "question_prob": 1.0, "terminates_at": 99}
-        super().__init__(
-            env_str=env_str,
-            env_config=env_config,
-            memory_management_policy="generalize",
-            qa_policy="episodic_semantic",
-            explore_policy="rl",
-            num_samples_for_results=num_samples_for_results,
-            capacity=capacity,
-        )
         self.all_params = deepcopy(locals())
         del self.all_params["self"]
         del self.all_params["__class__"]
+        self.room_size = room_size
+        self.question_prob = question_prob
+        self.terminates_at = terminates_at
+        env_config = {
+            "seed": train_seed,
+            "question_prob": self.question_prob,
+            "terminates_at": self.terminates_at,
+            "room_size": self.room_size,
+        }
+        self.memory_management_policy = memory_management_policy
+        self.qa_policy = qa_policy
+        self.explore_policy = explore_policy
+
+        assert [
+            self.memory_management_policy,
+            self.qa_policy,
+            self.explore_policy,
+        ].count("rl") == 1
+
+        if self.memory_management_policy == "rl":
+            self.action_space = gym.spaces.Discrete(3)
+        elif self.qa_policy == "rl":
+            self.action_space = gym.spaces.Discrete(5)
+
+        super().__init__(
+            env_str=env_str,
+            env_config=env_config,
+            memory_management_policy=self.memory_management_policy,
+            qa_policy=self.qa_policy,
+            explore_policy=self.explore_policy,
+            num_samples_for_results=num_samples_for_results,
+            capacity=capacity,
+        )
         self.train_seed = train_seed
         self.test_seed = test_seed
 
@@ -455,7 +492,7 @@ class DQNAgent(HandcraftedAgent):
         assert self.memory_systems["short"].is_empty
         action_qa = str(
             answer_question(self.memory_systems, "episodic_semantic", self.question)
-        ).lower()
+        )
         (observations, self.question), reward, done, truncated, info = self.env.step(
             (action_qa, self.action2str[action_explore])
         )

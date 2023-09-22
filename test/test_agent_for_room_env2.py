@@ -88,6 +88,12 @@ class RLAgentTest(unittest.TestCase):
                     "plotting_interval": 10,
                     "device": "cpu",
                     "test_seed": test_seed,
+                    "memory_management_policy": "generalize",
+                    "qa_policy": "episodic_semantic",
+                    "explore_policy": "rl",
+                    "room_size": "dev",
+                    "question_prob": 1.0,
+                    "terminates_at": 99,
                 }
 
                 agent = DQNAgent(**all_params)

@@ -997,3 +997,37 @@ class SemanticMemory(Memory):
             return candidate[0]
         else:
             raise ValueError("Something is wrong!")
+
+
+class MemorySystems:
+    """Multiple memory systems class."""
+
+    def __init__(
+        self,
+        episodic: EpisodicMemory = None,
+        semantic: SemanticMemory = None,
+        short: ShortMemory = None,
+    ) -> None:
+        """Bundle memory systems.
+
+        Args
+        ----
+        episodic: episodic memory system
+        semantic: semantic memory system
+        short: short-term memory system
+
+        """
+        self.episodic = episodic
+        self.semantic = semantic
+        self.short = short
+
+    def return_as_a_dict_list(self) -> dict:
+        """Return memory systems as a dictionary of lists."""
+        return {
+            "episodic": self.episodic.return_as_lists(),
+            "semantic": self.semantic.return_as_lists(),
+            "short": self.short.return_as_lists(),
+        }
+
+    def __repr__(self):
+        return pformat(vars(self), indent=4, width=1)

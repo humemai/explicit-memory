@@ -34,7 +34,7 @@ optimizer: adam
 policies:
   encoding: argmax
   memory_management: rl
-  question_answer: episodic_semantic
+  answer_question: episodic_semantic
 precision: 32
 pretrain_semantic: true
 question_prob: 1.0

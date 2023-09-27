@@ -96,7 +96,7 @@ def load_episodic_semantic_random_scratch_pretrained(
         question_prob=question_prob,
         policies={
             "memory_management": "rl",
-            "question_answer": "episodic_semantic",
+            "answer_question": "episodic_semantic",
             "encoding": "argmax",
         },
         capacities=[capacity],

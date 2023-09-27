@@ -10,49 +10,7 @@ import gymnasium as gym
 import numpy as np
 from tqdm.auto import tqdm
 
-from RoomEnv2.agent import DQNAgent, HandcraftedAgent
-
-
-class HandcraftedAgentTest(unittest.TestCase):
-    def test_all_agents(self) -> None:
-        capacity = {"episodic": 16, "semantic": 16, "short": 16}
-
-        config = {
-            "question_prob": 1.0,
-            "seed": 42,
-            "terminates_at": 99,
-        }
-
-        results = {}
-        for memory_management_policy in ["random", "generalize"]:
-            for qa_policy in ["random", "episodic_semantic"]:
-                for explore_policy in ["random", "avoid_walls"]:
-                    key = (memory_management_policy, qa_policy, explore_policy)
-                    if key not in results:
-                        results[key] = []
-                    print(
-                        memory_management_policy,
-                        qa_policy,
-                        explore_policy,
-                    )
-
-                    for seed in tqdm([0, 1]):
-                        config["seed"] = seed
-
-                        agent = HandcraftedAgent(
-                            env_str="room_env:RoomEnv-v2",
-                            env_config=config,
-                            memory_management_policy=memory_management_policy,
-                            qa_policy=qa_policy,
-                            explore_policy=explore_policy,
-                            num_samples_for_results=3,
-                            capacity=capacity,
-                        )
-                        agent.test()
-                        agent.remove_results_from_disk()
-                        to_append = (np.mean(agent.scores), np.std(agent.scores))
-                        print(to_append)
-                        results[key].append(to_append)
+from RoomEnv2.agent import DQNExploreAgent
 
 
 class RLAgentTest(unittest.TestCase):
@@ -66,7 +24,7 @@ class RLAgentTest(unittest.TestCase):
                     "min_epsilon": 0.1,
                     "epsilon_decay_until": 100 * 2,
                     "gamma": 0.99,
-                    "capacity": {"episodic": 16, "semantic": 16, "short": 16},
+                    "capacity": {"episodic": 16, "semantic": 16, "short": 1},
                     "nn_params": {
                         "hidden_size": 4,
                         "num_layers": 2,
@@ -96,6 +54,6 @@ class RLAgentTest(unittest.TestCase):
                     "terminates_at": 99,
                 }
 
-                agent = DQNAgent(**all_params)
+                agent = DQNExploreAgent(**all_params)
                 agent.train()
                 agent.remove_results_from_disk()

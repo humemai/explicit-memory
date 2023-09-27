@@ -14,10 +14,14 @@ import torch.optim as optim
 from IPython.display import clear_output
 from tqdm.auto import tqdm, trange
 
-from explicit_memory.memory import EpisodicMemory, SemanticMemory, ShortMemory
+from explicit_memory.memory import (
+    EpisodicMemory,
+    SemanticMemory,
+    ShortMemory,
+    MemorySystems,
+)
 from explicit_memory.nn import LSTM
-from explicit_memory.policy import (answer_question, encode_observation,
-                                    manage_memory)
+from explicit_memory.policy import answer_question, encode_observation, manage_memory
 from explicit_memory.utils import ReplayBuffer, is_running_notebook, write_yaml
 
 
@@ -78,23 +82,11 @@ class HandcraftedAgent:
     def init_memory_systems(self) -> None:
         """Initialize the agent's memory systems. This has nothing to do with the
         replay buffer."""
-        self.memory_systems = {
-            "episodic": EpisodicMemory(capacity=self.capacity["episodic"]),
-            "semantic": SemanticMemory(capacity=self.capacity["semantic"]),
-            "short": ShortMemory(capacity=self.capacity["short"]),
-        }
-
-    def get_memory_state(self) -> dict:
-        """Return the current state of the memory systems. This is NOT what the gym env
-        gives you. This is made by the agent.
-
-        """
-        state_as_dict = {
-            "episodic": self.memory_systems["episodic"].return_as_lists(),
-            "semantic": self.memory_systems["semantic"].return_as_lists(),
-            "short": self.memory_systems["short"].return_as_lists(),
-        }
-        return state_as_dict
+        self.memory_systems = MemorySystems(
+            episodic=EpisodicMemory(capacity=self.capacity["episodic"]),
+            semantic=SemanticMemory(capacity=self.capacity["semantic"]),
+            short=ShortMemory(capacity=self.capacity["short"]),
+        )
 
     def test(self):
         """Test the agent. There is no training for this agent, since it is
@@ -145,7 +137,7 @@ class HandcraftedAgent:
         write_yaml(results, os.path.join(self.default_root_dir, "results.yaml"))
         write_yaml(self.all_params, os.path.join(self.default_root_dir, "train.yaml"))
         write_yaml(
-            self.get_memory_state(),
+            self.memory_systems.return_as_a_dict_list(),
             os.path.join(self.default_root_dir, "last_memory_state.yaml"),
         )
 
@@ -337,7 +329,7 @@ class DQNAgent(HandcraftedAgent):
         )
         encode_observation(self.memory_systems, observation)
         done = done or truncated
-        next_state = self.get_memory_state()
+        next_state = self.memory_systems.return_as_a_dict_list()
 
         if not self.is_test:
             self.transition += [reward, next_state, done]
@@ -371,7 +363,7 @@ class DQNAgent(HandcraftedAgent):
 
             done = False
             while not done and len(self.replay_buffer) < self.warm_start:
-                state = self.get_memory_state()
+                state = self.memory_systems.return_as_a_dict_list()
                 action = self.select_action(state)
                 reward, done = self.step(action)
 
@@ -394,7 +386,7 @@ class DQNAgent(HandcraftedAgent):
         score = 0
         bar = trange(1, self.num_iterations + 1)
         for self.iteration_idx in bar:
-            state = self.get_memory_state()
+            state = self.memory_systems.return_as_a_dict_list()
             action = self.select_action(state)
             reward, done = self.step(action)
 
@@ -459,7 +451,7 @@ class DQNAgent(HandcraftedAgent):
             done = False
             score = 0
             while not done:
-                state = self.get_memory_state()
+                state = self.memory_systems.return_as_a_dict_list()
                 action = self.select_action(state)
                 reward, done = self.step(action)
 
@@ -515,7 +507,7 @@ class DQNAgent(HandcraftedAgent):
             done = False
             score = 0
             while not done:
-                state = self.get_memory_state()
+                state = self.memory_systems.return_as_a_dict_list()
                 action = self.select_action(state)
                 reward, done = self.step(action)
 
@@ -542,7 +534,7 @@ class DQNAgent(HandcraftedAgent):
         write_yaml(results, os.path.join(self.default_root_dir, "results.yaml"))
         write_yaml(self.all_params, os.path.join(self.default_root_dir, "train.yaml"))
         write_yaml(
-            self.get_memory_state(),
+            self.memory_systems.return_as_a_dict_list(),
             os.path.join(self.default_root_dir, "last_memory_state.yaml"),
         )
 
@@ -659,15 +651,16 @@ class DQNAgent(HandcraftedAgent):
     def init_memory_systems(self) -> None:
         """Initialize the agent's memory systems. This has nothing to do with the
         replay buffer."""
-        self.memory_systems = {
-            "episodic": EpisodicMemory(capacity=self.capacity["episodic"]),
-            "semantic": SemanticMemory(capacity=self.capacity["semantic"]),
-            "short": ShortMemory(capacity=self.capacity["short"]),
-        }
+
+        self.memory_systems = MemorySystems(
+            episodic=EpisodicMemory(capacity=self.capacity["episodic"]),
+            semantic=SemanticMemory(capacity=self.capacity["semantic"]),
+            short=ShortMemory(capacity=self.capacity["short"]),
+        )
 
         if self.pretrain_semantic:
             assert self.capacity["semantic"] > 0
-            _ = self.memory_systems["semantic"].pretrain_semantic(
+            _ = self.memory_systems.semantic.pretrain_semantic(
                 semantic_knowledge=self.env.des.semantic_knowledge,
                 return_remaining_space=False,
                 freeze=False,

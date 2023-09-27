@@ -1,4 +1,4 @@
-"""Agent for the RoomEnv2 environment."""
+"""Answer question Agent for the RoomEnv2 environment."""
 import datetime
 import os
 import random
@@ -15,276 +15,24 @@ import torch.optim as optim
 from IPython.display import clear_output
 from tqdm.auto import tqdm, trange
 
-from explicit_memory.memory import EpisodicMemory, SemanticMemory, ShortMemory
+from explicit_memory.memory import (
+    EpisodicMemory,
+    SemanticMemory,
+    ShortMemory,
+    MemorySystems,
+)
 from explicit_memory.nn import LSTM
-from explicit_memory.policy import answer_question, encode_observation, manage_memory
+from explicit_memory.policy import (
+    answer_question,
+    encode_observation,
+    manage_memory,
+    explore,
+)
 from explicit_memory.utils import ReplayBuffer, is_running_notebook, write_yaml
+from .dqn import DQNAgent
 
 
-class HandcraftedAgent:
-    """Handcrafted agent interacting with environment.
-
-    This agent explores the roooms, i.e., KGs. The exploration can be uniform-random,
-    or just avoiding walls.
-
-    """
-
-    def __init__(
-        self,
-        env_str: str = "room_env:RoomEnv-v2",
-        env_config: dict = {
-            "question_prob": 1.0,
-            "seed": 42,
-            "terminates_at": 99,
-        },
-        memory_management_policy: str = "generalize",
-        qa_policy: str = "episodic_semantic",
-        explore_policy: str = "random",
-        num_samples_for_results: int = 10,
-        capacity: dict = {
-            "episodic": 16,
-            "semantic": 16,
-            "short": 16,
-        },
-    ) -> None:
-        """Initialize the agent.
-
-        Args
-        ----
-        env_str: This has to be "room_env:RoomEnv-v2"
-        env_config: The configuration of the environment.
-        memory_management_policy: Memory management policy. Choose one of "random" or
-            "generalize"
-        qa_policy: question answering policy Choose one of "episodic_semantic" or
-            "random"
-        explore_policy: The room exploration policy. Choose one of "random" or
-            "avoid_walls"
-        num_samples_for_results: The number of samples to validate / test the agent.
-        capacity: The capacity of each human-like memory systems.
-
-        """
-        self.all_params = deepcopy(locals())
-        del self.all_params["self"]
-        self.env_str = env_str
-        self.env_config = env_config
-        self.memory_management_policy = memory_management_policy
-        assert self.memory_management_policy in ["random", "generalize", "rl", "neural"]
-        self.qa_policy = qa_policy
-        assert self.qa_policy in ["episodic_semantic", "random", "rl", "neural"]
-        self.explore_policy = explore_policy
-        assert self.explore_policy in ["random", "avoid_walls", "rl", "neural"]
-        self.num_samples_for_results = num_samples_for_results
-        self.capacity = capacity
-
-        self.env = gym.make(self.env_str, **env_config)
-
-        if "RoomEnv2" in os.listdir():
-            self.default_root_dir = (
-                f"./RoomEnv2/training_results/{str(datetime.datetime.now())}"
-            )
-        else:
-            self.default_root_dir = f"./training_results/{str(datetime.datetime.now())}"
-        os.makedirs(self.default_root_dir, exist_ok=True)
-
-        self.max_total_rewards = self.env_config["terminates_at"] + 1
-
-    def remove_results_from_disk(self) -> None:
-        """Remove the results from the disk."""
-        shutil.rmtree(self.default_root_dir)
-
-    def init_memory_systems(self) -> None:
-        """Initialize the agent's memory systems. This has nothing to do with the
-        replay buffer."""
-        self.memory_systems = {
-            "episodic": EpisodicMemory(capacity=self.capacity["episodic"]),
-            "semantic": SemanticMemory(capacity=self.capacity["semantic"]),
-            "short": ShortMemory(capacity=self.capacity["short"]),
-        }
-
-    def get_memory_state(self) -> dict:
-        """Return the current state of the memory systems. This is NOT what the gym env
-        gives you. This is made by the agent.
-
-        """
-        state_as_dict = {
-            "episodic": self.memory_systems["episodic"].return_as_lists(),
-            "semantic": self.memory_systems["semantic"].return_as_lists(),
-            "short": self.memory_systems["short"].return_as_lists(),
-        }
-        return state_as_dict
-
-    def encode_all_observations(self, observations: List[List[str]]) -> None:
-        """Encode all observations to the short-term memory systems.
-
-        Args
-        ----
-        observations: A list of list of quadruples.
-
-        """
-        for obs in observations:
-            encode_observation(self.memory_systems, obs)
-
-    def _manage_memory(
-        self, dont_generalize_agent: bool = True, split_possessive: bool = False
-    ) -> None:
-        """Manage the memory systems."""
-        while not self.memory_systems["short"].is_empty:
-            if self.memory_management_policy == "random":
-                selected_action = random.choice(["episodic", "semantic", "forget"])
-                manage_memory(
-                    self.memory_systems,
-                    selected_action,
-                    dont_generalize_agent,
-                    split_possessive,
-                )
-            elif self.memory_management_policy == "generalize":
-                manage_memory(
-                    self.memory_systems,
-                    "generalize",
-                    dont_generalize_agent,
-                    split_possessive,
-                )
-            else:
-                raise ValueError("Unknown memory management policy.")
-
-    def _answer_question(self, question: str, split_possessive: bool = False) -> str:
-        """Answer the question."""
-        return str(
-            answer_question(
-                self.memory_systems, self.qa_policy, question, split_possessive
-            )
-        )
-
-    def _explore_room(self) -> str:
-        """Explore the room (sub-graph).
-
-        Returns
-        -------
-        action: The exploration action to take.
-
-        """
-        if self.explore_policy == "random":
-            action = random.choice(["north", "east", "south", "west", "stay"])
-        elif self.explore_policy == "avoid_walls":
-            if self.memory_management_policy == "generalize":
-                assert (
-                    self.memory_systems["episodic"].entries[-1][0] == "agent"
-                ), f"{self.memory_systems['episodic'].entries[-1]}"
-                agent_current_location = self.memory_systems["episodic"].entries[-1][2]
-
-            elif self.memory_management_policy == "random":
-                agent_memories_episodic = []
-                agent_memories_semantic = []
-
-                agent_memories_episodic += self.memory_systems["episodic"].find_memory(
-                    "agent", "?", "?"
-                )
-                agent_memories_semantic += self.memory_systems["semantic"].find_memory(
-                    "agent", "?", "?"
-                )
-
-                agent_memories_episodic.sort(key=lambda x: x[-1])
-                agent_memories_semantic.sort(key=lambda x: x[-1])
-
-                if (
-                    len(agent_memories_episodic) == 0
-                    and len(agent_memories_semantic) == 0
-                ):
-                    agent_current_location = None
-
-                else:
-                    if len(agent_memories_episodic) > 0:
-                        agent_memories_episodic = agent_memories_episodic[-1]
-
-                    elif len(agent_memories_semantic) > 0:
-                        agent_memories_semantic = agent_memories_semantic[-1]
-
-                    agent_current_location = random.choice(
-                        agent_memories_episodic + agent_memories_semantic
-                    )
-
-            memories_rooms = []
-            MARKER = "^^^"  # to allow hashing
-
-            for memory_type in ["episodic", "semantic"]:
-                memories_rooms += [
-                    MARKER.join(entry[:-1])
-                    for entry in self.get_memory_state()[memory_type]
-                    if entry[1] in ["north", "east", "south", "west"]
-                    and entry[2] != "wall"
-                ]
-
-            memories_rooms = [mem.split(MARKER) for mem in list(set(memories_rooms))]
-
-            memories_rooms = [
-                mem for mem in memories_rooms if mem[0] == agent_current_location
-            ]
-
-            if len(memories_rooms) == 0:
-                action = random.choice(["north", "east", "south", "west", "stay"])
-            else:
-                action = random.choice(memories_rooms)[1]
-        else:
-            raise ValueError("Unknown exploration policy.")
-
-        return action
-
-    def _test(self) -> int:
-        score = 0
-        env_started = False
-        action_pair = (None, None)
-        done = False
-        self.init_memory_systems()
-
-        while not done:
-            if env_started:
-                (
-                    (observations, question),
-                    reward,
-                    done,
-                    truncated,
-                    info,
-                ) = self.env.step(action_pair)
-                score += reward
-                if done:
-                    break
-
-            else:
-                (observations, question), info = self.env.reset()
-                env_started = True
-
-            self.encode_all_observations(observations)
-            self._manage_memory()
-            action_qa = self._answer_question(question)
-            action_explore = self._explore_room()
-            action_pair = (action_qa, action_explore)
-
-        return score
-
-    def test(self):
-        """Test the agent. There is no training for this agent, since it is
-        handcrafted."""
-        self.scores = []
-
-        for _ in range(self.num_samples_for_results):
-            score = self._test()
-            self.scores.append(score)
-
-        results = {
-            "test_score": {
-                "mean": round(np.mean(self.scores).item(), 2),
-                "std": round(np.std(self.scores).item(), 2),
-            }
-        }
-        write_yaml(results, os.path.join(self.default_root_dir, "results.yaml"))
-        write_yaml(self.all_params, os.path.join(self.default_root_dir, "train.yaml"))
-        write_yaml(
-            self.get_memory_state(),
-            os.path.join(self.default_root_dir, "last_memory_state.yaml"),
-        )
-
-
-class DQNAgent(HandcraftedAgent):
+class DQNQuestionAnswerAgent(DQNAgent):
     """DQN Agent interacting with environment.
 
     Based on https://github.com/Curt-Park/rainbow-is-all-you-need/blob/master/01.dqn.ipynb
@@ -391,9 +139,16 @@ class DQNAgent(HandcraftedAgent):
         ].count("rl") == 1
 
         if self.memory_management_policy == "rl":
-            self.action_space = gym.spaces.Discrete(3)
+            self.action_space = gym.spaces.Discrete(3)  # episodic, semantic, forget
+            self.step = self.step_memory_management
         elif self.qa_policy == "rl":
-            self.action_space = gym.spaces.Discrete(5)
+            self.action_space = gym.spaces.Discrete(2)  # use episodic, semantic
+            self.step = self.step_qa
+        elif self.explore_policy == "rl":
+            self.action_space = gym.spaces.Discrete(5)  # north, east, south, west, stay
+            self.step = self.step_explore
+        else:
+            raise ValueError("At least one of the policies should be RL.")
 
         super().__init__(
             env_str=env_str,
@@ -453,15 +208,25 @@ class DQNAgent(HandcraftedAgent):
         self.is_test = False
 
         self.pretrain_semantic = pretrain_semantic
-        self.action2str = {0: "north", 1: "east", 2: "south", 3: "west", 4: "stay"}
+        self.action_explore2str = {
+            0: "north",
+            1: "east",
+            2: "south",
+            3: "west",
+            4: "stay",
+        }
 
-    def select_action_explore(self, state: dict) -> int:
+    def select_action(self, state: dict) -> int:
         """Select an action from the input state using epsilon greedy policy
 
         Args
         ----
         state: The current state of the memory systems. This is NOT what the gym env
             gives you. This is made by the agent.
+
+        Returns
+        -------
+        selected_action: The selected action.
 
         """
         if self.epsilon > np.random.random() and not self.is_test:
@@ -476,7 +241,88 @@ class DQNAgent(HandcraftedAgent):
 
         return selected_action
 
-    def step(self, action_explore: int) -> Tuple[int, bool]:
+    def step_memory_management(self, action: int) -> Tuple[int, bool]:
+        """Take an action_memory_management and return the response.
+
+        Args
+        ----
+        action: memory management action
+
+        Returns
+        -------
+        reward: The reward for the action.
+        done: Whether or not the episode ends.
+
+        """
+        assert not self.memory_systems.short.is_empty
+
+        if action == 0:
+            manage_memory(self.memory_systems, "episodic")
+        elif action == 1:
+            manage_memory(self.memory_systems, "semantic")
+        elif action == 2:
+            manage_memory(self.memory_systems, "forget")
+        else:
+            raise ValueError
+
+        answer = self._answer_question()
+
+        (
+            (self.observations, self.question),
+            reward,
+            done,
+            truncated,
+            info,
+        ) = self.env.step(answer)
+        self._encode_observation()
+        done = done or truncated
+        next_state = self.memory_systems.return_as_a_dict_list()
+
+        if not self.is_test:
+            self.transition += [reward, next_state, done]
+            self.replay_buffer.store(*self.transition)
+
+        return reward, done
+
+    def step_qa(self, action_qa: int) -> Tuple[int, bool]:
+        """Take an action_qa and return the response.
+
+        Args
+        ----
+        action_qa: question answering action
+
+        Returns
+        -------
+        reward: The reward for the action.
+        done: Whether or not the episode ends.
+
+        """
+        assert self.memory_systems.short.is_empty
+
+        action_explore = explore(
+            self.memory_systems, self.explore_policy, self.memory_management_policy
+        )
+        (
+            (self.observations, self.question),
+            reward,
+            done,
+            truncated,
+            info,
+        ) = self.env.step((action_qa, action_explore))
+
+        for self.obs in self.observations:
+            self._encode_observation()
+            self._manage_memory()
+        done = done or truncated
+        next_state = self.memory_systems.return_as_a_dict_list()
+
+        if not self.is_test:
+            self.transition += [reward, next_state, done]
+            self.replay_buffer.store(*self.transition)
+
+        return reward, done
+
+    def step_explore(self, action_explore: int) -> Tuple[int, bool]:
         """Take an action_explore and return the response.
 
         Args
@@ -489,18 +335,21 @@ class DQNAgent(HandcraftedAgent):
         done: Whether or not the episode ends.
 
         """
-        assert self.memory_systems["short"].is_empty
-        action_qa = str(
-            answer_question(self.memory_systems, "episodic_semantic", self.question)
-        )
-        (observations, self.question), reward, done, truncated, info = self.env.step(
-            (action_qa, self.action2str[action_explore])
-        )
+        assert self.memory_systems.short.is_empty
+        action_qa = self._answer_question()
+        (
+            (self.observations, self.question),
+            reward,
+            done,
+            truncated,
+            info,
+        ) = self.env.step((action_qa, self.action_explore2str[action_explore]))
 
-        self.encode_all_observations(observations)
-        self._manage_memory()
+        for self.obs in self.observations:
+            self._encode_observation()
+            self._manage_memory()
         done = done or truncated
-        next_state = self.get_memory_state()
+        next_state = self.memory_systems.return_as_a_dict_list()
 
         if not self.is_test:
             self.transition += [reward, next_state, done]
@@ -531,14 +380,15 @@ class DQNAgent(HandcraftedAgent):
 
         while len(self.replay_buffer) < self.warm_start:
             self.init_memory_systems()
-            (observations, self.question), info = self.env.reset()
-            self.encode_all_observations(observations)
-            self._manage_memory()
+            (self.observations, self.question), info = self.env.reset()
+            for self.obs in self.observations:
+                self._encode_observation()
+                self._manage_memory()
 
             done = False
             while not done and len(self.replay_buffer) < self.warm_start:
-                state = self.get_memory_state()
-                action_explore = self.select_action_explore(state)
+                state = self.memory_systems.return_as_a_dict_list()
+                action_explore = self.select_action(state)
                 reward, done = self.step(action_explore)
 
         self.dqn.train()
@@ -556,15 +406,16 @@ class DQNAgent(HandcraftedAgent):
         self.scores = {"train": [], "validation": [], "test": None}
 
         self.init_memory_systems()
-        (observations, question), info = self.env.reset()
-        self.encode_all_observations(observations)
-        self._manage_memory()
+        (self.observations, self.question), info = self.env.reset()
+        for self.obs in self.observations:
+            self._encode_observation()
+            self._manage_memory()
 
         score = 0
         bar = trange(1, self.num_iterations + 1)
         for self.iteration_idx in bar:
-            state = self.get_memory_state()
-            action_explore = self.select_action_explore(state)
+            state = self.memory_systems.return_as_a_dict_list()
+            action_explore = self.select_action(state)
             reward, done = self.step(action_explore)
             score += reward
 
@@ -577,9 +428,10 @@ class DQNAgent(HandcraftedAgent):
                         self.validate()
 
                 self.init_memory_systems()
-                (observations, self.question), info = self.env.reset()
-                self.encode_all_observations(observations)
-                self._manage_memory()
+                (self.observations, self.question), info = self.env.reset()
+                for self.obs in self.observations:
+                    self._encode_observation()
+                    self._manage_memory()
 
             loss = self.update_model()
             self.training_loss.append(loss)
@@ -622,15 +474,16 @@ class DQNAgent(HandcraftedAgent):
         scores = []
         for _ in range(self.num_samples_for_results):
             self.init_memory_systems()
-            (observations, self.question), info = self.env.reset()
-            self.encode_all_observations(observations)
-            self._manage_memory()
+            (self.observations, self.question), info = self.env.reset()
+            for self.obs in self.observations:
+                self._encode_observation()
+                self._manage_memory()
 
             done = False
             score = 0
             while not done:
-                state = self.get_memory_state()
-                action_explore = self.select_action_explore(state)
+                state = self.memory_systems.return_as_a_dict_list()
+                action_explore = self.select_action(state)
                 reward, done = self.step(action_explore)
 
                 score += reward
@@ -681,15 +534,16 @@ class DQNAgent(HandcraftedAgent):
         scores = []
         for _ in range(self.num_samples_for_results):
             self.init_memory_systems()
-            (observations, self.question), info = self.env.reset()
-            self.encode_all_observations(observations)
-            self._manage_memory()
+            (self.observations, self.question), info = self.env.reset()
+            for self.obs in self.observations:
+                self._encode_observation()
+                self._manage_memory()
 
             done = False
             score = 0
             while not done:
-                state = self.get_memory_state()
-                action_explore = self.select_action_explore(state)
+                state = self.memory_systems.return_as_a_dict_list()
+                action_explore = self.select_action(state)
                 reward, done = self.step(action_explore)
                 score += reward
             scores.append(score)
@@ -714,7 +568,7 @@ class DQNAgent(HandcraftedAgent):
         write_yaml(results, os.path.join(self.default_root_dir, "results.yaml"))
         write_yaml(self.all_params, os.path.join(self.default_root_dir, "train.yaml"))
         write_yaml(
-            self.get_memory_state(),
+            self.memory_systems.return_as_a_dict_list(),
             os.path.join(self.default_root_dir, "last_memory_state.yaml"),
         )
 
@@ -840,15 +694,15 @@ class DQNAgent(HandcraftedAgent):
     def init_memory_systems(self) -> None:
         """Initialize the agent's memory systems. This has nothing to do with the
         replay buffer."""
-        self.memory_systems = {
-            "episodic": EpisodicMemory(capacity=self.capacity["episodic"]),
-            "semantic": SemanticMemory(capacity=self.capacity["semantic"]),
-            "short": ShortMemory(capacity=self.capacity["short"]),
-        }
+        self.memory_systems = MemorySystems(
+            episodic=EpisodicMemory(capacity=self.capacity["episodic"]),
+            semantic=SemanticMemory(capacity=self.capacity["semantic"]),
+            short=ShortMemory(capacity=self.capacity["short"]),
+        )
 
         if self.pretrain_semantic:
             assert self.capacity["semantic"] > 0
-            _ = self.memory_systems["semantic"].pretrain_semantic(
+            _ = self.memory_systems.semantic.pretrain_semantic(
                 semantic_knowledge=self.env.env.room_layout,
                 return_remaining_space=False,
                 freeze=False,

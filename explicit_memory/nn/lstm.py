@@ -21,6 +21,7 @@ class LSTM(nn.Module):
         embedding_dim: int = 32,
         batch_first: bool = True,
         device: str = "cpu",
+        memory_of_interest: list = ["episodic", "semantic", "short"],
         v1_params: dict = {
             "include_human": "sum",
             "human_embedding_on_object_location": False,
@@ -55,7 +56,7 @@ class LSTM(nn.Module):
         """
         super().__init__()
         self.capacity = capacity
-        self.memory_of_interest = list(self.capacity.keys())
+        self.memory_of_interest = memory_of_interest
         self.entities = entities
         self.relations = relations
         self.n_actions = n_actions
@@ -111,9 +112,10 @@ class LSTM(nn.Module):
         self.fc_final0 = nn.Linear(
             hidden_size * len(self.memory_of_interest),
             hidden_size * len(self.memory_of_interest),
+            device=self.device,
         )
         self.fc_final1 = nn.Linear(
-            hidden_size * len(self.memory_of_interest), n_actions
+            hidden_size * len(self.memory_of_interest), n_actions, device=self.device
         )
         self.relu = nn.ReLU()
 

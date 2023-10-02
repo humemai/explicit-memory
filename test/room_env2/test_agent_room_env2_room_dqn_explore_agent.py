@@ -10,7 +10,7 @@ import gymnasium as gym
 import numpy as np
 from tqdm.auto import tqdm
 
-from RoomEnv2.agent import DQNExploreAgent
+from RoomEnv2.agent import DQNAgent
 
 
 class RLAgentTest(unittest.TestCase):
@@ -46,14 +46,17 @@ class RLAgentTest(unittest.TestCase):
                     "plotting_interval": 10,
                     "device": "cpu",
                     "test_seed": test_seed,
-                    "memory_management_policy": "generalize",
+                    "mm_policy": "rl",
                     "qa_policy": "episodic_semantic",
-                    "explore_policy": "rl",
-                    "room_size": "dev",
-                    "question_prob": 1.0,
-                    "terminates_at": 99,
+                    "explore_policy": "avoid_walls",
+                    "env_config": {
+                        "question_prob": 1.0,
+                        "seed": None,
+                        "terminates_at": 99,
+                        "room_size": "dev",
+                    },
                 }
 
-                agent = DQNExploreAgent(**all_params)
+                agent = DQNAgent(**all_params)
                 agent.train()
                 agent.remove_results_from_disk()

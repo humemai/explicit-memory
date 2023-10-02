@@ -23,123 +23,7 @@ from explicit_memory.memory import (
 from explicit_memory.nn import LSTM
 from explicit_memory.policy import answer_question, encode_observation, manage_memory
 from explicit_memory.utils import ReplayBuffer, is_running_notebook, write_yaml
-
-
-class HandcraftedAgent:
-
-    """Handcrafted agent interacting with environment. This agent is not trained.
-    Only one of the three agents, i.e., random, episodic_only, and semantic_only are
-    suported
-    """
-
-    def __init__(
-        self,
-        env_str: str = "room_env:RoomEnv-v1",
-        policy: str = "random",
-        num_samples_for_results: int = 10,
-        seed: int = 42,
-        capacity: dict = {
-            "episodic": 16,
-            "semantic": 16,
-            "short": 1,
-        },
-    ) -> None:
-        """Initialization.
-
-        Args
-        ----
-        env_str: This has to be "room_env:RoomEnv-v1"
-        policy: The memory management policy. Choose one of "random", "episodic_only",
-                or "semantic_only".
-        num_samples_for_results: The number of samples to validate / test the agent.
-        seed: The random seed for test.
-        capacity: The capacity of each human-like memory systems.
-
-        """
-        self.all_params = deepcopy(locals())
-        del self.all_params["self"]
-        self.env_str = env_str
-        self.policy = policy
-        self.num_samples_for_results = num_samples_for_results
-        self.seed = seed
-        self.capacity = capacity
-        self.action_space = gym.spaces.Discrete(3)
-
-        self.env = gym.make(self.env_str, seed=self.seed)
-
-        if "RoomEnv1" in os.listdir():
-            self.default_root_dir = (
-                f"./RoomEnv1/training_results/{str(datetime.datetime.now())}"
-            )
-        else:
-            self.default_root_dir = f"./training_results/{str(datetime.datetime.now())}"
-        os.makedirs(self.default_root_dir, exist_ok=True)
-
-    def remove_results_from_disk(self) -> None:
-        """Remove the results from the disk."""
-        shutil.rmtree(self.default_root_dir)
-
-    def init_memory_systems(self) -> None:
-        """Initialize the agent's memory systems. This has nothing to do with the
-        replay buffer."""
-        self.memory_systems = MemorySystems(
-            episodic=EpisodicMemory(capacity=self.capacity["episodic"]),
-            semantic=SemanticMemory(capacity=self.capacity["semantic"]),
-            short=ShortMemory(capacity=self.capacity["short"]),
-        )
-
-    def test(self):
-        """Test the agent. There is no training for this agent, since it is
-        handcrafted."""
-        self.scores = []
-        for _ in range(self.num_samples_for_results):
-            self.init_memory_systems()
-            (observation, self.question), info = self.env.reset()
-            encode_observation(self.memory_systems, observation)
-
-            done = False
-            score = 0
-            while not done:
-                if self.policy.lower() == "random":
-                    selected_action = random.choice(["episodic", "semantic", "forget"])
-                    manage_memory(self.memory_systems, selected_action)
-                    qa_policy = "episodic_semantic"
-                elif self.policy.lower() == "episodic_only":
-                    manage_memory(self.memory_systems, "episodic")
-                    qa_policy = "episodic"
-                elif self.policy.lower() == "semantic_only":
-                    qa_policy = "semantic"
-                    manage_memory(self.memory_systems, "semantic")
-                else:
-                    raise ValueError("Unknown policy.")
-
-                answer = str(
-                    answer_question(self.memory_systems, qa_policy, self.question)
-                ).lower()
-                (
-                    (observation, self.question),
-                    reward,
-                    done,
-                    truncated,
-                    info,
-                ) = self.env.step(answer)
-
-                encode_observation(self.memory_systems, observation)
-                score += reward
-            self.scores.append(score)
-
-        results = {
-            "test_score": {
-                "mean": round(np.mean(self.scores).item(), 2),
-                "std": round(np.std(self.scores).item(), 2),
-            }
-        }
-        write_yaml(results, os.path.join(self.default_root_dir, "results.yaml"))
-        write_yaml(self.all_params, os.path.join(self.default_root_dir, "train.yaml"))
-        write_yaml(
-            self.memory_systems.return_as_a_dict_list(),
-            os.path.join(self.default_root_dir, "last_memory_state.yaml"),
-        )
+from .handcrafted import HandcraftedAgent
 
 
 class DQNAgent(HandcraftedAgent):
@@ -169,7 +53,6 @@ class DQNAgent(HandcraftedAgent):
         nn_params: dict = {
             "hidden_size": 64,
             "num_layers": 2,
-            "n_actions": 3,
             "embedding_dim": 32,
             "v1_params": {
                 "include_human": "sum",
@@ -218,6 +101,7 @@ class DQNAgent(HandcraftedAgent):
             num_samples_for_results=num_samples_for_results,
             seed=train_seed,
             capacity=capacity,
+            pretrain_semantic=pretrain_semantic,
         )
         self.all_params = deepcopy(locals())
         del self.all_params["self"]
@@ -245,6 +129,13 @@ class DQNAgent(HandcraftedAgent):
         self.warm_start = warm_start
         assert self.batch_size <= self.warm_start <= self.replay_buffer_size
 
+        self.action_mm2str = {
+            0: "episodic",
+            1: "semantic",
+            2: "forget",
+        }
+        self.action_space = gym.spaces.Discrete(len(self.action_mm2str))
+
         self.nn_params = nn_params
         self.nn_params["capacity"] = self.capacity
         self.nn_params["device"] = self.device
@@ -253,6 +144,9 @@ class DQNAgent(HandcraftedAgent):
         )
         # there is only one relation in v1, so just ignore it.
         self.nn_params["relations"] = []
+
+        self.nn_params["memory_of_interest"] = ["episodic", "semantic", "short"]
+        self.nn_params["n_actions"] = len(self.action_mm2str)
 
         # networks: dqn, dqn_target
         self.dqn = LSTM(**self.nn_params)
@@ -267,75 +161,25 @@ class DQNAgent(HandcraftedAgent):
         # optimizer
         self.optimizer = optim.Adam(self.dqn.parameters())
 
-        # transition to store in replay buffer
-        self.transition = list()
-
-        # mode: train / test
-        self.is_test = False
-
-        self.pretrain_semantic = pretrain_semantic
-
-    def select_action(self, state: dict) -> int:
+    def select_action(self, state: dict, greedy: bool) -> int:
         """Select an action from the input state.
 
         Args
         ----
         state: The current state of the memory systems. This is NOT what the gym env
         gives you. This is made by the agent.
+        greedy: always pick greedy action if True
 
         """
         # epsilon greedy policy
-        if self.epsilon > np.random.random() and not self.is_test:
+        if self.epsilon < np.random.random() or greedy:
+            selected_action = self.dqn(np.array([state])).argmax()
+            selected_action = selected_action.detach().cpu().numpy().item()
+
+        else:
             selected_action = self.action_space.sample()
 
-        else:
-            selected_action = self.dqn(np.array([state])).argmax()
-            selected_action = selected_action.detach().cpu().numpy()
-
-        if not self.is_test:
-            self.transition = [state, selected_action]
-
         return selected_action
-
-    def step(self, action: np.ndarray) -> Tuple[int, bool]:
-        """Take an action and return the response.
-
-        Args
-        ----
-        action: This action has nothing to do with the action that you give to the
-        environment. This is the action that the agent takes, i.e., manage memory.
-
-        Returns
-        -------
-        reward: The reward for the action.
-        done: Whether or not the episode ends.
-
-        """
-        if action == 0:
-            manage_memory(self.memory_systems, "episodic")
-        elif action == 1:
-            manage_memory(self.memory_systems, "semantic")
-        elif action == 2:
-            manage_memory(self.memory_systems, "forget")
-        else:
-            raise ValueError
-
-        answer = str(
-            answer_question(self.memory_systems, "episodic_semantic", self.question)
-        ).lower()
-
-        (observation, self.question), reward, done, truncated, info = self.env.step(
-            answer
-        )
-        encode_observation(self.memory_systems, observation)
-        done = done or truncated
-        next_state = self.memory_systems.return_as_a_dict_list()
-
-        if not self.is_test:
-            self.transition += [reward, next_state, done]
-            self.replay_buffer.store(*self.transition)
-
-        return reward, done
 
     def update_model(self) -> torch.Tensor:
         """Update the model by gradient descent."""
@@ -353,26 +197,43 @@ class DQNAgent(HandcraftedAgent):
         """Make the replay buffer full in the beginning with the uniformly-sampled
         actions. The filling continues until it reaches the warm start size."""
 
-        self.is_test = False
         self.dqn.eval()
 
         while len(self.replay_buffer) < self.warm_start:
             self.init_memory_systems()
-            (observation, self.question), info = self.env.reset()
+            (observation, question), info = self.env.reset()
             encode_observation(self.memory_systems, observation)
 
             done = False
             while not done and len(self.replay_buffer) < self.warm_start:
                 state = self.memory_systems.return_as_a_dict_list()
-                action = self.select_action(state)
-                reward, done = self.step(action)
+                action = self.select_action(state, greedy=False)
+                manage_memory(self.memory_systems, self.action_mm2str[action])
+
+                answer = str(
+                    answer_question(self.memory_systems, "episodic_semantic", question)
+                )
+
+                (
+                    (observation, question),
+                    reward,
+                    done,
+                    truncated,
+                    info,
+                ) = self.env.step(answer)
+
+                encode_observation(self.memory_systems, observation)
+                done = done or truncated
+                next_state = self.memory_systems.return_as_a_dict_list()
+
+                transition = [state, action, reward, next_state, done]
+                self.replay_buffer.store(*transition)
 
         self.dqn.train()
 
     def train(self):
         """Train the agent."""
         self.fill_replay_buffer()  # fill up the buffer till warm start size
-        self.is_test = False
         self.num_validation = 0
 
         self.epsilons = []
@@ -380,17 +241,36 @@ class DQNAgent(HandcraftedAgent):
         self.scores = {"train": [], "validation": [], "test": None}
 
         self.init_memory_systems()
-        (observation, self.question), info = self.env.reset()
+        (observation, question), info = self.env.reset()
         encode_observation(self.memory_systems, observation)
 
         score = 0
         bar = trange(1, self.num_iterations + 1)
         for self.iteration_idx in bar:
             state = self.memory_systems.return_as_a_dict_list()
-            action = self.select_action(state)
-            reward, done = self.step(action)
+            action = self.select_action(state, greedy=False)
 
+            manage_memory(self.memory_systems, self.action_mm2str[action])
+
+            answer = str(
+                answer_question(self.memory_systems, "episodic_semantic", question)
+            )
+
+            (
+                (observation, question),
+                reward,
+                done,
+                truncated,
+                info,
+            ) = self.env.step(answer)
             score += reward
+
+            encode_observation(self.memory_systems, observation)
+            done = done or truncated
+            next_state = self.memory_systems.return_as_a_dict_list()
+
+            transition = [state, action, reward, next_state, done]
+            self.replay_buffer.store(*transition)
 
             # if episode ends
             if done:
@@ -401,7 +281,7 @@ class DQNAgent(HandcraftedAgent):
                         self.validate()
 
                 self.init_memory_systems()
-                (observation, self.question), info = self.env.reset()
+                (observation, question), info = self.env.reset()
                 encode_observation(self.memory_systems, observation)
 
             loss = self.update_model()
@@ -424,8 +304,10 @@ class DQNAgent(HandcraftedAgent):
                 self.iteration_idx == self.num_iterations
                 or self.iteration_idx % self.plotting_interval == 0
             ):
-                self._plot()
-
+                if self.is_notebook:
+                    self._plot()
+                else:
+                    self._console()
         with torch.no_grad():
             self.test()
 
@@ -439,23 +321,36 @@ class DQNAgent(HandcraftedAgent):
 
     def validate(self) -> None:
         """Validate the agent."""
-        self.is_test = True
         self.dqn.eval()
 
         scores = []
         for _ in range(self.num_samples_for_results):
             self.init_memory_systems()
-            (observation, self.question), info = self.env.reset()
+            (observation, question), info = self.env.reset()
             encode_observation(self.memory_systems, observation)
 
             done = False
             score = 0
             while not done:
                 state = self.memory_systems.return_as_a_dict_list()
-                action = self.select_action(state)
-                reward, done = self.step(action)
+                action = self.select_action(state, greedy=True)
+                manage_memory(self.memory_systems, self.action_mm2str[action])
 
+                answer = str(
+                    answer_question(self.memory_systems, "episodic_semantic", question)
+                )
+                (
+                    (observation, question),
+                    reward,
+                    done,
+                    truncated,
+                    info,
+                ) = self.env.step(answer)
                 score += reward
+
+                encode_observation(self.memory_systems, observation)
+                done = done or truncated
+
             scores.append(score)
 
         mean_score = round(np.mean(scores).item())
@@ -476,7 +371,6 @@ class DQNAgent(HandcraftedAgent):
 
         self.env.close()
         self.num_validation += 1
-        self.is_test = False
         self.dqn.train()
 
     def test(self, checkpoint: str = None) -> None:
@@ -488,7 +382,6 @@ class DQNAgent(HandcraftedAgent):
             best validation is used.
 
         """
-        self.is_test = True
         self.env = gym.make(self.env_str, seed=self.test_seed)
         self.dqn.eval()
 
@@ -501,17 +394,31 @@ class DQNAgent(HandcraftedAgent):
         scores = []
         for _ in range(self.num_samples_for_results):
             self.init_memory_systems()
-            (observation, self.question), info = self.env.reset()
+            (observation, question), info = self.env.reset()
             encode_observation(self.memory_systems, observation)
 
             done = False
             score = 0
             while not done:
                 state = self.memory_systems.return_as_a_dict_list()
-                action = self.select_action(state)
-                reward, done = self.step(action)
+                action = self.select_action(state, greedy=True)
+                manage_memory(self.memory_systems, self.action_mm2str[action])
 
+                answer = str(
+                    answer_question(self.memory_systems, "episodic_semantic", question)
+                )
+                (
+                    (observation, question),
+                    reward,
+                    done,
+                    truncated,
+                    info,
+                ) = self.env.step(answer)
                 score += reward
+
+                encode_observation(self.memory_systems, observation)
+                done = done or truncated
+
             scores.append(score)
 
         self.scores["test"] = scores
@@ -538,9 +445,11 @@ class DQNAgent(HandcraftedAgent):
             os.path.join(self.default_root_dir, "last_memory_state.yaml"),
         )
 
-        self._plot()
+        if self.is_notebook:
+            self._plot()
+        else:
+            self._console()
         self.env.close()
-        self.is_test = False
         self.dqn.train()
 
     def _compute_dqn_loss(self, samples: Dict[str, np.ndarray]) -> torch.Tensor:
@@ -620,9 +529,6 @@ class DQNAgent(HandcraftedAgent):
         plt.savefig(f"{self.default_root_dir}/plot.png")
         plt.show()
 
-        if not self.is_notebook:
-            self._console()
-
     def _console(self):
         """Print the training progresses to the console."""
         if self.scores["train"]:
@@ -647,21 +553,3 @@ class DQNAgent(HandcraftedAgent):
         tqdm.write(
             f"training loss: {self.training_loss[-1]}\nepsilons: {self.epsilons[-1]}\n"
         )
-
-    def init_memory_systems(self) -> None:
-        """Initialize the agent's memory systems. This has nothing to do with the
-        replay buffer."""
-
-        self.memory_systems = MemorySystems(
-            episodic=EpisodicMemory(capacity=self.capacity["episodic"]),
-            semantic=SemanticMemory(capacity=self.capacity["semantic"]),
-            short=ShortMemory(capacity=self.capacity["short"]),
-        )
-
-        if self.pretrain_semantic:
-            assert self.capacity["semantic"] > 0
-            _ = self.memory_systems.semantic.pretrain_semantic(
-                semantic_knowledge=self.env.des.semantic_knowledge,
-                return_remaining_space=False,
-                freeze=False,
-            )

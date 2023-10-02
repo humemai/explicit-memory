@@ -25,13 +25,12 @@ def encode_observation(memory_systems: MemorySystems, obs: List[List]) -> None:
     memory_systems.short.add(mem_short)
 
 
-def explore(
-    memory_systems: MemorySystems, explore_policy: str, memory_management_policy: str
-) -> str:
+def explore(memory_systems: MemorySystems, explore_policy: str) -> str:
     """Explore the room (sub-graph).
 
     Args
     ----
+    memory_systems: MemorySystems
     explore_policy: "random", "avoid_walls", or "neural"
 
     Returns
@@ -39,6 +38,7 @@ def explore(
     action: The exploration action to take.
 
     """
+    assert memory_systems.short.is_empty
     if explore_policy == "random":
         action = random.choice(["north", "east", "south", "west", "stay"])
     elif explore_policy == "avoid_walls":
@@ -119,6 +119,7 @@ def manage_memory(
     split_possessive: whether to split the possessive, i.e., 's, or not.
 
     """
+    assert not memory_systems.short.is_empty
     assert policy.lower() in [
         "episodic",
         "semantic",
@@ -222,7 +223,7 @@ def manage_memory(
 def answer_question(
     memory_systems: MemorySystems,
     policy: str,
-    question: dict,
+    question: List[str],
     split_possessive: bool = True,
 ) -> str:
     """Non RL question answering policy.
@@ -232,7 +233,7 @@ def answer_question(
     MemorySystems
     qa_policy: "episodic_semantic", "semantic_episodic", "episodic", "semantic",
             "random", or "neural",
-    question: question = {"human": <human>, "object": <obj>}
+    question: e.g., [laptop, atlocation, ?]
     split_possessive: whether to split the possessive, i.e., 's, or not.
 
     Returns
@@ -240,6 +241,7 @@ def answer_question(
     pred: prediction
 
     """
+    assert memory_systems.short.is_empty
     assert policy.lower() in [
         "episodic_semantic",
         "semantic_episodic",
@@ -272,4 +274,4 @@ def answer_question(
     else:
         raise ValueError
 
-    return pred
+    return str(pred).lower()

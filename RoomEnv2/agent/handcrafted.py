@@ -21,14 +21,13 @@ from explicit_memory.memory import (
     ShortMemory,
     MemorySystems,
 )
-from explicit_memory.nn import LSTM
 from explicit_memory.policy import (
     answer_question,
     encode_observation,
     manage_memory,
     explore,
 )
-from explicit_memory.utils import ReplayBuffer, is_running_notebook, write_yaml
+from explicit_memory.utils import write_yaml
 
 
 class HandcraftedAgent:
@@ -46,10 +45,11 @@ class HandcraftedAgent:
             "question_prob": 1.0,
             "seed": 42,
             "terminates_at": 99,
+            "room_size": "dev",
         },
-        memory_management_policy: str = "generalize",
+        mm_policy: str = "generalize",
         qa_policy: str = "episodic_semantic",
-        explore_policy: str = "random",
+        explore_policy: str = "avoid_walls",
         num_samples_for_results: int = 10,
         capacity: dict = {
             "episodic": 16,
@@ -64,7 +64,7 @@ class HandcraftedAgent:
         ----
         env_str: This has to be "room_env:RoomEnv-v2"
         env_config: The configuration of the environment.
-        memory_management_policy: Memory management policy. Choose one of "random" or
+        mm_policy: Memory management policy. Choose one of "random" or
             "generalize"
         qa_policy: question answering policy Choose one of "episodic_semantic" or
             "random"
@@ -73,14 +73,15 @@ class HandcraftedAgent:
         num_samples_for_results: The number of samples to validate / test the agent.
         capacity: The capacity of each human-like memory systems.
         pretrain_semantic: Whether or not to pretrain the semantic memory system.
-
+        room_size: The room configuration to use. Choose one of "dev", "xxs", "xs",
+            "s", "m", or "l"
         """
         self.all_params = deepcopy(locals())
         del self.all_params["self"]
         self.env_str = env_str
         self.env_config = env_config
-        self.memory_management_policy = memory_management_policy
-        assert self.memory_management_policy in ["random", "generalize", "rl", "neural"]
+        self.mm_policy = mm_policy
+        assert self.mm_policy in ["random", "generalize", "rl", "neural"]
         self.qa_policy = qa_policy
         assert self.qa_policy in ["episodic_semantic", "random", "rl", "neural"]
         self.explore_policy = explore_policy
@@ -100,60 +101,27 @@ class HandcraftedAgent:
         os.makedirs(self.default_root_dir, exist_ok=True)
 
         self.max_total_rewards = self.env_config["terminates_at"] + 1
+        self.action_mm2str = {
+            0: "episodic",
+            1: "semantic",
+            2: "forget",
+        }
+        self.action_qa2str = {
+            0: "episodic",
+            1: "semantic",
+        }
+
+        self.action_explore2str = {
+            0: "north",
+            1: "east",
+            2: "south",
+            3: "west",
+            4: "stay",
+        }
 
     def remove_results_from_disk(self) -> None:
         """Remove the results from the disk."""
         shutil.rmtree(self.default_root_dir)
-
-    def _encode_observation(self, obs: List[str]) -> None:
-        """Encode an observation into a short-term memory.
-
-        Args
-        ----
-        obs: observation as a quadruple: [head, relation, tail, num]
-
-        """
-        encode_observation(self.memory_systems, obs)
-
-    def _manage_memory(
-        self, dont_generalize_agent: bool = True, split_possessive: bool = False
-    ) -> None:
-        """Manage the memory systems."""
-        if self.memory_management_policy == "random":
-            selected_action = random.choice(["episodic", "semantic", "forget"])
-            manage_memory(
-                self.memory_systems,
-                selected_action,
-                dont_generalize_agent,
-                split_possessive,
-            )
-        elif self.memory_management_policy == "generalize":
-            manage_memory(
-                self.memory_systems,
-                "generalize",
-                dont_generalize_agent,
-                split_possessive,
-            )
-        elif self.memory_management_policy == "neural":
-            raise NotImplementedError
-        else:
-            raise ValueError("Unknown memory management policy.")
-
-    def _answer_question(
-        self, question: List[str], split_possessive: bool = False
-    ) -> str:
-        """Answer the question."""
-        return str(
-            answer_question(
-                self.memory_systems, self.qa_policy, question, split_possessive
-            )
-        )
-
-    def _explore(self) -> str:
-        """Explore the room."""
-        return explore(
-            self.memory_systems, self.explore_policy, self.memory_management_policy
-        )
 
     def _test(self) -> int:
         score = 0
@@ -180,12 +148,23 @@ class HandcraftedAgent:
                 env_started = True
 
             for obs in observations:
-                self._encode_observation(obs)
-                self._manage_memory()
-            action_qa = self._answer_question(question)
-            action_explore = explore(
-                self.memory_systems, self.explore_policy, self.memory_management_policy
+                encode_observation(self.memory_systems, obs)
+                manage_memory(
+                    self.memory_systems,
+                    self.mm_policy,
+                    dont_generalize_agent=True,
+                    split_possessive=False,
+                )
+
+            action_qa = str(
+                answer_question(
+                    self.memory_systems,
+                    self.qa_policy,
+                    question,
+                    split_possessive=False,
+                )
             )
+            action_explore = explore(self.memory_systems, self.explore_policy)
             action_pair = (action_qa, action_explore)
 
         return score

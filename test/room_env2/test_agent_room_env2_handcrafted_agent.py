@@ -24,15 +24,15 @@ class HandcraftedAgentTest(unittest.TestCase):
         }
 
         results = {}
-        for memory_management_policy in ["random", "generalize"]:
+        for mm_policy in ["random", "generalize"]:
             for qa_policy in ["random", "episodic_semantic"]:
                 for explore_policy in ["random", "avoid_walls"]:
                     for pretrain_semantic in [False, True]:
-                        key = (memory_management_policy, qa_policy, explore_policy)
+                        key = (mm_policy, qa_policy, explore_policy)
                         if key not in results:
                             results[key] = []
                         print(
-                            memory_management_policy,
+                            mm_policy,
                             qa_policy,
                             explore_policy,
                         )
@@ -43,7 +43,7 @@ class HandcraftedAgentTest(unittest.TestCase):
                             agent = HandcraftedAgent(
                                 env_str="room_env:RoomEnv-v2",
                                 env_config=config,
-                                memory_management_policy=memory_management_policy,
+                                mm_policy=mm_policy,
                                 qa_policy=qa_policy,
                                 explore_policy=explore_policy,
                                 num_samples_for_results=3,

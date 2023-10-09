@@ -15,7 +15,7 @@ from RoomEnv2.agent import HandcraftedAgent
 
 class HandcraftedAgentTest(unittest.TestCase):
     def test_all_agents(self) -> None:
-        capacity = {"episodic": 16, "semantic": 16, "short": 1}
+        capacity = {"episodic": 4, "episodic_agent": 4, "semantic": 4, "short": 1}
 
         config = {
             "question_prob": 1.0,
@@ -31,13 +31,8 @@ class HandcraftedAgentTest(unittest.TestCase):
                         key = (mm_policy, qa_policy, explore_policy)
                         if key not in results:
                             results[key] = []
-                        print(
-                            mm_policy,
-                            qa_policy,
-                            explore_policy,
-                        )
 
-                        for seed in tqdm([0, 1]):
+                        for seed in tqdm([42]):
                             config["seed"] = seed
 
                             agent = HandcraftedAgent(

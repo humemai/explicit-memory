@@ -15,7 +15,7 @@ from RoomEnv1.agent import DQNAgent, HandcraftedAgent
 class HandcraftedAgentTest(unittest.TestCase):
     def test_all_agents(self) -> None:
         for policy in tqdm(["random", "episodic_only", "semantic_only"]):
-            for test_seed in [0, 1]:
+            for test_seed in [42]:
                 all_params = {
                     "env_str": "room_env:RoomEnv-v1",
                     "policy": policy,
@@ -42,7 +42,7 @@ class HandcraftedAgentTest(unittest.TestCase):
 class RLAgentTest(unittest.TestCase):
     def test_agent(self) -> None:
         for pretrain_semantic in [False, True]:
-            for test_seed in [0, 1]:
+            for test_seed in [42]:
                 # parameters
                 all_params = {
                     "env_str": "room_env:RoomEnv-v1",

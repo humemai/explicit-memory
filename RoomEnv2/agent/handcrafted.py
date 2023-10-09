@@ -138,8 +138,12 @@ class HandcraftedAgent:
                     (observations, question), info = self.env.reset()
                     env_started = True
 
-                for obs in observations:
+                encode_observation(self.memory_systems, observations[0])
+                assert self.memory_systems.short.get_oldest_memory()[0] == "agent"
+                manage_memory(self.memory_systems, "agent", split_possessive=False)
+                for obs in observations[1:]:
                     encode_observation(self.memory_systems, obs)
+                    assert self.memory_systems.short.get_oldest_memory()[0] != "agent"
                     manage_memory(
                         self.memory_systems,
                         self.mm_policy,

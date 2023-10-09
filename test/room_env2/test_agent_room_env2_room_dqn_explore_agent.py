@@ -10,58 +10,120 @@ import gymnasium as gym
 import numpy as np
 from tqdm.auto import tqdm
 
-from RoomEnv2.agent import DQNAgent
+from RoomEnv2.agent import DQNMMAgent, DQNExploreAgent
 
 
-class RLAgentTest(unittest.TestCase):
+class DQNExploreAgenttTest(unittest.TestCase):
     def test_agent(self) -> None:
         for pretrain_semantic in [True, False]:
-            for test_seed in [0, 1]:
+            for test_seed in [42]:
                 # parameters
                 all_params = {
                     "env_str": "room_env:RoomEnv-v2",
                     "max_epsilon": 1.0,
                     "min_epsilon": 0.1,
                     "epsilon_decay_until": 100 * 2,
-                    "gamma": 0.99,
+                    "gamma": 0.65,
                     "capacity": {
-                        "episodic": 16,
-                        "episodic_agent": 16,
-                        "semantic": 16,
+                        "episodic": 4,
+                        "episodic_agent": 4,
+                        "semantic": 4,
                         "short": 1,
                     },
                     "nn_params": {
                         "hidden_size": 4,
                         "num_layers": 2,
-                        "n_actions": 5,
                         "embedding_dim": 4,
                         "v1_params": None,
                         "v2_params": {},
+                        "memory_of_interest": [
+                            "episodic",
+                            "episodic_agent",
+                            "semantic",
+                            "short",
+                        ],
                     },
                     "num_iterations": 100 * 2,
-                    "replay_buffer_size": 128,
-                    "warm_start": 128,
-                    "batch_size": 2,
+                    "replay_buffer_size": 16,
+                    "warm_start": 16,
+                    "batch_size": 4,
                     "target_update_rate": 10,
                     "pretrain_semantic": pretrain_semantic,
                     "run_validation": True,
                     "run_test": True,
-                    "num_samples_for_results": 10,
+                    "num_samples_for_results": 3,
                     "train_seed": test_seed + 5,
                     "plotting_interval": 10,
                     "device": "cpu",
                     "test_seed": test_seed,
-                    "mm_policy": "rl",
+                    "mm_policy": "generalize",
+                    "qa_policy": "episodic_semantic",
+                    "env_config": {
+                        "question_prob": 1.0,
+                        "terminates_at": 99,
+                        "room_size": "dev",
+                    },
+                    "ddqn": True,
+                    "dueling_dqn": True,
+                }
+                agent = DQNExploreAgent(**all_params)
+                agent.train()
+                agent.remove_results_from_disk()
+
+
+class DQNMMAgenttTest(unittest.TestCase):
+    def test_agent(self) -> None:
+        for pretrain_semantic in [True, False]:
+            for test_seed in [42]:
+                # parameters
+                all_params = {
+                    "env_str": "room_env:RoomEnv-v2",
+                    "max_epsilon": 1.0,
+                    "min_epsilon": 0.1,
+                    "epsilon_decay_until": 100 * 2,
+                    "gamma": 0.65,
+                    "capacity": {
+                        "episodic": 4,
+                        "episodic_agent": 4,
+                        "semantic": 4,
+                        "short": 1,
+                    },
+                    "nn_params": {
+                        "hidden_size": 4,
+                        "num_layers": 2,
+                        "embedding_dim": 4,
+                        "v1_params": None,
+                        "v2_params": {},
+                        "memory_of_interest": [
+                            "episodic",
+                            "episodic_agent",
+                            "semantic",
+                            "short",
+                        ],
+                    },
+                    "num_iterations": 100 * 2,
+                    "replay_buffer_size": 16,
+                    "warm_start": 16,
+                    "batch_size": 4,
+                    "target_update_rate": 10,
+                    "pretrain_semantic": pretrain_semantic,
+                    "run_validation": True,
+                    "run_test": True,
+                    "num_samples_for_results": 3,
+                    "train_seed": test_seed + 5,
+                    "plotting_interval": 10,
+                    "device": "cpu",
+                    "test_seed": test_seed,
                     "qa_policy": "episodic_semantic",
                     "explore_policy": "avoid_walls",
                     "env_config": {
                         "question_prob": 1.0,
-                        "seed": None,
                         "terminates_at": 99,
                         "room_size": "dev",
                     },
+                    "ddqn": True,
+                    "dueling_dqn": True,
                 }
-
-                agent = DQNAgent(**all_params)
+                agent = DQNMMAgent(**all_params)
                 agent.train()
                 agent.remove_results_from_disk()

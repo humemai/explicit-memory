@@ -148,19 +148,21 @@ class DQNMMAgent(DQNAgent):
         while len(self.replay_buffer) < self.warm_start:
             self.init_memory_systems()
             (observations, question), info = self.env.reset()
+
             obs = observations[0]
             encode_observation(self.memory_systems, obs)
-            for obs in observations[1:]:
-                if self.memory_systems.short.get_oldest_memory()[0] == "agent":
-                    manage_memory(self.memory_systems, "agent")
-                else:
-                    state = self.memory_systems.return_as_a_dict_list()
-                    action = self.select_action(state, greedy=False)
-                    manage_memory(self.memory_systems, self.action2str[action])
-                    encode_observation(self.memory_systems, obs)
-                    next_state = self.memory_systems.return_as_a_dict_list()
-                    transition = [state, action, 0, next_state, False]
-                    self.replay_buffer.store(*transition)
+            manage_memory(self.memory_systems, "agent")
+            obs = observations[1]
+            encode_observation(self.memory_systems, obs)
+
+            for obs in observations[2:]:
+                state = self.memory_systems.return_as_a_dict_list()
+                action = self.select_action(state, greedy=False)
+                manage_memory(self.memory_systems, self.action2str[action])
+                encode_observation(self.memory_systems, obs)
+                next_state = self.memory_systems.return_as_a_dict_list()
+                transition = [state, action, 0, next_state, False]
+                self.replay_buffer.store(*transition)
 
             done = False
             while not done and len(self.replay_buffer) < self.warm_start:
@@ -182,11 +184,14 @@ class DQNMMAgent(DQNAgent):
 
                 obs = observations[0]
                 encode_observation(self.memory_systems, obs)
+                manage_memory(self.memory_systems, "agent")
+                obs = observations[1]
+                encode_observation(self.memory_systems, obs)
                 done = done or truncated
                 next_state = self.memory_systems.return_as_a_dict_list()
                 transition = [state, action, reward, next_state, done]
                 self.replay_buffer.store(*transition)
-                for obs in observations[1:]:
+                for obs in observations[2:]:
                     state = self.memory_systems.return_as_a_dict_list()
                     action = self.select_action(state, greedy=False)
                     manage_memory(self.memory_systems, self.action2str[action])
@@ -207,9 +212,14 @@ class DQNMMAgent(DQNAgent):
         self.dqn.train()
         self.init_memory_systems()
         (observations, question), info = self.env.reset()
+
         obs = observations[0]
         encode_observation(self.memory_systems, obs)
-        for obs in observations[1:]:
+        manage_memory(self.memory_systems, "agent")
+        obs = observations[1]
+        encode_observation(self.memory_systems, obs)
+
+        for obs in observations[2:]:
             state = self.memory_systems.return_as_a_dict_list()
             action = self.select_action(state, greedy=False)
             manage_memory(self.memory_systems, self.action2str[action])
@@ -240,11 +250,14 @@ class DQNMMAgent(DQNAgent):
 
             obs = observations[0]
             encode_observation(self.memory_systems, obs)
+            manage_memory(self.memory_systems, "agent")
+            obs = observations[1]
+            encode_observation(self.memory_systems, obs)
             done = done or truncated
             next_state = self.memory_systems.return_as_a_dict_list()
             transition = [state, action, reward, next_state, done]
             self.replay_buffer.store(*transition)
-            for obs in observations[1:]:
+            for obs in observations[2:]:
                 state = self.memory_systems.return_as_a_dict_list()
                 action = self.select_action(state, greedy=False)
                 manage_memory(self.memory_systems, self.action2str[action])
@@ -263,9 +276,14 @@ class DQNMMAgent(DQNAgent):
 
                 self.init_memory_systems()
                 (observations, question), info = self.env.reset()
+
                 obs = observations[0]
                 encode_observation(self.memory_systems, obs)
-                for obs in observations[1:]:
+                manage_memory(self.memory_systems, "agent")
+                obs = observations[1]
+                encode_observation(self.memory_systems, obs)
+
+                for obs in observations[2:]:
                     state = self.memory_systems.return_as_a_dict_list()
                     action = self.select_action(state, greedy=False)
                     manage_memory(self.memory_systems, self.action2str[action])
@@ -317,9 +335,14 @@ class DQNMMAgent(DQNAgent):
         for _ in range(self.num_samples_for_results):
             self.init_memory_systems()
             (observations, question), info = self.env.reset()
+
             obs = observations[0]
             encode_observation(self.memory_systems, obs)
-            for obs in observations[1:]:
+            manage_memory(self.memory_systems, "agent")
+            obs = observations[1]
+            encode_observation(self.memory_systems, obs)
+
+            for obs in observations[2:]:
                 state = self.memory_systems.return_as_a_dict_list()
                 action = self.select_action(state, greedy=True)
                 manage_memory(self.memory_systems, self.action2str[action])
@@ -348,7 +371,11 @@ class DQNMMAgent(DQNAgent):
 
                 obs = observations[0]
                 encode_observation(self.memory_systems, obs)
-                for obs in observations[1:]:
+                manage_memory(self.memory_systems, "agent")
+                obs = observations[1]
+                encode_observation(self.memory_systems, obs)
+
+                for obs in observations[2:]:
                     state = self.memory_systems.return_as_a_dict_list()
                     action = self.select_action(state, greedy=True)
                     manage_memory(self.memory_systems, self.action2str[action])

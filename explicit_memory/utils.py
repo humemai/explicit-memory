@@ -1,4 +1,4 @@
-"""utility functions"""
+"""Utility functions."""
 import csv
 import json
 import logging
@@ -13,6 +13,7 @@ from typing import Deque, Dict, List, Tuple
 import numpy as np
 import torch
 import yaml
+from pprint import pformat
 
 from .segment_tree import MinSegmentTree, SumSegmentTree
 
@@ -23,7 +24,7 @@ logging.basicConfig(
 )
 
 
-def remove_timestamp(entry: list) -> list:
+def remove_timestamp(entry: List[str]) -> list:
     """Remove the timestamp from a given observation/episodic memory.
 
     Args
@@ -276,6 +277,7 @@ class ReplayBuffer:
     """A simple numpy replay buffer.
 
     numpy replay buffer is faster than deque or list.
+    copied from https://github.com/Curt-Park/rainbow-is-all-you-need
 
     """
 
@@ -295,12 +297,15 @@ class ReplayBuffer:
         batch_size: batch size to sample
 
         """
+        if batch_size > size:
+            raise ValueError("batch_size must be smaller than size")
         if observation_type == "dict":
             self.obs_buf = np.array([{}] * size)
             self.next_obs_buf = np.array([{}] * size)
         else:
-            self.obs_buf = np.zeros([size, *obs_dim], dtype=np.float32)
-            self.next_obs_buf = np.zeros([size, *obs_dim], dtype=np.float32)
+            raise ValueError("At the moment, observation_type must be 'dict'")
+            # self.obs_buf = np.zeros([size, *obs_dim], dtype=np.float32)
+            # self.next_obs_buf = np.zeros([size, *obs_dim], dtype=np.float32)
 
         self.acts_buf = np.zeros([size], dtype=np.float32)
         self.rews_buf = np.zeros([size], dtype=np.float32)
@@ -345,7 +350,10 @@ class ReplayBuffer:
 
 
 class ReplayBufferNStep:
-    """A simple numpy replay buffer."""
+    """A simple numpy N step replay buffer.
+    copied from https://github.com/Curt-Park/rainbow-is-all-you-need
+
+    """
 
     def __init__(
         self,
@@ -462,6 +470,9 @@ class ReplayBufferNStep:
 
 class PrioritizedReplayBuffer(ReplayBufferNStep):
     """Prioritized Replay buffer.
+
+    copied from https://github.com/Curt-Park/rainbow-is-all-you-need
+
 
     Attributes:
         max_priority (float): max priority

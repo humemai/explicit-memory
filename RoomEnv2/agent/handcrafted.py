@@ -17,15 +17,15 @@ from tqdm.auto import tqdm, trange
 
 from explicit_memory.memory import (
     EpisodicMemory,
+    MemorySystems,
     SemanticMemory,
     ShortMemory,
-    MemorySystems,
 )
 from explicit_memory.policy import (
     answer_question,
     encode_observation,
-    manage_memory,
     explore,
+    manage_memory,
 )
 from explicit_memory.utils import write_yaml
 
@@ -78,20 +78,24 @@ class HandcraftedAgent:
         """
         self.all_params = deepcopy(locals())
         del self.all_params["self"]
+
         self.env_str = env_str
         self.env_config = env_config
         self.mm_policy = mm_policy
         assert self.mm_policy in ["random", "generalize", "rl", "neural"]
         self.qa_policy = qa_policy
-        assert self.qa_policy in ["episodic_semantic", "random", "rl", "neural"]
+        assert self.qa_policy in ["episodic_semantic", "random", "neural"]
         self.explore_policy = explore_policy
         assert self.explore_policy in ["random", "avoid_walls", "rl", "neural"]
         self.num_samples_for_results = num_samples_for_results
         self.capacity = capacity
         self.pretrain_semantic = pretrain_semantic
-
         self.env = gym.make(self.env_str, **env_config)
+        self.max_total_rewards = self.env_config["terminates_at"] + 1
+        self._create_directory()
 
+    def _create_directory(self) -> None:
+        """Create the directory to store the results."""
         if "RoomEnv2" in os.listdir():
             self.default_root_dir = (
                 f"./RoomEnv2/training_results/{str(datetime.datetime.now())}"
@@ -99,75 +103,11 @@ class HandcraftedAgent:
         else:
             self.default_root_dir = f"./training_results/{str(datetime.datetime.now())}"
         os.makedirs(self.default_root_dir, exist_ok=True)
-
-        self.max_total_rewards = self.env_config["terminates_at"] + 1
-        self.action_mm2str = {
-            0: "episodic",
-            1: "semantic",
-            2: "forget",
-        }
-        self.action_qa2str = {
-            0: "episodic",
-            1: "semantic",
-        }
-
-        self.action_explore2str = {
-            0: "north",
-            1: "east",
-            2: "south",
-            3: "west",
-            4: "stay",
-        }
+        write_yaml(self.all_params, os.path.join(self.default_root_dir, "train.yaml"))
 
     def remove_results_from_disk(self) -> None:
         """Remove the results from the disk."""
         shutil.rmtree(self.default_root_dir)
-
-    def _test(self) -> int:
-        score = 0
-        env_started = False
-        action_pair = (None, None)
-        done = False
-        self.init_memory_systems()
-
-        while not done:
-            if env_started:
-                (
-                    (observations, question),
-                    reward,
-                    done,
-                    truncated,
-                    info,
-                ) = self.env.step(action_pair)
-                score += reward
-                if done:
-                    break
-
-            else:
-                (observations, question), info = self.env.reset()
-                env_started = True
-
-            for obs in observations:
-                encode_observation(self.memory_systems, obs)
-                manage_memory(
-                    self.memory_systems,
-                    self.mm_policy,
-                    dont_generalize_agent=True,
-                    split_possessive=False,
-                )
-
-            action_qa = str(
-                answer_question(
-                    self.memory_systems,
-                    self.qa_policy,
-                    question,
-                    split_possessive=False,
-                )
-            )
-            action_explore = explore(self.memory_systems, self.explore_policy)
-            action_pair = (action_qa, action_explore)
-
-        return score
 
     def test(self):
         """Test the agent. There is no training for this agent, since it is
@@ -175,7 +115,47 @@ class HandcraftedAgent:
         self.scores = []
 
         for _ in range(self.num_samples_for_results):
-            score = self._test()
+            score = 0
+            env_started = False
+            action_pair = (None, None)
+            done = False
+            self.init_memory_systems()
+
+            while not done:
+                if env_started:
+                    (
+                        (observations, question),
+                        reward,
+                        done,
+                        truncated,
+                        info,
+                    ) = self.env.step(action_pair)
+                    score += reward
+                    if done:
+                        break
+
+                else:
+                    (observations, question), info = self.env.reset()
+                    env_started = True
+
+                for obs in observations:
+                    encode_observation(self.memory_systems, obs)
+                    manage_memory(
+                        self.memory_systems,
+                        self.mm_policy,
+                        split_possessive=False,
+                    )
+
+                action_qa = str(
+                    answer_question(
+                        self.memory_systems,
+                        self.qa_policy,
+                        question,
+                        split_possessive=False,
+                    )
+                )
+                action_explore = explore(self.memory_systems, self.explore_policy)
+                action_pair = (action_qa, action_explore)
             self.scores.append(score)
 
         results = {
@@ -185,7 +165,6 @@ class HandcraftedAgent:
             }
         }
         write_yaml(results, os.path.join(self.default_root_dir, "results.yaml"))
-        write_yaml(self.all_params, os.path.join(self.default_root_dir, "train.yaml"))
         write_yaml(
             self.memory_systems.return_as_a_dict_list(),
             os.path.join(self.default_root_dir, "last_memory_state.yaml"),
@@ -195,7 +174,12 @@ class HandcraftedAgent:
         """Initialize the agent's memory systems. This has nothing to do with the
         replay buffer."""
         self.memory_systems = MemorySystems(
-            episodic=EpisodicMemory(capacity=self.capacity["episodic"]),
+            episodic=EpisodicMemory(
+                capacity=self.capacity["episodic"], remove_duplicates=False
+            ),
+            episodic_agent=EpisodicMemory(
+                capacity=self.capacity["episodic"], remove_duplicates=False
+            ),
             semantic=SemanticMemory(capacity=self.capacity["semantic"]),
             short=ShortMemory(capacity=self.capacity["short"]),
         )

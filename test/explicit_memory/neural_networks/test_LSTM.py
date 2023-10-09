@@ -31,6 +31,11 @@ class LSTMTest(unittest.TestCase):
                                                     "semantic": capacity // 2,
                                                     "short": capacity // 2,
                                                 },
+                                                "memory_of_interest": [
+                                                    "episodic",
+                                                    "semantic",
+                                                    "short",
+                                                ],
                                                 "entities": [
                                                     "Foo",
                                                     "Bar",
@@ -44,8 +49,9 @@ class LSTMTest(unittest.TestCase):
                                                     "include_human": include_human,
                                                     "human_embedding_on_object_location": human_embedding_on_object_location,
                                                 },
+                                                "v2_params": None,
                                                 "batch_first": batch_first,
-                                                "accelerator": "cpu",
+                                                "device": "cpu",
                                             }
                                         )
         for config in configs:
@@ -62,6 +68,11 @@ class LSTMTest(unittest.TestCase):
                 "semantic": 16,
                 "short": 1,
             },
+            "memory_of_interest": [
+                "episodic",
+                "semantic",
+                "short",
+            ],
             "entities": [
                 "Foo",
                 "Bar",
@@ -75,8 +86,9 @@ class LSTMTest(unittest.TestCase):
                 "include_human": "sum",
                 "human_embedding_on_object_location": False,
             },
+            "v2_params": None,
             "batch_first": True,
-            "accelerator": "cpu",
+            "device": "cpu",
         }
         lstm = LSTM(**config)
         lstm.forward(

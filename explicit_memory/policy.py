@@ -5,7 +5,7 @@ The trained neural network policies are not implemented yet.
 import random
 from typing import List
 
-from .memory import EpisodicMemory, SemanticMemory, ShortMemory, MemorySystems
+from .memory import EpisodicMemory, MemorySystems, SemanticMemory, ShortMemory
 
 
 def encode_observation(memory_systems: MemorySystems, obs: List[List]) -> None:
@@ -42,34 +42,10 @@ def explore(memory_systems: MemorySystems, explore_policy: str) -> str:
     if explore_policy == "random":
         action = random.choice(["north", "east", "south", "west", "stay"])
     elif explore_policy == "avoid_walls":
-        agent_memories_episodic = []
-        agent_memories_semantic = []
-
-        agent_memories_episodic += memory_systems.episodic.find_memory(
-            "agent", "?", "?"
-        )
-        agent_memories_semantic += memory_systems.semantic.find_memory(
-            "agent", "?", "?"
-        )
-
-        agent_memories_episodic.sort(key=lambda x: x[-1])
-        agent_memories_semantic.sort(key=lambda x: x[-1])
-
-        if len(agent_memories_episodic) == 0 and len(agent_memories_semantic) == 0:
-            agent_current_location = None
-
-        else:
-            combined_memories = []
-
-            if len(agent_memories_episodic) > 0:
-                combined_memories += [agent_memories_episodic[-1]]
-            elif len(agent_memories_semantic) > 0:
-                combined_memories += [agent_memories_semantic[-1]]
-
-            agent_current_location = random.choice(combined_memories)[2]
+        agent_current_location = memory_systems.episodic_agent.get_latest_memory()[2]
 
         memories_rooms = []
-        MARKER = "^^^"  # to allow hashing
+        MARKER = "^^^"  # to allow hashing for the set operation
 
         memories_rooms += [
             MARKER.join(entry[:-1])
@@ -105,7 +81,6 @@ def explore(memory_systems: MemorySystems, explore_policy: str) -> str:
 def manage_memory(
     memory_systems: MemorySystems,
     policy: str,
-    dont_generalize_agent: bool = True,
     split_possessive: bool = True,
 ) -> None:
     """Non RL memory management policy.
@@ -114,8 +89,6 @@ def manage_memory(
     ----
     MemorySystems
     policy: "episodic", "semantic", "generalize", "forget", "random", or "neural"
-    dont_generalize_agent: if True, the agent-related memories are not generalized,
-        i.e., they are not put into the semantic memory system.
     split_possessive: whether to split the possessive, i.e., 's, or not.
 
     """
@@ -127,8 +100,17 @@ def manage_memory(
         "random",
         "generalize",
         "neural",
+        "agent",
     ]
-    if policy.lower() == "episodic":
+    if policy.lower() == "agent":
+        assert memory_systems.episodic_agent.capacity > 0
+        if memory_systems.episodic_agent.is_full:
+            memory_systems.episodic_agent.forget_oldest()
+        mem_short = memory_systems.short.get_oldest_memory()
+        mem_epi = ShortMemory.short2epi(mem_short)
+        memory_systems.episodic_agent.add(mem_epi)
+
+    elif policy.lower() == "episodic":
         assert memory_systems.episodic.capacity != 0
         if memory_systems.episodic.is_full:
             memory_systems.episodic.forget_oldest()
@@ -143,16 +125,6 @@ def manage_memory(
         mem_short = memory_systems.short.get_oldest_memory()
         mem_sem = ShortMemory.short2sem(mem_short, split_possessive=split_possessive)
 
-        if dont_generalize_agent and mem_sem[0] == "agent":
-            if (
-                mem_sem[0] != "agent"
-                and mem_sem[1] != "agent"
-                and mem_sem[2] != "agent"
-            ):
-                memory_systems.semantic.add(mem_sem)
-        else:
-            memory_systems.semantic.add(mem_sem)
-
     elif policy.lower() == "forget":
         pass
 
@@ -164,7 +136,6 @@ def manage_memory(
         if memory_systems.episodic.is_full:
             mems_epi, mem_sem = memory_systems.episodic.find_similar_memories(
                 split_possessive=split_possessive,
-                dont_generalize_agent=dont_generalize_agent,
             )
             if mems_epi is None and mem_sem is None:
                 memory_systems.episodic.forget_oldest()
@@ -172,9 +143,7 @@ def manage_memory(
                 for mem_epi in mems_epi:
                     memory_systems.episodic.forget(mem_epi)
 
-                mem_sem_same = memory_systems.semantic.find_same_memory(mem_sem)
-
-                if mem_sem_same is not None:
+                if memory_systems.semantic.can_be_added(mem_sem)[0]:
                     memory_systems.semantic.add(mem_sem)
                 else:
                     if memory_systems.semantic.is_full:
@@ -184,8 +153,6 @@ def manage_memory(
                             memory_systems.semantic.add(mem_sem)
                         else:
                             pass
-                    else:
-                        memory_systems.semantic.add(mem_sem)
 
         mem_short = memory_systems.short.get_oldest_memory()
         mem_epi = ShortMemory.short2epi(mem_short)

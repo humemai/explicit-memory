@@ -75,7 +75,7 @@ class HandcraftedAgent:
         """Initialize the memory systems."""
         if self.agent_type == "episodic":
             self.M_e = [
-                EpisodicMemory(capacity=self.episodic_capacity)
+                EpisodicMemory(capacity=self.episodic_capacity, remove_duplicates=False)
                 for _ in range(self.env.num_agents)
             ]
         elif self.agent_type == "semantic":
@@ -85,7 +85,7 @@ class HandcraftedAgent:
             ]
         elif self.agent_type == "episodic_semantic":
             self.M_e = [
-                EpisodicMemory(capacity=self.episodic_capacity)
+                EpisodicMemory(capacity=self.episodic_capacity, remove_duplicates=False)
                 for _ in range(self.env.num_agents)
             ]
             self.M_s = [
@@ -96,7 +96,9 @@ class HandcraftedAgent:
             self.M_e = []
             self.M_s = []
             for _ in range(self.env.num_agents):
-                me = EpisodicMemory(capacity=self.episodic_capacity)
+                me = EpisodicMemory(
+                    capacity=self.episodic_capacity, remove_duplicates=False
+                )
                 ms = SemanticMemory(capacity=self.semantic_capacity)
                 free_space = ms.pretrain_semantic(self.env.semantic_knowledge)
                 me.increase_capacity(free_space)
@@ -263,10 +265,9 @@ class HandcraftedAgent:
                             for mem_epi in mems_epi:
                                 self.M_e[i].forget(mem_epi)
 
-                            mem_sem_same = self.M_s[i].find_same_memory(mem_sem)
-
-                            if mem_sem_same is not None:
+                            if self.M_s[i].can_be_added(mem_sem)[0]:
                                 self.M_s[i].add(mem_sem)
+
                             else:
                                 if self.M_s[i].is_full:
                                     mem_sem_weakset = self.M_s[i].get_weakest_memory()
@@ -275,8 +276,6 @@ class HandcraftedAgent:
                                         self.M_s[i].add(mem_sem)
                                     else:
                                         pass
-                                else:
-                                    self.M_s[i].add(mem_sem)
 
                     elif self.forget_policy == "random":
                         self.M_e[i].forget_random()

@@ -1,2 +1,2 @@
-from .handcrafted import HandcraftedAgent
 from .dqn import DQNAgent
+from .handcrafted import HandcraftedAgent

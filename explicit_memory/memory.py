@@ -37,12 +37,89 @@ class Memory:
         self.type = memory_type
         self.entries = []
         self.capacity = capacity
+        assert self.capacity >= 0
         self._frozen = False
 
         logging.debug(f"{memory_type} memory object with size {capacity} instantiated!")
 
     def __repr__(self):
         return pformat(vars(self), indent=4, width=1)
+
+    def can_be_added(self, mem: List[str]) -> Tuple[bool, str]:
+        """Check if a memory can be added to the system or not.
+
+        Args
+        ----
+        mem: A memory as a quadraple: [head, relation, tail, num]
+
+        Returns
+        -------
+        True or False
+        error_msg
+
+        """
+        if self.capacity == 0:
+            return False, "The memory system capacity is 0!"
+
+        if self._frozen:
+            return False, "The memory system is frozen!"
+
+        if self.is_full:
+            return False, "The memory system is full!"
+
+        return True, ""
+
+    def add(self, mem: List[str]) -> None:
+        """Add memory to the memory system.
+
+        Args
+        ----
+        mem: A memory as a quadraple: [head, relation, tail, num]
+
+        """
+        check, error_msg = self.can_be_added(mem)
+        if not check:
+            logging.error(error_msg)
+            raise ValueError(error_msg)
+
+        logging.debug(f"Adding a new memory entry {mem} ...")
+        self.entries.append(mem)
+        logging.info(
+            f"memory entry {mem} added. Now there are in total of "
+            f"{len(self.entries)} memories!"
+        )
+
+        # sort ascending
+        self.entries.sort(key=lambda x: x[-1])
+
+        assert self.size <= self.capacity
+
+    def can_be_forgotten(self, mem: List[str]) -> Tuple[bool, str]:
+        """Check if a memory can be added to the system or not.
+
+        Args
+        ----
+        mem: A memory as a quadraple: [head, relation, tail, num]
+
+        Returns
+        -------
+        True or False
+        error_msg
+
+        """
+        if self.capacity == 0:
+            return False, "The memory system capacity is 0!"
+
+        if self.size == 0:
+            return False, "The memory system is empty!"
+
+        if self._frozen:
+            return False, "The memory system is frozen!"
+
+        if mem not in self.entries:
+            return False, f"{mem} is not in the memory system!"
+
+        return True, None
 
     def forget(self, mem: List) -> None:
         """forget the given memory.
@@ -54,13 +131,8 @@ class Memory:
             respectively.
 
         """
-        if self._frozen:
-            error_msg = "The memory system is frozen!"
-            logging.error(error_msg)
-            raise ValueError(error_msg)
-
-        if mem not in self.entries:
-            error_msg = f"{mem} is not in the memory system!"
+        check, error_msg = self.can_be_forgotten(mem)
+        if not check:
             logging.error(error_msg)
             raise ValueError(error_msg)
 
@@ -77,6 +149,148 @@ class Memory:
         else:
             logging.warning("EVERYTHING IN THE MEMORY SYSTEM WILL BE FORGOTTEN!")
             self.entries = []
+
+    def get_first_memory(self) -> None:
+        """Get the first memory in the memory system.
+
+        Returns
+        -------
+        mem: the first memory as a quadraple
+
+        """
+        return deepcopy(self.entries[0])
+
+    def get_last_memory(self) -> None:
+        """Get the last memory in the memory system.
+
+        Returns
+        -------
+        mem: the last memory as a quadraple
+
+        """
+        return deepcopy(self.entries[-1])
+
+    def is_valid_query(self, query: List[str]) -> bool:
+        """Check if the query can be answered or not."""
+        if not (
+            len(query) == 3
+            and query.count("?") == 1
+            and all([isinstance(foo, str) for foo in query])
+        ):
+            return False
+        else:
+            return True
+
+    def answer_random(self, query: List) -> Tuple[str, int]:
+        """Answer the question with a uniform-randomly chosen memory.
+
+        Args
+        ----
+        query: e.g., ["bob", "atlocation", "?"],
+            ["?", "atlocation", "officeroom"], ["bob", "?", "officeroom"]
+
+        Returns
+        -------
+        pred: prediction (e.g., desk)
+        num: either a timestamp or num generalized, for episodic / short and semantic,
+
+        """
+        if not self.is_valid_query(query):
+            raise ValueError(
+                f"query {query} is not valid. It should be a triple with a single "
+                f"question mark."
+            )
+
+        if self.is_empty:
+            logging.warning("Memory is empty. I can't answer any questions!")
+            pred = None
+            num = None
+
+        else:
+            mem = random.choice(self.entries)
+            pred_idx = query.index("?")
+            pred = mem[pred_idx]
+            num = mem[-1]
+
+        logging.info(f"pred: {pred}, num: {num}")
+
+        return pred, num
+
+    def answer_with_smallest_num(self, query: List[str]) -> Tuple[str, int]:
+        """Answer the question with the memory with the smallest num.
+
+        Args
+        ----
+        query: a triple, e.g., ["bob", "atlocation", "?"],
+            ["?", "atlocation", "officeroom"], ["bob", "?", "officeroom"]
+
+        Returns
+        -------
+        pred
+        num
+
+        """
+        if not self.is_valid_query(query):
+            raise ValueError(
+                f"query {query} is not valid. It should be a triple with a single "
+                f"question mark."
+            )
+
+        candidates = self.find_memory(query + ["?"])
+
+        if len(candidates) == 0:
+            logging.info("no relevant memories found.")
+            pred = None
+            num = None
+        else:
+            logging.info(
+                f"{len(candidates)} relevant memories were found in the entries!"
+            )
+            candidates.sort(key=lambda x: x[-1])
+            candidate = candidates[0]
+            query_idx = query.index("?")
+            pred = candidate[query_idx]
+            num = candidate[-1]
+
+        return pred, num
+
+    def answer_with_largest_num(self, query: List[str]) -> Tuple[str, int]:
+        """Answer the question with the memory with the largest num.
+
+        Args
+        ----
+        query: a triple, e.g., ["bob", "atlocation", "?"],
+            ["?", "atlocation", "officeroom"], ["bob", "?", "officeroom"]
+
+        Returns
+        -------
+        pred
+        num
+
+        """
+        if not self.is_valid_query(query):
+            raise ValueError(
+                f"query {query} is not valid. It should be a triple with a single "
+                f"question mark."
+            )
+
+        candidates = self.find_memory(query + ["?"])
+
+        if len(candidates) == 0:
+            logging.info("no relevant memories found.")
+            pred = None
+            num = None
+        else:
+            logging.info(
+                f"{len(candidates)} relevant memories were found in the entries!"
+            )
+            candidates.sort(key=lambda x: x[-1])
+            candidate = candidates[-1]
+            query_idx = query.index("?")
+            pred = candidate[query_idx]
+            num = candidate[-1]
+
+        return pred, num
 
     @property
     def is_empty(self) -> bool:
@@ -148,37 +362,37 @@ class Memory:
             f"{self.capacity}!"
         )
 
-    def return_as_lists(self) -> List[list]:
+    def return_as_list(self) -> List[list]:
         """
         Return the memories as a list of lists.
         """
         return deepcopy(self.entries)
 
-    def find_memory(self, head: str, relation: str, tail: str) -> List[List[str]]:
+    def find_memory(self, mem_query: List) -> List:
         """Find memory.
-
-        At least one of the two should be ?
 
         Args
         ----
         head: head
         relation: relation
         tail: tail
+        num: a number
 
         Returns
         -------
         mem: A memory as a quadraple: [head, relation, tail, num]
 
         """
-        assert (head != "?") or (relation != "?") or (tail != "?")
+        assert len(mem_query) == 4
         mems_found = []
         for mem in self.entries:
-            if (head == mem[0]) or (head == "?"):
-                if (relation == mem[1]) or (relation == "?"):
-                    if (tail == mem[2]) or (tail == "?"):
-                        mems_found.append(mem)
+            if (mem_query[0] == mem[0]) or (mem_query[0] == "?"):
+                if (mem_query[1] == mem[1]) or (mem_query[1] == "?"):
+                    if (mem_query[2] == mem[2]) or (mem_query[2] == "?"):
+                        if (mem_query[3] == mem[3]) or (mem_query[3] == "?"):
+                            mems_found.append(mem)
 
-        return mems_found
+        return deepcopy(mems_found)
 
 
 class EpisodicMemory(Memory):
@@ -197,21 +411,7 @@ class EpisodicMemory(Memory):
         super().__init__("episodic", capacity)
         self.remove_duplicates = remove_duplicates
 
-    def can_be_added(self) -> bool:
-        """Checks if a memory can be added to the system or not.
-
-        Returns
-        -------
-        True or False
-
-        """
-        if (self.capacity <= 0) or (self._frozen) or (self.is_full):
-            return False
-
-        else:
-            return True
-
-    def add(self, mem: list) -> None:
+    def add(self, mem: List[str]) -> None:
         """Append a memory to the episodic memory system.
 
         Args
@@ -219,66 +419,15 @@ class EpisodicMemory(Memory):
         mem: An episodic memory as a quadraple: [head, relation, tail, timestamp]
 
         """
-        if self._frozen:
-            error_msg = "The memory system is frozen!"
-            logging.error(error_msg)
-            raise ValueError(error_msg)
-
-        logging.debug(f"Adding a new memory entry {mem} ...")
-        self.entries.append(mem)
-        logging.info(
-            f"memory entry {mem} added. Now there are in total of "
-            f"{len(self.entries)} memories!"
-        )
+        super().add(mem)
         if self.remove_duplicates:
             self.clean_old_memories()
 
-        # sort ascending
-        self.entries.sort(key=lambda x: x[-1])
-
-        assert self.size <= self.capacity
-
     def get_oldest_memory(self) -> List:
-        """Get the oldest memory in the episodic memory system.
-
-        At the moment, this is simply done by looking up the timestamps and comparing
-        them.
-
-        Returns
-        -------
-        mem: the oldest memory as a quadraple
-
-        """
-        # sorted() is ascending by default.
-        mem_candidate = sorted(self.entries, key=lambda x: x[-1])[0]
-        mem = mem_candidate
-        # mem = random.choice(
-        #     [mem for mem in self.entries if mem_candidate[-1] == mem[-1]]
-        # )
-        logging.info(f"{mem} is the oldest memory in the system.")
-
-        return mem
+        return self.get_first_memory()
 
     def get_latest_memory(self) -> list:
-        """Get the latest memory in the episodic memory system.
-
-        At the moment, this is simply done by looking up the timestamps and comparing
-        them. If there are more than one memory with the same timestamp, then it'll
-        choose one of them uniformly at random.
-
-        Returns
-        -------
-        mem: An episodic memory as a quadraple: [head, relation, tail, timestamp]
-
-        """
-        # sorted() is ascending by default.
-        mem_candidate = sorted(self.entries, key=lambda x: x[-1])[-1]
-        mem = random.choice(
-            [mem for mem in self.entries if mem_candidate[-1] == mem[-1]]
-        )
-        logging.info(f"{mem} is the oldest memory in the system.")
-
-        return mem
+        return self.get_last_memory()
 
     def forget_oldest(self) -> None:
         """Forget the oldest entry in the memory system.
@@ -292,45 +441,25 @@ class EpisodicMemory(Memory):
         mem = self.get_oldest_memory()
         self.forget(mem)
 
-    def answer_random(self, query: List) -> Tuple[str, int]:
-        """Answer the question with a uniform-randomly chosen memory.
+    def forget_latest(self) -> None:
+        """Forget the oldest entry in the memory system.
 
-        Args
-        ----
-        query: e.g., ["bob", "atlocation", "?", 42],
-            ["?", "atlocation", "officeroom", 42], ["bob", "?", "officeroom", 42]
-
-        Returns
-        -------
-        pred: prediction (e.g., desk)
-        timestamp
+        At the moment, this is simply done by looking up the timestamps and comparing
+        them.
 
         """
-        if self.is_empty:
-            logging.warning("Memory is empty. I can't answer any questions!")
-            pred = None
-            timestamp = None
+        logging.debug("forgetting the oldest memory (FIFO)...")
 
-        else:
-            mem = random.choice(self.entries)
-            pred_idx = query.index("?")
-            pred = mem[pred_idx]
-            timestamp = mem[-1]
+        mem = self.get_latest_memory()
+        self.forget(mem)
 
-        logging.info(f"pred: {pred}, timestamp: {timestamp}")
-
-        return pred, timestamp
-
-    def answer_latest(self, query: List) -> Tuple[str, int]:
-        """Answer the question with the latest relevant memory.
-
-        If object X was found at Y and then later on found Z, then this strategy answers
-        Z, instead of Y.
+    def answer_oldest(self, query: List[str]) -> Tuple[str, int]:
+        """Answer the question with the oldest relevant memory.
 
         Args
         ----
-        query: e.g., ["bob", "atlocation", "?", 42],
-            ["?", "atlocation", "officeroom", 42], ["bob", "?", "officeroom", 42]
+        query: a triple, e.g., ["bob", "atlocation", "?"],
+            ["?", "atlocation", "officeroom"], ["bob", "?", "officeroom"]
 
         Returns
         -------
@@ -338,44 +467,26 @@ class EpisodicMemory(Memory):
         timestamp: timestamp
 
         """
-        logging.debug("answering a question with the answer_latest policy ...")
+        return self.answer_with_smallest_num(query)
 
-        if self.is_empty:
-            logging.warning("Memory is empty. I can't answer any questions!")
-            pred = None
-            timestamp = None
+    def answer_latest(self, query: List[str]) -> Tuple[str, int]:
+        """Answer the question with the latest relevant memory.
 
-        candidates = []
+        Args
+        ----
+        query: a triple, e.g., ["bob", "atlocation", "?"],
+            ["?", "atlocation", "officeroom"], ["bob", "?", "officeroom"]
 
-        for target in self.entries:
-            assert len(query) == len(target) == 4
-            count = 0
-            for s, t in zip(query[:-1], target[:-1]):
-                if s == t:
-                    count += 1
-            if count == 2:
-                candidates.append(target)
+        Returns
+        -------
+        pred: prediction
+        timestamp: timestamp
 
-        if len(candidates) == 0:
-            logging.info("no relevant memories found.")
-            pred = None
-            timestamp = None
-        else:
-            logging.info(
-                f"{len(candidates)} relevant memories were found in the entries!"
-            )
-            candidates.sort(key=lambda x: x[-1])
-            candidate = candidates[-1]
-            pred_idx = query.index("?")
-            pred = candidate[pred_idx]
-            timestamp = candidate[-1]
-
-        logging.info(f"pred: {pred}, timestamp: {timestamp}")
-
-        return pred, timestamp
+        """
+        return self.answer_with_largest_num(query)
 
     @staticmethod
-    def ob2epi(ob: list) -> dict:
+    def ob2epi(ob: List[str]) -> List[str]:
         """Turn an observation into an episodic memory.
 
         At the moment, the observation format is the same as an episodic memory
@@ -388,7 +499,6 @@ class EpisodicMemory(Memory):
         Returns
         -------
         mem: An episodic memory as a quadruple: [head, relation, tail, timestamp]
-
 
         """
         logging.debug(f"Turning an observation {ob} into a episodic memory ...")
@@ -403,11 +513,10 @@ class EpisodicMemory(Memory):
         """Find if there are duplicate memories with different timestamps."""
         logging.debug("finding if duplicate memories exist ...")
 
-        entries = ["".join(target[:-1]) for target in self.entries]
+        MARKER = "^^^"  # to allow hashing.
+        entries = [MARKER.join(target[:-1]) for target in self.entries]
 
         logging.debug(f"There are {len(entries)} episodic memories before cleaning")
-
-        entries = ["".join(mem) for mem in entries]  # to make list hashable
         uniques = set(entries)
 
         locs_all = [
@@ -422,11 +531,11 @@ class EpisodicMemory(Memory):
             entries_cleaned.append(mem)
 
         self.entries = entries_cleaned
+        self.entries.sort(key=lambda x: x[-1])
+
         logging.debug(f"There are {len(self.entries)} episodic memories after cleaning")
 
-    def find_similar_memories(
-        self, split_possessive: bool = True, dont_generalize_agent: bool = True
-    ) -> List:
+    def find_similar_memories(self, split_possessive: bool = True) -> List:
         """Find N episodic memories that can be compressed into one semantic.
 
         At the moment, this is simply done by matching string values. If there are more
@@ -436,9 +545,6 @@ class EpisodicMemory(Memory):
         Args
         ----
         split_possessive: whether to split the possessive, i.e., 's, or not.
-        dont_generalize_agent: if True, the agent-related memories are not generalized,
-            i.e., they are not put into the semantic memory system.
-
 
         Returns
         -------
@@ -450,20 +556,13 @@ class EpisodicMemory(Memory):
         logging.debug("looking for episodic entries that can be compressed ...")
         MARKER = "^^^"  # to allow hashing.
 
+        semantic_possibles = [
+            [e for e in remove_timestamp(entry)] for entry in self.entries
+        ]
+
         if split_possessive:
             semantic_possibles = [
-                [remove_posession(e) for e in remove_timestamp(entry)]
-                for entry in self.entries
-            ]
-        else:
-            semantic_possibles = [
-                [e for e in remove_timestamp(entry)] for entry in self.entries
-            ]
-        if dont_generalize_agent:
-            semantic_possibles = [
-                entry
-                for entry in semantic_possibles
-                if entry[0] != "agent" and entry[1] != "agent" and entry[2] != "agent"
+                [remove_posession(e) for e in entry] for entry in semantic_possibles
             ]
 
         semantic_possibles = [MARKER.join(elem) for elem in semantic_possibles]
@@ -478,6 +577,7 @@ class EpisodicMemory(Memory):
         if len(semantic_possibles) == len(self.entries):
             logging.info("no episodic memories found to be compressible.")
             return None, None
+
         elif len(semantic_possibles) < len(self.entries):
             logging.debug("some episodic memories found to be compressible.")
 
@@ -515,73 +615,11 @@ class ShortMemory(Memory):
     def __init__(self, capacity: int) -> None:
         super().__init__("short", capacity)
 
-    def add(self, mem: list) -> None:
-        """Append a memory to the short memory system.
-
-        Args
-        ----
-        mem: An episodic memory as a quadraple: [head, relation, tail, timestamp]
-
-        """
-        if self._frozen:
-            error_msg = "The memory system is frozen!"
-            logging.error(error_msg)
-            raise ValueError(error_msg)
-
-        assert not self.is_full
-
-        logging.debug(f"Adding a new memory entry {mem} ...")
-        self.entries.append(mem)
-        logging.info(
-            f"memory entry {mem} added. Now there are in total of "
-            f"{len(self.entries)} memories!"
-        )
-        # sort ascending
-        self.entries.sort(key=lambda x: x[-1])
-
-        assert self.size <= self.capacity
-
-    def get_oldest_memory(self) -> list:
-        """Get the oldest memory in the short-term memory system.
-
-        At the moment, this is simply done by looking up the timestamps and comparing
-        them.
-
-        Returns
-        -------
-        mem: the oldest memory as a quadraple
-
-        """
-        # sorted() is ascending by default.
-        mem_candidate = sorted(self.entries, key=lambda x: x[-1])[0]
-        mem = mem_candidate
-        # mem = random.choice(
-        #     [mem for mem in self.entries if mem_candidate[-1] == mem[-1]]
-        # )
-        logging.info(f"{mem} is the oldest memory in the system.")
-
-        return mem
+    def get_oldest_memory(self) -> List:
+        return self.get_first_memory()
 
     def get_latest_memory(self) -> list:
-        """Get the latest memory in the short-term memory system.
-
-        At the moment, this is simply done by looking up the timestamps and comparing
-        them. If there are more than one memory with the same timestamp, then it'll
-        choose one of them uniformly at random.
-
-        Returns
-        -------
-        mem: An episodic memory as a quadraple
-
-        """
-        # sorted() is ascending by default.
-        mem_candidate = sorted(self.entries, key=lambda x: x[-1])[-1]
-        mem = random.choice(
-            [mem for mem in self.entries if mem_candidate[-1] == mem[-1]]
-        )
-        logging.info(f"{mem} is the oldest memory in the system.")
-
-        return mem
+        return self.get_last_memory()
 
     def forget_oldest(self) -> None:
         """Forget the oldest entry in the memory system.
@@ -595,8 +633,20 @@ class ShortMemory(Memory):
         mem = self.get_oldest_memory()
         self.forget(mem)
 
+    def forget_latest(self) -> None:
+        """Forget the oldest entry in the memory system.
+
+        At the moment, this is simply done by looking up the timestamps and comparing
+        them.
+
+        """
+        logging.debug("forgetting the oldest memory (FIFO)...")
+
+        mem = self.get_latest_memory()
+        self.forget(mem)
+
     @staticmethod
-    def ob2short(ob: list) -> list:
+    def ob2short(ob: List[str]) -> List[str]:
         """Turn an observation into an short memory.
 
         At the moment, the observation format is almost the same as an episodic memory
@@ -620,7 +670,7 @@ class ShortMemory(Memory):
         return mem
 
     @staticmethod
-    def short2epi(short: list) -> list:
+    def short2epi(short: List[str]) -> List[str]:
         """Turn a short memory into a episodic memory.
 
         Args
@@ -636,7 +686,7 @@ class ShortMemory(Memory):
 
     @staticmethod
     def short2sem(short: list, split_possessive: bool = True) -> list:
-        """Turn a short memory into a episodic memory.
+        """Turn a short memory into a semantic memory.
 
         Args
         ----
@@ -649,13 +699,12 @@ class ShortMemory(Memory):
 
 
         """
-        sem = deepcopy(short)
+        sem = deepcopy(short)[:-1]
 
         if split_possessive:
-            sem[0] = remove_posession(sem[0])
-        else:
-            sem[0] = sem[0]
-        sem[-1] = 1
+            sem = [remove_posession(elem) for elem in sem]
+
+        sem += [1]
 
         return sem
 
@@ -676,27 +725,57 @@ class SemanticMemory(Memory):
         """
         super().__init__("semantic", capacity)
 
-    def can_be_added(self, mem: List[List[str]]) -> bool:
+    def can_be_added(self, mem: List[str]) -> bool:
         """Checks if a memory can be added to the system or not.
 
         Args
         ----
+        mem: A semantic memory as a quadraple: [head, relation, tail, num_generalized]
+
+        Returns
+        -------
         True or False
 
         """
-        if self.capacity <= 0:
-            return False
+        if self.capacity == 0:
+            return False, "The memory system capacity is 0!"
 
         if self._frozen:
-            return False
+            return False, "The memory system is frozen!"
 
         if self.is_full:
-            if self.find_same_memory(mem) is None:
-                return False
+            if len(self.find_memory(mem[:-1] + ["?"])) == 0:
+                return False, "The memory system is full!"
             else:
-                return True
+                return True, ""
         else:
-            return True
+            return True, ""
+
+    def add(self, mem: dict):
+        """Append a memory to the semantic memory system.
+
+        Args
+        ----
+        mem: A memory as a quadruple: [head, relation, tail, num_generalized]
+
+        """
+        check, error_msg = self.can_be_added(mem)
+        if not check:
+            logging.error(error_msg)
+            raise ValueError(error_msg)
+
+        logging.debug(f"Adding a new memory entry {mem} ...")
+        self.entries.append(mem)
+        logging.info(
+            f"memory entry {mem} added. Now there are in total of "
+            f"{len(self.entries)} memories!"
+        )
+        self.clean_same_memories()
+
+        # sort ascending
+        self.entries.sort(key=lambda x: x[-1])
+
+        assert self.size <= self.capacity
 
     def pretrain_semantic(
         self,
@@ -747,46 +826,10 @@ class SemanticMemory(Memory):
         return free_space
 
     def get_weakest_memory(self) -> List:
-        """Get the weakest memory in the semantic memory system system.
-
-        At the moment, this is simply done by looking up num_generalized and comparing
-        them. If there are more than one memory with the same num_generalized, then
-        it'll choose one of them uniformly at random.
-
-        Returns
-        -------
-        mem: the weakest memory as a quadraple
-
-        """
-        # sorted() is ascending by default.
-        mem_candidate = sorted(self.entries, key=lambda x: x[-1])[0]
-        mem = random.choice(
-            [mem for mem in self.entries if mem_candidate[-1] == mem[-1]]
-        )
-        logging.info(f"{mem} is the weakest memory in the system.")
-
-        return mem
+        return self.get_first_memory()
 
     def get_strongest_memory(self) -> List:
-        """Get the strongest memory in the semantic memory system system.
-
-        At the moment, this is simply done by looking up num_generalized and comparing
-        them. If there are more than one memory with the same num_generalized, then
-        it'll choose one of them uniformly at random.
-
-        Returns
-        -------
-        mem: the strongest memory as a quadraple
-
-        """
-        # sorted() is ascending by default.
-        mem_candidate = sorted(self.entries, key=lambda x: x[-1])[-1]
-        mem = random.choice(
-            [mem for mem in self.entries if mem_candidate[-1] == mem[-1]]
-        )
-        logging.info(f"{mem} is the strongest memory in the system.")
-
-        return mem
+        return self.get_last_memory()
 
     def forget_weakest(self) -> None:
         """Forget the weakest entry in the semantic memory system.
@@ -800,44 +843,22 @@ class SemanticMemory(Memory):
         self.forget(mem)
         logging.info(f"{mem} is forgotten!")
 
-    def answer_random(self, query: List) -> Tuple[str, int]:
-        """Answer the question with a uniform-randomly chosen memory.
+    def forget_strongest(self) -> None:
+        """Forget the strongest entry in the semantic memory system."""
+        logging.debug("forgetting the strongest memory ...")
+        mem = self.get_strongest_memory()
+        self.forget(mem)
+        logging.info(f"{mem} is forgotten!")
 
-        Args
-        ----
-        query: e.g., ["bob", "atlocation", "?", 42],
-            ["?", "atlocation", "officeroom", 42], ["bob", "?", "officeroom", 42]
-
-        Returns
-        -------
-        pred: prediction (e.g., desk)
-        num_generalized
-
-        """
-        if self.is_empty:
-            logging.warning("Memory is empty. I can't answer any questions!")
-            pred = None
-            num_generalized = None
-
-        else:
-            mem = random.choice(self.entries)
-            pred_idx = query.index("?")
-            pred = mem[pred_idx]
-            num_generalized = mem[-1]
-
-        logging.info(f"pred: {pred}, num_generalized: {num_generalized}")
-
-        return pred, num_generalized
-
-    def answer_strongest(
+    def answer_weakest(
         self, query: List, split_possessive: bool = True
     ) -> Tuple[str, int]:
         """Answer the question with the strongest relevant memory.
 
         Args
         ----
-        query: e.g., ["bob", "atlocation", "?", 42],
-            ["?", "atlocation", "officeroom", 42], ["bob", "?", "officeroom", 42]
+        query: e.g., ["bob", "atlocation", "?"],
+            ["?", "atlocation", "officeroom"], ["bob", "?", "officeroom"]
 
         Returns
         -------
@@ -847,43 +868,33 @@ class SemanticMemory(Memory):
         """
         logging.debug("answering a question with the answer_strongest policy ...")
 
-        if self.is_empty:
-            logging.warning("Memory is empty. I can't answer any questions!")
-            pred = None
-            num_generalized = None
+        if split_possessive:
+            query = [remove_posession(elem) for elem in query]
 
-        candidates = []
+        return self.answer_with_smallest_num(query)
 
-        for target in self.entries:
-            assert len(query) == len(target) == 4
-            count = 0
-            for s, t in zip(query[:-1], target[:-1]):
-                if split_possessive:
-                    if remove_posession(s) == t:
-                        count += 1
-                else:
-                    if s == t:
-                        count += 1
-            if count == 2:
-                candidates.append(target)
+    def answer_strongest(
+        self, query: List, split_possessive: bool = True
+    ) -> Tuple[str, int]:
+        """Answer the question with the strongest relevant memory.
 
-        if len(candidates) == 0:
-            logging.info("no relevant memories found.")
-            pred = None
-            num_generalized = None
-        else:
-            logging.info(
-                f"{len(candidates)} relevant memories were found in the entries!"
-            )
-            candidates.sort(key=lambda x: x[-1])
-            candidate = candidates[-1]
-            pred_idx = query.index("?")
-            pred = candidate[pred_idx]
-            num_generalized = candidate[-1]
+        Args
+        ----
+        query: e.g., ["bob", "atlocation", "?"],
+            ["?", "atlocation", "officeroom"], ["bob", "?", "officeroom"]
 
-        logging.info(f"pred: {pred}, num_generalized: {num_generalized}")
+        Returns
+        -------
+        pred: prediction
+        num_generalized: number of generalized samples.
 
-        return pred, num_generalized
+        """
+        logging.debug("answering a question with the answer_strongest policy ...")
+
+        if split_possessive:
+            query = [remove_posession(elem) for elem in query]
+
+        return self.answer_with_largest_num(query)
 
     @staticmethod
     def ob2sem(ob: list, split_possessive: bool = True) -> dict:
@@ -950,83 +961,39 @@ class SemanticMemory(Memory):
         self.entries = entries_cleaned
         logging.debug(f"There are {len(self.entries)} episodic memories after cleaning")
 
-    def add(self, mem: dict):
-        """Append a memory to the semantic memory system.
-
-        Args
-        ----
-        mem: A memory as a quadruple: [head, relation, tail, num_generalized]
-
-        """
-        if self._frozen:
-            error_msg = "The memory system is frozen!"
-            logging.error(error_msg)
-            raise ValueError(error_msg)
-
-        logging.debug(f"Adding a new memory entry {mem} ...")
-        self.entries.append(mem)
-        logging.info(
-            f"memory entry {mem} added. Now there are in total of "
-            f"{len(self.entries)} memories!"
-        )
-        self.clean_same_memories()
-
-        # sort ascending
-        self.entries.sort(key=lambda x: x[-1])
-
-        assert self.size <= self.capacity
-
-    def find_same_memory(self, mem: List[List[str]]) -> List[List[str]]:
-        """Find a semantic memory that's the same as the query memory.
-
-        Args
-        ----
-        mem: A semantic memory in a quadruple: [head, relation, tail, num_generalized]
-
-        Returns
-        -------
-        A semantic memory. If it doesn't exist, then return None.
-
-        """
-        candidate = [entry for entry in self.entries if mem[:-1] == entry[:-1]]
-
-        if len(candidate) == 0:
-            return None
-
-        elif len(candidate) == 1:
-            return candidate[0]
-        else:
-            raise ValueError("Something is wrong!")
-
 
 class MemorySystems:
     """Multiple memory systems class."""
 
     def __init__(
         self,
-        episodic: EpisodicMemory = None,
-        semantic: SemanticMemory = None,
-        short: ShortMemory = None,
+        episodic: EpisodicMemory,
+        episodic_agent: EpisodicMemory,
+        semantic: SemanticMemory,
+        short: ShortMemory,
     ) -> None:
         """Bundle memory systems.
 
         Args
         ----
         episodic: episodic memory system
+        episodic_agent: episodic memory system for agent-related memories
         semantic: semantic memory system
         short: short-term memory system
 
         """
         self.episodic = episodic
+        self.episodic_agent = episodic_agent
         self.semantic = semantic
         self.short = short
 
-    def return_as_a_dict_list(self) -> dict:
+    def return_as_a_dict_list(self) -> Dict[str, List[list[str]]]:
         """Return memory systems as a dictionary of lists."""
         return {
-            "episodic": self.episodic.return_as_lists(),
-            "semantic": self.semantic.return_as_lists(),
-            "short": self.short.return_as_lists(),
+            "episodic": self.episodic.return_as_list(),
+            "episodic_agent": self.episodic_agent.return_as_list(),
+            "semantic": self.semantic.return_as_list(),
+            "short": self.short.return_as_list(),
         }
 
     def __repr__(self):

@@ -16,13 +16,14 @@ from tqdm.auto import tqdm, trange
 
 from explicit_memory.memory import (
     EpisodicMemory,
+    MemorySystems,
     SemanticMemory,
     ShortMemory,
-    MemorySystems,
 )
 from explicit_memory.nn import LSTM
 from explicit_memory.policy import answer_question, encode_observation, manage_memory
 from explicit_memory.utils import ReplayBuffer, is_running_notebook, write_yaml
+
 from .handcrafted import HandcraftedAgent
 
 
@@ -66,6 +67,8 @@ class DQNAgent(HandcraftedAgent):
         train_seed: int = 42,
         test_seed: int = 42,
         device: str = "cpu",
+        ddqn: bool = False,
+        dueling_dqn: bool = False,
     ):
         """Initialization.
 
@@ -136,6 +139,9 @@ class DQNAgent(HandcraftedAgent):
         }
         self.action_space = gym.spaces.Discrete(len(self.action_mm2str))
 
+        self.ddqn = ddqn
+        self.dueling_dqn = dueling_dqn
+
         self.nn_params = nn_params
         self.nn_params["capacity"] = self.capacity
         self.nn_params["device"] = self.device
@@ -147,6 +153,7 @@ class DQNAgent(HandcraftedAgent):
 
         self.nn_params["memory_of_interest"] = ["episodic", "semantic", "short"]
         self.nn_params["n_actions"] = len(self.action_mm2str)
+        self.nn_params["dueling_dqn"] = self.dueling_dqn
 
         # networks: dqn, dqn_target
         self.dqn = LSTM(**self.nn_params)
@@ -473,7 +480,16 @@ class DQNAgent(HandcraftedAgent):
         # G_t   = r + gamma * v(s_{t+1})  if state != Terminal
         #       = r                       otherwise
         curr_q_value = self.dqn(state).gather(1, action)
-        next_q_value = self.dqn_target(next_state).max(dim=1, keepdim=True)[0].detach()
+        if self.ddqn:
+            next_q_value = (
+                self.dqn_target(next_state)
+                .gather(1, self.dqn(next_state).argmax(dim=1, keepdim=True))
+                .detach()
+            )
+        else:
+            next_q_value = (
+                self.dqn_target(next_state).max(dim=1, keepdim=True)[0].detach()
+            )
         mask = 1 - done
         target = (reward + self.gamma * next_q_value * mask).to(self.device)
 

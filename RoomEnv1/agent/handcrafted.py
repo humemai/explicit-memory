@@ -16,9 +16,9 @@ from tqdm.auto import tqdm, trange
 
 from explicit_memory.memory import (
     EpisodicMemory,
+    MemorySystems,
     SemanticMemory,
     ShortMemory,
-    MemorySystems,
 )
 from explicit_memory.nn import LSTM
 from explicit_memory.policy import answer_question, encode_observation, manage_memory
@@ -74,9 +74,7 @@ class HandcraftedAgent:
                 f"./RoomEnv1/training_results/{str(datetime.datetime.now())}"
             )
         else:
-            self.default_root_dir = (
-                f"./training_results/{str(datetime.datetime.now())}"
-            )
+            self.default_root_dir = f"./training_results/{str(datetime.datetime.now())}"
         os.makedirs(self.default_root_dir, exist_ok=True)
 
     def remove_results_from_disk(self) -> None:
@@ -88,7 +86,10 @@ class HandcraftedAgent:
         replay buffer."""
 
         self.memory_systems = MemorySystems(
-            episodic=EpisodicMemory(capacity=self.capacity["episodic"]),
+            episodic=EpisodicMemory(
+                capacity=self.capacity["episodic"], remove_duplicates=False
+            ),
+            episodic_agent=EpisodicMemory(capacity=0, remove_duplicates=False),
             semantic=SemanticMemory(capacity=self.capacity["semantic"]),
             short=ShortMemory(capacity=self.capacity["short"]),
         )

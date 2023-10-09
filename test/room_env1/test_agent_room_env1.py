@@ -56,7 +56,6 @@ class RLAgentTest(unittest.TestCase):
                         "num_layers": 2,
                         "n_actions": 3,
                         "embedding_dim": 4,
-                        "include_human": "sum",
                     },
                     "num_iterations": 128 * 2,
                     "replay_buffer_size": 2 * 4,

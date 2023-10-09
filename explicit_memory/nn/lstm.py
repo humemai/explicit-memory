@@ -1,4 +1,5 @@
 """Deep Q-network architecture. Currently only LSTM is implemented."""
+from typing import List, Tuple, Union, Dict
 
 import numpy as np
 import torch
@@ -16,18 +17,18 @@ class LSTM(nn.Module):
         entities: list,
         relations: list,
         n_actions: int,
+        memory_of_interest: list,
         hidden_size: int = 64,
         num_layers: int = 2,
         embedding_dim: int = 32,
         batch_first: bool = True,
         device: str = "cpu",
-        memory_of_interest: list = ["episodic", "semantic", "short"],
         v1_params: dict = {
             "include_human": "sum",
             "human_embedding_on_object_location": False,
         },
         v2_params: dict = None,
-        **kwargs,
+        dueling_dqn: bool = False,
     ) -> None:
         """Initialize the LSTM.
 
@@ -39,6 +40,7 @@ class LSTM(nn.Module):
             "lap"]
         relations : list of relations, e.g., ["atlocation", "north", "south"]
         n_actions: number of actions. This should be 3, at the moment.
+        memory_of_interest: e.g., ["episodic", "semantic", "short"]
         hidden_size: hidden size of the LSTM
         num_layers: number of the LSTM layers
         embedding_dim: entity embedding dimension (e.g., 32)
@@ -52,6 +54,7 @@ class LSTM(nn.Module):
                     embeddings.
             human_embedding_on_object_location: whether to superposition the human embedding
                 on the tail (object location entity).
+        dueling_dqn: whether to use dueling DQN or not.
 
         """
         super().__init__()
@@ -64,6 +67,7 @@ class LSTM(nn.Module):
         self.device = device
         self.v1_params = v1_params
         self.v2_params = v2_params
+        self.dueling_dqn = dueling_dqn
 
         if self.v1_params is None:
             assert self.v2_params is not None
@@ -86,6 +90,17 @@ class LSTM(nn.Module):
             )
             self.fc_e0 = nn.Linear(hidden_size, hidden_size, device=self.device)
             self.fc_e1 = nn.Linear(hidden_size, hidden_size, device=self.device)
+
+        if "episodic_agent" in self.memory_of_interest:
+            self.lstm_e_agent = nn.LSTM(
+                self.input_size_e_agent,
+                hidden_size,
+                num_layers,
+                batch_first=batch_first,
+                device=self.device,
+            )
+            self.fc_e0_agent = nn.Linear(hidden_size, hidden_size, device=self.device)
+            self.fc_e1_agent = nn.Linear(hidden_size, hidden_size, device=self.device)
 
         if "semantic" in self.memory_of_interest:
             self.lstm_s = nn.LSTM(
@@ -117,6 +132,36 @@ class LSTM(nn.Module):
         self.fc_final1 = nn.Linear(
             hidden_size * len(self.memory_of_interest), n_actions, device=self.device
         )
+
+        self.advantage_layer = nn.Sequential(
+            nn.Linear(
+                hidden_size * len(self.memory_of_interest),
+                hidden_size * len(self.memory_of_interest),
+                device=self.device,
+            ),
+            nn.ReLU(),
+            nn.Linear(
+                hidden_size * len(self.memory_of_interest),
+                n_actions,
+                device=self.device,
+            ),
+        )
+
+        if self.dueling_dqn:
+            self.value_layer = nn.Sequential(
+                nn.Linear(
+                    hidden_size * len(self.memory_of_interest),
+                    hidden_size * len(self.memory_of_interest),
+                    device=self.device,
+                ),
+                nn.ReLU(),
+                nn.Linear(
+                    hidden_size * len(self.memory_of_interest),
+                    1,
+                    device=self.device,
+                ),
+            )
+
         self.relu = nn.ReLU()
 
     def create_embeddings(self) -> None:
@@ -145,12 +190,13 @@ class LSTM(nn.Module):
         elif self.version == "v2":  # [head, relation, tail]
             self.input_size_s = self.embedding_dim * 3
             self.input_size_e = self.embedding_dim * 3
+            self.input_size_e_agent = self.embedding_dim * 3
             self.input_size_o = self.embedding_dim * 3
 
         else:
             raise ValueError(f"{self.version} is a wrong version!")
 
-    def make_embedding_v1(self, mem: list, memory_type: str) -> torch.Tensor:
+    def make_embedding_v1(self, mem: List[str], memory_type: str) -> torch.Tensor:
         """Create one embedding vector with summation and concatenation.
 
         Embeddings for v1
@@ -214,7 +260,7 @@ class LSTM(nn.Module):
 
         return final_embedding
 
-    def make_embedding_v2(self, mem: list, memory_type: str) -> torch.Tensor:
+    def make_embedding_v2(self, mem: List[str], memory_type: str) -> torch.Tensor:
         """Create one embedding vector with summation and concatenation.
 
         Embeddings for v1
@@ -243,7 +289,7 @@ class LSTM(nn.Module):
 
         return final_embedding
 
-    def create_batch(self, x: list, memory_type: str) -> torch.Tensor:
+    def create_batch(self, x: List[str], memory_type: str) -> torch.Tensor:
         """Create one batch from data.
 
         Args
@@ -286,7 +332,6 @@ class LSTM(nn.Module):
 
         """
         assert isinstance(x, np.ndarray)
-
         to_concat = []
         if "episodic" in self.memory_of_interest:
             batch_e = [sample["episodic"] for sample in x]
@@ -296,6 +341,19 @@ class LSTM(nn.Module):
                 self.fc_e1(self.relu(self.fc_e0(lstm_out_e[:, -1, :])))
             )
             to_concat.append(fc_out_e)
+
+        if "episodic_agent" in self.memory_of_interest:
+            batch_e_agent = [sample["episodic_agent"] for sample in x]
+            batch_e_agent = self.create_batch(
+                batch_e_agent, memory_type="episodic_agent"
+            )
+            lstm_out_e_agent, _ = self.lstm_e_agent(batch_e_agent)
+            fc_out_e_agent = self.relu(
+                self.fc_e1_agent(
+                    self.relu(self.fc_e0_agent(lstm_out_e_agent[:, -1, :]))
+                )
+            )
+            to_concat.append(fc_out_e_agent)
 
         if "semantic" in self.memory_of_interest:
             batch_s = [sample["semantic"] for sample in x]
@@ -317,7 +375,11 @@ class LSTM(nn.Module):
 
         fc_out_all = torch.concat(to_concat, dim=-1)
 
-        # fc_out has the dimension of (batch_size, n_actions)
-        fc_out = self.fc_final1(self.relu(self.fc_final0(fc_out_all)))
+        if self.dueling_dqn:
+            value = self.value_layer(fc_out_all)
+            advantage = self.advantage_layer(fc_out_all)
+            q = value + advantage - advantage.mean(dim=-1, keepdim=True)
+        else:
+            q = self.advantage_layer(fc_out_all)
 
-        return fc_out
+        return q

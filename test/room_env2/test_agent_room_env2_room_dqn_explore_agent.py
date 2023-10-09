@@ -24,7 +24,12 @@ class RLAgentTest(unittest.TestCase):
                     "min_epsilon": 0.1,
                     "epsilon_decay_until": 100 * 2,
                     "gamma": 0.99,
-                    "capacity": {"episodic": 16, "semantic": 16, "short": 1},
+                    "capacity": {
+                        "episodic": 16,
+                        "episodic_agent": 16,
+                        "semantic": 16,
+                        "short": 1,
+                    },
                     "nn_params": {
                         "hidden_size": 4,
                         "num_layers": 2,

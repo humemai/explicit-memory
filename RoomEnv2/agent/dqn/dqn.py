@@ -56,7 +56,7 @@ class DQNAgent(HandcraftedAgent):
             "semantic": 16,
             "short": 1,
         },
-        pretrain_semantic: bool = False,
+        pretrain_semantic: bool = None,
         nn_params: dict = {
             "hidden_size": 64,
             "num_layers": 2,
@@ -224,19 +224,83 @@ class DQNAgent(HandcraftedAgent):
         """
 
     def train(self) -> None:
+        """Code for training"""
         pass
 
-    def choose_best_val(self, filenames: list):
+    def save_validation(self, scores) -> None:
+        """Keep the best validation model.
+
+        Args
+        ----
+        scores: The scores of one validation episode
+        """
+        mean_score = round(np.mean(scores).item())
+        filename = (
+            f"{self.default_root_dir}/"
+            f"episode={self.num_validation}_val-score={mean_score}.pt"
+        )
+        self.val_filenames.append(filename)
+        torch.save(self.dqn.state_dict(), filename)
+        self.scores["validation"].append(scores)
+
         scores = []
-        for filename in filenames:
+        for filename in self.val_filenames:
             scores.append(int(filename.split("val-score=")[-1].split(".pt")[0]))
-        return filenames[scores.index(max(scores))]
+
+        file_to_keep = self.val_filenames[scores.index(max(scores))]
+
+        for filename in deepcopy(self.val_filenames):
+            if filename != file_to_keep:
+                os.remove(filename)
+                self.val_filenames.remove(filename)
 
     def validate(self) -> None:
-        pass
+        self.dqn.eval()
+        scores = self.validate_test_middle()
+        self.save_validation(scores)
+        self.env.close()
+        self.num_validation += 1
+        self.dqn.train()
 
-    def test(self) -> None:
-        pass
+    def test(self, checkpoint: str = None) -> None:
+        self.dqn.eval()
+        self.env_config["seed"] = self.test_seed
+        self.env = gym.make(self.env_str, **self.env_config)
+
+        if self.run_validation:
+            assert len(self.val_filenames) == 1
+            self.dqn.load_state_dict(torch.load(self.val_filenames[0]))
+            if checkpoint is not None:
+                self.dqn.load_state_dict(torch.load(checkpoint))
+
+        scores = self.validate_test_middle()
+        self.scores["test"] = scores
+
+        results = {
+            "train_score": self.scores["train"],
+            "validation_score": [
+                {
+                    "mean": round(np.mean(scores).item(), 2),
+                    "std": round(np.std(scores).item(), 2),
+                }
+                for scores in self.scores["validation"]
+            ],
+            "test_score": {
+                "mean": round(np.mean(self.scores["test"]).item(), 2),
+                "std": round(np.std(self.scores["test"]).item(), 2),
+            },
+            "training_loss": self.training_loss,
+        }
+        write_yaml(results, os.path.join(self.default_root_dir, "results.yaml"))
+        write_yaml(
+            self.memory_systems.return_as_a_dict_list(),
+            os.path.join(self.default_root_dir, "last_memory_state.yaml"),
+        )
+
+        self._plot()
+
+        self.env.close()
+        self.dqn.train()
 
     def _compute_dqn_loss(self, samples: Dict[str, np.ndarray]) -> torch.Tensor:
         """Return dqn loss.
@@ -283,7 +347,8 @@ class DQNAgent(HandcraftedAgent):
 
     def _plot(self):
         """Plot the training progresses."""
-        clear_output(True)
+        if self.is_notebook:
+            clear_output(True)
         plt.figure(figsize=(20, 8))
 
         if self.scores["train"]:
@@ -328,10 +393,8 @@ class DQNAgent(HandcraftedAgent):
 
         plt.subplots_adjust(hspace=0.5)
         plt.savefig(f"{self.default_root_dir}/plot.png")
-        plt.show()
-
-        if not self.is_notebook:
-            self._console()
+        if self.is_notebook:
+            plt.show()
 
     def _console(self):
         """Print the training progresses to the console."""

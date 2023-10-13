@@ -57,7 +57,7 @@ class DQNExploreAgent(DQNAgent):
             "semantic": 16,
             "short": 1,
         },
-        pretrain_semantic: bool = False,
+        pretrain_semantic: bool = None,
         nn_params: dict = {
             "hidden_size": 64,
             "num_layers": 2,
@@ -125,16 +125,14 @@ class DQNExploreAgent(DQNAgent):
         dueling_dqn: whether to use dueling dqn
 
         """
-        self.all_params = deepcopy(locals())
-        del self.all_params["self"]
-        del self.all_params["__class__"]
-        self.all_params["nn_params"]["n_actions"] = 5
-        self.all_params["explore_policy"] = "rl"
-        super().__init__(**self.all_params)
+        all_params = deepcopy(locals())
+        del all_params["self"]
+        del all_params["__class__"]
+        self.all_params = deepcopy(all_params)
 
-        self.all_params = deepcopy(locals())
-        del self.all_params["self"]
-        del self.all_params["__class__"]
+        all_params["nn_params"]["n_actions"] = 5
+        all_params["explore_policy"] = "rl"
+        super().__init__(**all_params)
         write_yaml(self.all_params, os.path.join(self.default_root_dir, "train.yaml"))
 
         self.action2str = {0: "north", 1: "east", 2: "south", 3: "west", 4: "stay"}
@@ -281,10 +279,7 @@ class DQNExploreAgent(DQNAgent):
                 self.iteration_idx == self.num_iterations
                 or self.iteration_idx % self.plotting_interval == 0
             ):
-                if self.is_notebook:
-                    self._plot()
-                else:
-                    self._console()
+                self._plot()
 
         with torch.no_grad():
             self.test()
@@ -300,7 +295,6 @@ class DQNExploreAgent(DQNAgent):
         scores: a list of scores
 
         """
-        self.dqn.eval()
         scores = []
         for _ in range(self.num_samples_for_results):
             self.init_memory_systems()
@@ -345,78 +339,3 @@ class DQNExploreAgent(DQNAgent):
             scores.append(score)
 
         return scores
-
-    def validate(self) -> None:
-        """Validate the exploration agent."""
-
-        scores = self.validate_test_middle()
-
-        mean_score = round(np.mean(scores).item())
-        filename = (
-            f"{self.default_root_dir}/"
-            f"episode={self.num_validation}_val-score={mean_score}.pt"
-        )
-        self.val_filenames.append(filename)
-        torch.save(self.dqn.state_dict(), filename)
-        self.scores["validation"].append(scores)
-
-        file_to_keep = self.choose_best_val(self.val_filenames)
-
-        for filename in self.val_filenames:
-            if filename != file_to_keep:
-                os.remove(filename)
-                self.val_filenames.remove(filename)
-
-        self.env.close()
-        self.num_validation += 1
-        self.dqn.train()
-
-    def test(self, checkpoint: str = None) -> None:
-        """Test the exploration agent.
-
-        Args
-        ----
-        checkpoint: The checkpoint to load the model from. If None, the model from the
-            best validation is used.
-
-        """
-        self.env = gym.make(self.env_str, seed=self.test_seed)
-
-        if self.run_validation:
-            assert len(self.val_filenames) == 1
-            self.dqn.load_state_dict(torch.load(self.val_filenames[0]))
-            if checkpoint is not None:
-                self.dqn.load_state_dict(torch.load(checkpoint))
-
-        scores = self.validate_test_middle()
-        self.scores["test"] = scores
-
-        results = {
-            "train_score": self.scores["train"],
-            "validation_score": [
-                {
-                    "mean": round(np.mean(scores).item(), 2),
-                    "std": round(np.std(scores).item(), 2),
-                }
-                for scores in self.scores["validation"]
-            ],
-            "test_score": {
-                "mean": round(np.mean(self.scores["test"]).item(), 2),
-                "std": round(np.std(self.scores["test"]).item(), 2),
-            },
-            "training_loss": self.training_loss,
-        }
-        write_yaml(results, os.path.join(self.default_root_dir, "results.yaml"))
-        write_yaml(self.all_params, os.path.join(self.default_root_dir, "train.yaml"))
-        write_yaml(
-            self.memory_systems.return_as_a_dict_list(),
-            os.path.join(self.default_root_dir, "last_memory_state.yaml"),
-        )
-
-        if self.is_notebook:
-            self._plot()
-        else:
-            self._console()
-
-        self.env.close()
-        self.dqn.train()

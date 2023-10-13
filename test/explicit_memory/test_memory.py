@@ -1,3 +1,4 @@
+import itertools
 import random
 import unittest
 
@@ -14,6 +15,19 @@ class MemoryTest(unittest.TestCase):
         with self.assertRaises(AssertionError):
             foo = Memory(memory_type="foo", capacity=0)
 
+    def test_can_be_added(self):
+        memory = Memory(memory_type="episodic", capacity=0)
+        self.assertFalse(memory.can_be_added(["foo", "bar", "baz", 1])[0])
+
+        memory = Memory(memory_type="semantic", capacity=4)
+        memory.freeze()
+        self.assertFalse(memory.can_be_added(["foo", "bar", "baz", 1])[0])
+
+        memory.unfreeze()
+        memory = Memory(memory_type="short", capacity=1)
+        memory.add(["foo", "bar", "baz", 1])
+        self.assertFalse(memory.can_be_added(["foo", "bar", "baz", 1])[0])
+
     def test_add(self):
         self.memory.add(["foo", "bar", "baz", 1])
         self.assertEqual(self.memory.size, 1)
@@ -22,8 +36,43 @@ class MemoryTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.memory.add(["foo", "bar", "baz", 1])
 
+        self.memory.unfreeze()
+        self.assertTrue(not self.memory.is_frozen)
+
+        self.memory.add(["foo", "bar", "baz", 2])
+        self.memory.add(["foo", "bar", "baz", 3])
+        self.memory.add(["foo", "bar", "baz", 4])
+        self.memory.add(["foo", "bar", "baz", 5])
+        self.memory.add(["foo", "bar", "baz", 6])
+        self.memory.add(["foo", "bar", "baz", 7])
+        self.memory.add(["foo", "bar", "baz", 8])
+
+        self.assertTrue(self.memory.is_full)
+
         timestamps = [mem[-1] for mem in self.memory.entries]
         self.assertEqual(sorted(timestamps), timestamps)
+
+        with self.assertRaises(ValueError):
+            self.memory.add(["foo", "bar", "baz", 9])
+
+    def test_can_be_forgotten(self):
+        memory = Memory(memory_type="short", capacity=0)
+        check, error_msg = memory.can_be_forgotten(["foo", "bar", "baz", 1])
+        self.assertFalse(check)
+
+        memory = Memory(memory_type="semantic", capacity=4)
+        check, error_msg = memory.can_be_forgotten(["foo", "bar", "baz", 1])
+        self.assertFalse(check)
+
+        memory = Memory(memory_type="episodic", capacity=4)
+        memory.freeze()
+        check, error_msg = memory.can_be_forgotten(["foo", "bar", "baz", 1])
+        self.assertFalse(check)
+
+        memory = Memory(memory_type="short", capacity=2)
+        memory.add(["foo", "bar", "baz", 1])
+        check, error_msg = memory.can_be_forgotten(["foo", "bar", "qux", 1])
+        self.assertFalse(check)
 
     def test_forget(self):
         with self.assertRaises(ValueError):
@@ -54,6 +103,10 @@ class MemoryTest(unittest.TestCase):
         self.memory.forget_all()
         self.assertEqual(self.memory.size, 0)
         self.assertTrue(self.memory.is_empty)
+
+        memory = Memory("short", 0)
+        with self.assertRaises(ValueError):
+            memory.forget_all()
 
     def test_forget_random(self):
         self.memory.add(["foo", "bar", "baz", 1])
@@ -189,25 +242,6 @@ class EpisodicMemoryTest(unittest.TestCase):
     def setUp(self) -> None:
         self.memory = EpisodicMemory(capacity=8, remove_duplicates=False)
 
-    def test_can_be_added(self):
-        for idx in range(8):
-            mem_random = [
-                str(random.random()),
-                str(random.random()),
-                str(random.random()),
-                str(random.random()),
-            ]
-            self.assertTrue(self.memory.can_be_added(mem_random))
-            self.memory.add(mem_random)
-
-        mem_random = [
-            str(random.random()),
-            str(random.random()),
-            str(random.random()),
-            str(random.random()),
-        ]
-        self.assertFalse(self.memory.can_be_added(mem_random)[0])
-
     def test_add(self):
         self.memory.add(["foo", "bar", "baz", 1])
         self.assertEqual(self.memory.size, 1)
@@ -215,6 +249,25 @@ class EpisodicMemoryTest(unittest.TestCase):
         self.memory.freeze()
         with self.assertRaises(ValueError):
             self.memory.add(["foo", "bar", "baz", 1])
+
+        self.memory.unfreeze()
+        self.assertTrue(not self.memory.is_frozen)
+
+        self.memory.add(["foo", "bar", "baz", 8])
+        self.memory.add(["foo", "bar", "baz", 3])
+        self.memory.add(["foo", "bar", "baz", 7])
+        self.memory.add(["foo", "bar", "baz", 5])
+        self.memory.add(["foo", "bar", "baz", 6])
+        self.memory.add(["foo", "bar", "baz", 4])
+        self.memory.add(["foo", "bar", "baz", 2])
+
+        self.assertTrue(self.memory.is_full)
+
+        timestamps = [mem[-1] for mem in self.memory.entries]
+        self.assertEqual(sorted(timestamps), timestamps)
+
+        with self.assertRaises(ValueError):
+            self.memory.add(["foo", "bar", "baz", 0])
 
     def test_get_oldest_memory(self):
         self.memory.add(["foo", "bar", "baz", 4])
@@ -329,9 +382,10 @@ class EpisodicMemoryTest(unittest.TestCase):
         self.memory.add(["baz", "foo", "bar", 5])
         self.memory.add(["baz", "qux", "bar", 1])
         self.memory.add(["baz", "foo", "bar", 10])
+        self.memory.add(["qux", "foo", "bar", 6])
 
         self.memory.clean_old_memories()
-        self.assertEqual(self.memory.size, 3)
+        self.assertEqual(self.memory.size, 4)
 
         timestamps = [mem[-1] for mem in self.memory.entries]
         self.assertEqual(sorted(timestamps), timestamps)
@@ -341,6 +395,7 @@ class EpisodicMemoryTest(unittest.TestCase):
             [
                 ["baz", "qux", "bar", 1],
                 ["tae's foo", "bar", "baz", 3],
+                ["qux", "foo", "bar", 6],
                 ["baz", "foo", "bar", 10],
             ],
         )
@@ -529,25 +584,6 @@ class EpisodicMemoryRemoveDuplicatesTest(unittest.TestCase):
     def setUp(self) -> None:
         self.memory = EpisodicMemory(capacity=8, remove_duplicates=True)
 
-    def test_can_be_added(self):
-        for idx in range(8):
-            mem_random = [
-                str(random.random()),
-                str(random.random()),
-                str(random.random()),
-                str(random.random()),
-            ]
-            self.assertTrue(self.memory.can_be_added(mem_random))
-            self.memory.add(mem_random)
-
-        mem_random = [
-            str(random.random()),
-            str(random.random()),
-            str(random.random()),
-            str(random.random()),
-        ]
-        self.assertFalse(self.memory.can_be_added(mem_random)[0])
-
     def test_add(self):
         self.memory.add(["foo", "bar", "baz", 1])
         self.assertEqual(self.memory.size, 1)
@@ -555,6 +591,28 @@ class EpisodicMemoryRemoveDuplicatesTest(unittest.TestCase):
         self.memory.freeze()
         with self.assertRaises(ValueError):
             self.memory.add(["foo", "bar", "baz", 1])
+
+        self.memory.unfreeze()
+        self.assertTrue(not self.memory.is_frozen)
+
+        self.memory.add(["foo", "bar", "baz", 8])
+        self.memory.add(["foo", "bar", "baz", 3])
+        self.memory.add(["foo", "bar", "baz", 7])
+        self.memory.add(["foo", "bar", "baz", 5])
+        self.memory.add(["foo", "bar", "baz", 6])
+        self.memory.add(["foo", "bar", "baz", 4])
+        self.memory.add(["foo", "bar", "baz", 2])
+
+        self.assertEqual(self.memory.size, 1)
+        self.assertEqual(self.memory.get_oldest_memory(), ["foo", "bar", "baz", 8])
+        self.assertEqual(self.memory.get_latest_memory(), ["foo", "bar", "baz", 8])
+
+        for i in range(7):
+            self.memory.add([str(i), str(i), str(i), 8 - i])
+
+        self.assertTrue(self.memory.is_full)
+        timestamps = [mem[-1] for mem in self.memory.entries]
+        self.assertEqual(sorted(timestamps), timestamps)
 
     def test_get_oldest_memory(self):
         self.memory.add(["foo", "bar", "baz", 4])
@@ -818,21 +876,290 @@ class SemanticMemoryTest(unittest.TestCase):
     def setUp(self) -> None:
         self.memory = SemanticMemory(capacity=8)
 
-    def test_can_be_added(self) -> None:
-        for idx in range(8):
-            mem_random = [
-                str(random.random()),
-                str(random.random()),
-                str(random.random()),
-                random.randint(0, 100),
-            ]
-            self.assertTrue(self.memory.can_be_added(mem_random))
-            self.memory.add(mem_random)
+    def test_can_be_added(self):
+        memory = SemanticMemory(capacity=0)
+        self.assertFalse(memory.can_be_added(["foo", "bar", "baz", 1])[0])
 
-        mem_random = [
-            str(random.random()),
-            str(random.random()),
-            str(random.random()),
-            random.randint(0, 100),
+        memory = SemanticMemory(capacity=4)
+        memory.freeze()
+        self.assertFalse(memory.can_be_added(["foo", "bar", "baz", 1])[0])
+
+        memory = SemanticMemory(capacity=1)
+        memory.add(["foo", "bar", "baz", 1])
+        self.assertTrue(memory.can_be_added(["foo", "bar", "baz", 1])[0])
+
+    def test_add(self):
+        self.memory.add(["foo", "bar", "baz", 2])
+        self.assertEqual(self.memory.size, 1)
+
+        self.memory.freeze()
+        with self.assertRaises(ValueError):
+            self.memory.add(["foo", "bar", "baz", 1])
+
+        self.memory.unfreeze()
+        self.memory.add(["foo", "bar", "baz", 2])
+        self.assertEqual(self.memory.size, 1)
+
+        self.memory.add(["baz", "bar", "foo", 1])
+        self.assertEqual(self.memory.size, 2)
+
+        nums = [mem[-1] for mem in self.memory.entries]
+        self.assertEqual(sorted(nums), nums)
+
+        self.memory.add(["foo", "bar", "baz", 8])
+        self.memory.add(["foo", "bar", "baz", 3])
+        self.memory.add(["foo", "bar", "baz", 7])
+        self.memory.add(["foo", "bar", "baz", 5])
+        self.memory.add(["foo", "bar", "baz", 6])
+        self.memory.add(["foo", "bar", "baz", 4])
+        self.memory.add(["foo", "bar", "baz", 2])
+
+        self.assertEqual(self.memory.size, 2)
+        self.assertEqual(self.memory.get_strongest_memory(), ["foo", "bar", "baz", 39])
+        self.assertEqual(self.memory.get_weakest_memory(), ["baz", "bar", "foo", 1])
+
+        for i in range(6):
+            self.memory.add([str(i), str(i), str(i), random.randint(1, 10)])
+
+        self.assertTrue(self.memory.is_full)
+        timestamps = [mem[-1] for mem in self.memory.entries]
+        self.assertEqual(sorted(timestamps), timestamps)
+
+        memory = SemanticMemory(capacity=2)
+        memory.add(["foo", "bar", "baz", 3])
+        memory.add(["foo", "bar", "baz", 1])
+        self.assertEqual(memory.size, 1)
+        memory.add(["foo", "bar", "qux", 1])
+        self.assertEqual(memory.size, 2)
+        memory.add(["foo", "bar", "qux", 4])
+        self.assertEqual(memory.size, 2)
+        with self.assertRaises(ValueError):
+            memory.add(["baz", "bar", "qux", 5])
+
+        timestamps = [mem[-1] for mem in memory.entries]
+        self.assertEqual(sorted(timestamps), timestamps)
+        self.assertEqual(timestamps, [4, 5])
+
+    def test_pretrain_semantic(self):
+        semantic_knowledge = list(itertools.permutations(["foo", "bar", "baz"]))
+        free_space = self.memory.pretrain_semantic(
+            semantic_knowledge, return_remaining_space=True
+        )
+        self.assertEqual(free_space, 2)
+        self.assertEqual(self.memory.size, 6)
+        nums = [mem[-1] for mem in self.memory.entries]
+        self.assertEqual(nums, [1] * 6)
+
+        self.memory.unfreeze()
+        self.memory.forget_all()
+        self.memory.increase_capacity(2)
+        semantic_knowledge = list(
+            itertools.permutations(["foo", "bar", "baz", "qux"], 3)
+        )
+        free_space = self.memory.pretrain_semantic(
+            semantic_knowledge, return_remaining_space=False, freeze=False
+        )
+        self.assertEqual(free_space, None)
+        self.assertEqual(self.memory.size, 8)
+        nums = [mem[-1] for mem in self.memory.entries]
+        self.assertEqual(nums, [1] * 8)
+
+        self.assertFalse(self.memory.is_frozen)
+
+    def test_get_weakest_memory(self):
+        self.memory.add(["foo", "bar", "baz", 3])
+        self.memory.add(["foo", "baz", "bar", 1])
+        self.memory.add(["baz", "foo", "bar", 2])
+
+        weakest = self.memory.get_weakest_memory()
+        self.assertEqual(weakest, ["foo", "baz", "bar", 1])
+        self.assertEqual(
+            self.memory.entries,
+            [
+                ["foo", "baz", "bar", 1],
+                ["baz", "foo", "bar", 2],
+                ["foo", "bar", "baz", 3],
+            ],
+        )
+
+    def test_get_strongest_memory(self):
+        self.memory.add(["foo", "bar", "baz", 3])
+        self.memory.add(["foo", "baz", "bar", 1])
+        self.memory.add(["baz", "foo", "bar", 2])
+
+        strongest = self.memory.get_strongest_memory()
+        self.assertEqual(strongest, ["foo", "bar", "baz", 3])
+        self.assertEqual(
+            self.memory.entries,
+            [
+                ["foo", "baz", "bar", 1],
+                ["baz", "foo", "bar", 2],
+                ["foo", "bar", "baz", 3],
+            ],
+        )
+
+    def test_forget_weakest(self):
+        self.memory.add(["foo", "bar", "baz", 3])
+        self.memory.add(["foo", "baz", "bar", 1])
+        self.memory.add(["baz", "foo", "bar", 2])
+
+        self.memory.forget_weakest()
+        self.assertEqual(self.memory.size, 2)
+        self.assertEqual(
+            self.memory.entries,
+            [
+                ["baz", "foo", "bar", 2],
+                ["foo", "bar", "baz", 3],
+            ],
+        )
+
+    def test_forget_strongest(self):
+        self.memory.add(["foo", "bar", "baz", 3])
+        self.memory.add(["foo", "baz", "bar", 1])
+        self.memory.add(["baz", "foo", "bar", 2])
+
+        self.memory.forget_strongest()
+        self.assertEqual(self.memory.size, 2)
+        self.assertEqual(
+            self.memory.entries,
+            [
+                ["foo", "baz", "bar", 1],
+                ["baz", "foo", "bar", 2],
+            ],
+        )
+
+    def test_answer_weakest(self):
+        self.memory.add(["foo", "bar", "baz", 3])
+        self.memory.add(["foo", "baz", "bar", 1])
+        self.memory.add(["baz", "foo", "bar", 2])
+        self.memory.add(["foo", "bar", "baz", 1])
+        self.memory.add(["qux", "bar", "baz", 1])
+
+        pred, num = self.memory.answer_weakest(["foo", "bar", "?"])
+        self.assertEqual((pred, num), ("baz", 4))
+
+        pred, num = self.memory.answer_weakest(["foo", "baz", "?"])
+        self.assertEqual((pred, num), ("bar", 1))
+
+        pred, num = self.memory.answer_weakest(["?", "bar", "baz"])
+        self.assertEqual((pred, num), ("qux", 1))
+
+        pred, num = self.memory.answer_weakest(["?", "foo", "bar"])
+        self.assertEqual((pred, num), ("baz", 2))
+
+    def test_answer_strongest(self):
+        self.memory.add(["foo", "bar", "baz", 3])
+        self.memory.add(["foo", "baz", "bar", 1])
+        self.memory.add(["baz", "foo", "bar", 2])
+        self.memory.add(["foo", "bar", "baz", 1])
+        self.memory.add(["qux", "bar", "baz", 1])
+
+        pred, num = self.memory.answer_strongest(["foo", "bar", "?"])
+        self.assertEqual((pred, num), ("baz", 4))
+
+        pred, num = self.memory.answer_strongest(["foo", "baz", "?"])
+        self.assertEqual((pred, num), ("bar", 1))
+
+        pred, num = self.memory.answer_strongest(["?", "bar", "baz"])
+        self.assertEqual((pred, num), ("foo", 4))
+
+        pred, num = self.memory.answer_strongest(["?", "foo", "bar"])
+        self.assertEqual((pred, num), ("baz", 2))
+
+    def test_ob2sem(self):
+        sem = SemanticMemory.ob2sem(["foo", "bar", "baz", 3], split_possessive=True)
+        self.assertEqual(sem, ["foo", "bar", "baz", 1])
+
+        sem = SemanticMemory.ob2sem(["foo", "bar", "baz", 1], split_possessive=False)
+        self.assertEqual(sem, ["foo", "bar", "baz", 1])
+
+        sem = SemanticMemory.ob2sem(
+            ["tae's foo", "bar", "tae's baz", 100], split_possessive=True
+        )
+        self.assertEqual(sem, ["foo", "bar", "baz", 1])
+
+        sem = SemanticMemory.ob2sem(
+            ["foo", "tae's bar", "baz", 100], split_possessive=False
+        )
+        self.assertEqual(sem, ["foo", "tae's bar", "baz", 1])
+
+    def test_clean_same_memories(self):
+        self.memory.entries = [
+            ["foo", "bar", "baz", 3],
+            ["foo", "baz", "bar", 1],
+            ["baz", "foo", "bar", 2],
+            ["foo", "bar", "baz", 1],
+            ["qux", "bar", "baz", 1],
         ]
-        self.assertFalse(self.memory.can_be_added(mem_random)[0])
+
+        self.memory.clean_same_memories()
+        self.assertEqual(self.memory.size, 4)
+
+        self.assertTrue(
+            (
+                self.memory.entries
+                == [
+                    ["qux", "bar", "baz", 1],
+                    ["foo", "baz", "bar", 1],
+                    ["baz", "foo", "bar", 2],
+                    ["foo", "bar", "baz", 4],
+                ]
+            )
+            or (
+                self.memory.entries
+                == [
+                    ["foo", "baz", "bar", 1],
+                    ["qux", "bar", "baz", 1],
+                    ["baz", "foo", "bar", 2],
+                    ["foo", "bar", "baz", 4],
+                ]
+            )
+        )
+
+
+class MemorySystemsTest(unittest.TestCase):
+    def test_all(self) -> None:
+        self.memory_systems = MemorySystems(
+            episodic=EpisodicMemory(capacity=8),
+            semantic=SemanticMemory(capacity=4),
+            short=ShortMemory(capacity=1),
+        )
+
+        to_return = self.memory_systems.return_as_a_dict_list()
+        self.assertTrue(to_return["episodic"] == [])
+        self.assertTrue(to_return["semantic"] == [])
+        self.assertTrue(to_return["short"] == [])
+        self.assertTrue("episodic_agent" not in to_return)
+
+        self.memory_systems.episodic.add(["foo", "bar", "baz", 1])
+        self.memory_systems.semantic.add(["foo", "bar", "baz", 1])
+        self.memory_systems.short.add(["foo", "bar", "baz", 1])
+
+        self.memory_systems.forget_all()
+        self.assertTrue(self.memory_systems.episodic.is_empty)
+        self.assertTrue(self.memory_systems.semantic.is_empty)
+        self.assertTrue(self.memory_systems.short.is_empty)
+
+        self.memory_systems = MemorySystems(
+            episodic=EpisodicMemory(capacity=8),
+            episodic_agent=EpisodicMemory(capacity=3),
+            semantic=SemanticMemory(capacity=4),
+            short=ShortMemory(capacity=1),
+        )
+
+        to_return = self.memory_systems.return_as_a_dict_list()
+        self.assertTrue(to_return["episodic"] == [])
+        self.assertTrue(to_return["episodic_agent"] == [])
+        self.assertTrue(to_return["semantic"] == [])
+        self.assertTrue(to_return["short"] == [])
+
+        self.memory_systems.episodic.add(["foo", "bar", "baz", 1])
+        self.memory_systems.episodic_agent.add(["foo", "bar", "baz", 1])
+        self.memory_systems.semantic.add(["foo", "bar", "baz", 1])
+        self.memory_systems.short.add(["foo", "bar", "baz", 1])
+
+        self.memory_systems.forget_all()
+        self.assertTrue(self.memory_systems.episodic.is_empty)
+        self.assertTrue(self.memory_systems.episodic_agent.is_empty)
+        self.assertTrue(self.memory_systems.semantic.is_empty)
+        self.assertTrue(self.memory_systems.short.is_empty)

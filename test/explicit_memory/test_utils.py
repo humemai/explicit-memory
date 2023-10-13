@@ -3,8 +3,8 @@ import unittest
 
 import numpy as np
 
-from explicit_memory.utils import *
 from explicit_memory.nn import LSTM
+from explicit_memory.utils import *
 
 
 class UtilsTest(unittest.TestCase):

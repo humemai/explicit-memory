@@ -92,8 +92,6 @@ class Memory:
         # sort ascending
         self.entries.sort(key=lambda x: x[-1])
 
-        assert self.size <= self.capacity
-
     def can_be_forgotten(self, mem: List[str]) -> Tuple[bool, str]:
         """Check if a memory can be added to the system or not.
 
@@ -142,10 +140,16 @@ class Memory:
 
     def forget_all(self) -> None:
         """Forget everything in the memory system!"""
+        if self.capacity == 0:
+            error_msg = "The memory system capacity is 0. Can't forget all."
+            logging.warning(error_msg)
+            raise ValueError(error_msg)
+
         if self.is_frozen:
             error_msg = "The memory system is frozen. Can't forget all. Unfreeze first."
             logging.warning(error_msg)
             raise ValueError(error_msg)
+
         else:
             logging.warning("EVERYTHING IN THE MEMORY SYSTEM WILL BE FORGOTTEN!")
             self.entries = []
@@ -759,27 +763,12 @@ class SemanticMemory(Memory):
         mem: A memory as a quadruple: [head, relation, tail, num_generalized]
 
         """
-        check, error_msg = self.can_be_added(mem)
-        if not check:
-            logging.error(error_msg)
-            raise ValueError(error_msg)
-
-        logging.debug(f"Adding a new memory entry {mem} ...")
-        self.entries.append(mem)
-        logging.info(
-            f"memory entry {mem} added. Now there are in total of "
-            f"{len(self.entries)} memories!"
-        )
+        super().add(mem)
         self.clean_same_memories()
-
-        # sort ascending
-        self.entries.sort(key=lambda x: x[-1])
-
-        assert self.size <= self.capacity
 
     def pretrain_semantic(
         self,
-        semantic_knowledge: list,
+        semantic_knowledge: List[List[str]],
         return_remaining_space: bool = True,
         freeze: bool = True,
     ) -> int:
@@ -959,6 +948,7 @@ class SemanticMemory(Memory):
             entries_cleaned.append(mem)
 
         self.entries = entries_cleaned
+        self.entries.sort(key=lambda x: x[-1])
         logging.debug(f"There are {len(self.entries)} episodic memories after cleaning")
 
 
@@ -967,10 +957,10 @@ class MemorySystems:
 
     def __init__(
         self,
-        episodic: EpisodicMemory,
-        episodic_agent: EpisodicMemory,
-        semantic: SemanticMemory,
-        short: ShortMemory,
+        episodic: EpisodicMemory = None,
+        episodic_agent: EpisodicMemory = None,
+        semantic: SemanticMemory = None,
+        short: ShortMemory = None,
     ) -> None:
         """Bundle memory systems.
 
@@ -989,12 +979,28 @@ class MemorySystems:
 
     def return_as_a_dict_list(self) -> Dict[str, List[list[str]]]:
         """Return memory systems as a dictionary of lists."""
-        return {
-            "episodic": self.episodic.return_as_list(),
-            "episodic_agent": self.episodic_agent.return_as_list(),
-            "semantic": self.semantic.return_as_list(),
-            "short": self.short.return_as_list(),
-        }
+        to_return = {}
+        if self.episodic is not None:
+            to_return["episodic"] = self.episodic.return_as_list()
+        if self.episodic_agent is not None:
+            to_return["episodic_agent"] = self.episodic_agent.return_as_list()
+        if self.semantic is not None:
+            to_return["semantic"] = self.semantic.return_as_list()
+        if self.short is not None:
+            to_return["short"] = self.short.return_as_list()
+
+        return to_return
+
+    def forget_all(self) -> None:
+        """Forget everything in the memory systems."""
+        if self.episodic is not None:
+            self.episodic.forget_all()
+        if self.episodic_agent is not None:
+            self.episodic_agent.forget_all()
+        if self.semantic is not None:
+            self.semantic.forget_all()
+        if self.short is not None:
+            self.short.forget_all()
 
     def __repr__(self):
         return pformat(vars(self), indent=4, width=1)

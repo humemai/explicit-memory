@@ -73,11 +73,9 @@ class HandcraftedAgent:
         num_samples_for_results: The number of samples to validate / test the agent.
         capacity: The capacity of each human-like memory systems.
         pretrain_semantic: Whether or not to pretrain the semantic memory system.
-        room_size: The room configuration to use. Choose one of "dev", "xxs", "xs",
-            "s", "m", or "l"
         """
-        self.all_params = deepcopy(locals())
-        del self.all_params["self"]
+        params_to_save = deepcopy(locals())
+        del params_to_save["self"]
 
         self.env_str = env_str
         self.env_config = env_config
@@ -90,11 +88,11 @@ class HandcraftedAgent:
         self.num_samples_for_results = num_samples_for_results
         self.capacity = capacity
         self.pretrain_semantic = pretrain_semantic
-        self.env = gym.make(self.env_str, **env_config)
+        self.env = gym.make(self.env_str, **self.env_config)
         self.max_total_rewards = self.env_config["terminates_at"] + 1
-        self._create_directory()
+        self._create_directory(params_to_save)
 
-    def _create_directory(self) -> None:
+    def _create_directory(self, params_to_save: dict) -> None:
         """Create the directory to store the results."""
         if "RoomEnv2" in os.listdir():
             self.default_root_dir = (
@@ -103,7 +101,7 @@ class HandcraftedAgent:
         else:
             self.default_root_dir = f"./training_results/{str(datetime.datetime.now())}"
         os.makedirs(self.default_root_dir, exist_ok=True)
-        write_yaml(self.all_params, os.path.join(self.default_root_dir, "train.yaml"))
+        write_yaml(params_to_save, os.path.join(self.default_root_dir, "train.yaml"))
 
     def remove_results_from_disk(self) -> None:
         """Remove the results from the disk."""
@@ -188,10 +186,11 @@ class HandcraftedAgent:
             short=ShortMemory(capacity=self.capacity["short"]),
         )
 
-        if self.pretrain_semantic:
+        if self.pretrain_semantic is not None:
             assert self.capacity["semantic"] > 0
+            room_layout = self.env.return_room_layout()
             _ = self.memory_systems.semantic.pretrain_semantic(
-                semantic_knowledge=self.env.env.room_layout,
+                semantic_knowledge=room_layout,
                 return_remaining_space=False,
                 freeze=False,
             )

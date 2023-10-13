@@ -22,7 +22,11 @@ from explicit_memory.memory import (
 )
 from explicit_memory.nn import LSTM
 from explicit_memory.policy import answer_question, encode_observation, manage_memory
-from explicit_memory.utils import ReplayBuffer, is_running_notebook, write_yaml
+from explicit_memory.utils import (
+    ReplayBuffer,
+    is_running_notebook,
+    write_yaml,
+)
 
 from .handcrafted import HandcraftedAgent
 
@@ -30,7 +34,7 @@ from .handcrafted import HandcraftedAgent
 class DQNAgent(HandcraftedAgent):
     """DQN Agent interacting with environment.
 
-    Based on https://github.com/Curt-Park/rainbow-is-all-you-need/blob/master/01.dqn.ipynb
+    Based on https://github.com/Curt-Park/rainbow-is-all-you-need/
     """
 
     def __init__(
@@ -59,6 +63,7 @@ class DQNAgent(HandcraftedAgent):
                 "include_human": "sum",
                 "human_embedding_on_object_location": False,
             },
+            "v2_params": None,
         },
         run_validation: bool = True,
         run_test: bool = True,
@@ -98,17 +103,20 @@ class DQNAgent(HandcraftedAgent):
         device: The device to run the agent on. This is either "cpu" or "cuda".
 
         """
+        all_params = deepcopy(locals())
+        del all_params["self"]
+        del all_params["__class__"]
+        self.all_params = deepcopy(all_params)
         super().__init__(
             env_str=env_str,
-            policy=None,
+            policy="rl",
             num_samples_for_results=num_samples_for_results,
             seed=train_seed,
             capacity=capacity,
             pretrain_semantic=pretrain_semantic,
         )
-        self.all_params = deepcopy(locals())
-        del self.all_params["self"]
-        del self.all_params["__class__"]
+        write_yaml(self.all_params, os.path.join(self.default_root_dir, "train.yaml"))
+
         self.train_seed = train_seed
         self.test_seed = test_seed
 
@@ -132,12 +140,12 @@ class DQNAgent(HandcraftedAgent):
         self.warm_start = warm_start
         assert self.batch_size <= self.warm_start <= self.replay_buffer_size
 
-        self.action_mm2str = {
+        self.action2str = {
             0: "episodic",
             1: "semantic",
             2: "forget",
         }
-        self.action_space = gym.spaces.Discrete(len(self.action_mm2str))
+        self.action_space = gym.spaces.Discrete(len(self.action2str))
 
         self.ddqn = ddqn
         self.dueling_dqn = dueling_dqn
@@ -152,7 +160,7 @@ class DQNAgent(HandcraftedAgent):
         self.nn_params["relations"] = []
 
         self.nn_params["memory_of_interest"] = ["episodic", "semantic", "short"]
-        self.nn_params["n_actions"] = len(self.action_mm2str)
+        self.nn_params["n_actions"] = len(self.action2str)
         self.nn_params["dueling_dqn"] = self.dueling_dqn
 
         # networks: dqn, dqn_target
@@ -215,7 +223,9 @@ class DQNAgent(HandcraftedAgent):
             while not done and len(self.replay_buffer) < self.warm_start:
                 state = self.memory_systems.return_as_a_dict_list()
                 action = self.select_action(state, greedy=False)
-                manage_memory(self.memory_systems, self.action_mm2str[action])
+                manage_memory(
+                    self.memory_systems, self.action2str[action], split_possessive=True
+                )
 
                 answer = str(
                     answer_question(self.memory_systems, "episodic_semantic", question)
@@ -257,7 +267,9 @@ class DQNAgent(HandcraftedAgent):
             state = self.memory_systems.return_as_a_dict_list()
             action = self.select_action(state, greedy=False)
 
-            manage_memory(self.memory_systems, self.action_mm2str[action])
+            manage_memory(
+                self.memory_systems, self.action2str[action], split_possessive=True
+            )
 
             answer = str(
                 answer_question(self.memory_systems, "episodic_semantic", question)
@@ -311,20 +323,11 @@ class DQNAgent(HandcraftedAgent):
                 self.iteration_idx == self.num_iterations
                 or self.iteration_idx % self.plotting_interval == 0
             ):
-                if self.is_notebook:
-                    self._plot()
-                else:
-                    self._console()
+                self._plot()
         with torch.no_grad():
             self.test()
 
         self.env.close()
-
-    def choose_best_val(self, filenames: list):
-        scores = []
-        for filename in filenames:
-            scores.append(int(filename.split("val-score=")[-1].split(".pt")[0]))
-        return filenames[scores.index(max(scores))]
 
     def validate(self) -> None:
         """Validate the agent."""
@@ -341,7 +344,9 @@ class DQNAgent(HandcraftedAgent):
             while not done:
                 state = self.memory_systems.return_as_a_dict_list()
                 action = self.select_action(state, greedy=True)
-                manage_memory(self.memory_systems, self.action_mm2str[action])
+                manage_memory(
+                    self.memory_systems, self.action2str[action], split_possessive=True
+                )
 
                 answer = str(
                     answer_question(self.memory_systems, "episodic_semantic", question)
@@ -360,6 +365,18 @@ class DQNAgent(HandcraftedAgent):
 
             scores.append(score)
 
+        self.save_validation(scores)
+        self.env.close()
+        self.num_validation += 1
+        self.dqn.train()
+
+    def save_validation(self, scores) -> None:
+        """Keep the best validation model.
+
+        Args
+        ----
+        scores: The scores of one validation episode
+        """
         mean_score = round(np.mean(scores).item())
         filename = (
             f"{self.default_root_dir}/"
@@ -369,16 +386,16 @@ class DQNAgent(HandcraftedAgent):
         torch.save(self.dqn.state_dict(), filename)
         self.scores["validation"].append(scores)
 
-        file_to_keep = self.choose_best_val(self.val_filenames)
-
+        scores = []
         for filename in self.val_filenames:
+            scores.append(int(filename.split("val-score=")[-1].split(".pt")[0]))
+
+        file_to_keep = self.val_filenames[scores.index(max(scores))]
+
+        for filename in deepcopy(self.val_filenames):
             if filename != file_to_keep:
                 os.remove(filename)
                 self.val_filenames.remove(filename)
-
-        self.env.close()
-        self.num_validation += 1
-        self.dqn.train()
 
     def test(self, checkpoint: str = None) -> None:
         """Test the agent.
@@ -409,7 +426,9 @@ class DQNAgent(HandcraftedAgent):
             while not done:
                 state = self.memory_systems.return_as_a_dict_list()
                 action = self.select_action(state, greedy=True)
-                manage_memory(self.memory_systems, self.action_mm2str[action])
+                manage_memory(
+                    self.memory_systems, self.action2str[action], split_possessive=True
+                )
 
                 answer = str(
                     answer_question(self.memory_systems, "episodic_semantic", question)
@@ -446,16 +465,12 @@ class DQNAgent(HandcraftedAgent):
             "training_loss": self.training_loss,
         }
         write_yaml(results, os.path.join(self.default_root_dir, "results.yaml"))
-        write_yaml(self.all_params, os.path.join(self.default_root_dir, "train.yaml"))
         write_yaml(
             self.memory_systems.return_as_a_dict_list(),
             os.path.join(self.default_root_dir, "last_memory_state.yaml"),
         )
 
-        if self.is_notebook:
-            self._plot()
-        else:
-            self._console()
+        self._plot()
         self.env.close()
         self.dqn.train()
 
@@ -504,7 +519,8 @@ class DQNAgent(HandcraftedAgent):
 
     def _plot(self):
         """Plot the training progresses."""
-        clear_output(True)
+        if self.is_notebook:
+            clear_output(True)
         plt.figure(figsize=(20, 8))
 
         if self.scores["train"]:
@@ -543,7 +559,8 @@ class DQNAgent(HandcraftedAgent):
 
         plt.subplots_adjust(hspace=0.5)
         plt.savefig(f"{self.default_root_dir}/plot.png")
-        plt.show()
+        if self.is_notebook:
+            plt.show()
 
     def _console(self):
         """Print the training progresses to the console."""

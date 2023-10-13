@@ -1,5 +1,5 @@
 """Deep Q-network architecture. Currently only LSTM is implemented."""
-from typing import List, Tuple, Union, Dict
+from typing import Dict, List, Tuple, Union
 
 import numpy as np
 import torch

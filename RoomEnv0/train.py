@@ -13,6 +13,11 @@ import yaml
 from agent import HandcraftedAgent
 from tqdm import tqdm
 
+
+from explicit_memory.utils import is_running_notebook
+
+is_notebook = is_running_notebook()
+
 parser = argparse.ArgumentParser(description="train")
 parser.add_argument(
     "-c",
@@ -160,7 +165,8 @@ for num_agents in num_agentss:
             plt.savefig(
                 f"./figures/best-strategies-{num_agents}-v0.{fmt}", bbox_inches="tight"
             )
-        # plt.show()
+        if is_notebook:
+            plt.show()
 
 idx = np.asanyarray([i for i in range(len(caps))])
 width = 0.2
@@ -422,4 +428,5 @@ for num_agents in num_agentss[::-1]:
             plt.savefig(
                 f"./figures/single-and-double-agents-v0.{fmt}", bbox_inches="tight"
             )
-        # plt.show()
+        if is_notebook:
+            plt.show()

@@ -14,14 +14,11 @@ import torch.optim as optim
 from IPython.display import clear_output
 from tqdm.auto import tqdm, trange
 
-from explicit_memory.memory import (
-    EpisodicMemory,
-    MemorySystems,
-    SemanticMemory,
-    ShortMemory,
-)
+from explicit_memory.memory import (EpisodicMemory, MemorySystems,
+                                    SemanticMemory, ShortMemory)
 from explicit_memory.nn import LSTM
-from explicit_memory.policy import answer_question, encode_observation, manage_memory
+from explicit_memory.policy import (answer_question, encode_observation,
+                                    manage_memory)
 from explicit_memory.utils import ReplayBuffer, is_running_notebook, write_yaml
 
 
@@ -58,8 +55,9 @@ class HandcraftedAgent:
         pretrain_semantic: Whether or not to pretrain the semantic memory system.
 
         """
-        self.all_params = deepcopy(locals())
-        del self.all_params["self"]
+        params_to_save = deepcopy(locals())
+        del params_to_save["self"]
+
         self.env_str = env_str
         self.policy = policy
         self.num_samples_for_results = num_samples_for_results
@@ -68,14 +66,18 @@ class HandcraftedAgent:
         self.pretrain_semantic = pretrain_semantic
 
         self.env = gym.make(self.env_str, seed=self.seed)
+        self._create_directory(params_to_save)
 
-        if "RoomEnv1" in os.listdir():
+    def _create_directory(self, params_to_save: dict) -> None:
+        """Create the directory to store the results."""
+        if "RoomEnv2" in os.listdir():
             self.default_root_dir = (
                 f"./RoomEnv1/training_results/{str(datetime.datetime.now())}"
             )
         else:
             self.default_root_dir = f"./training_results/{str(datetime.datetime.now())}"
         os.makedirs(self.default_root_dir, exist_ok=True)
+        write_yaml(params_to_save, os.path.join(self.default_root_dir, "train.yaml"))
 
     def remove_results_from_disk(self) -> None:
         """Remove the results from the disk."""
@@ -89,7 +91,6 @@ class HandcraftedAgent:
             episodic=EpisodicMemory(
                 capacity=self.capacity["episodic"], remove_duplicates=False
             ),
-            episodic_agent=EpisodicMemory(capacity=0, remove_duplicates=False),
             semantic=SemanticMemory(capacity=self.capacity["semantic"]),
             short=ShortMemory(capacity=self.capacity["short"]),
         )
@@ -116,14 +117,20 @@ class HandcraftedAgent:
             while not done:
                 if self.policy.lower() == "random":
                     selected_action = random.choice(["episodic", "semantic", "forget"])
-                    manage_memory(self.memory_systems, selected_action)
+                    manage_memory(
+                        self.memory_systems, selected_action, split_possessive=True
+                    )
                     qa_policy = "episodic_semantic"
                 elif self.policy.lower() == "episodic_only":
-                    manage_memory(self.memory_systems, "episodic")
+                    manage_memory(
+                        self.memory_systems, "episodic", split_possessive=True
+                    )
                     qa_policy = "episodic"
                 elif self.policy.lower() == "semantic_only":
                     qa_policy = "semantic"
-                    manage_memory(self.memory_systems, "semantic")
+                    manage_memory(
+                        self.memory_systems, "semantic", split_possessive=True
+                    )
                 else:
                     raise ValueError("Unknown policy.")
 
@@ -149,7 +156,6 @@ class HandcraftedAgent:
             }
         }
         write_yaml(results, os.path.join(self.default_root_dir, "results.yaml"))
-        write_yaml(self.all_params, os.path.join(self.default_root_dir, "train.yaml"))
         write_yaml(
             self.memory_systems.return_as_a_dict_list(),
             os.path.join(self.default_root_dir, "last_memory_state.yaml"),

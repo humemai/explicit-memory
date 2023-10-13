@@ -1,2 +1,2 @@
-from .dqn import DQNMMAgent, DQNExploreAgent
+from .dqn import DQNExploreAgent, DQNMMAgent
 from .handcrafted import HandcraftedAgent

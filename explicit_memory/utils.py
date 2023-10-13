@@ -8,12 +8,12 @@ import random
 import shutil
 from collections import deque
 from glob import glob
+from pprint import pformat
 from typing import Deque, Dict, List, Tuple
 
 import numpy as np
 import torch
 import yaml
-from pprint import pformat
 
 from .segment_tree import MinSegmentTree, SumSegmentTree
 

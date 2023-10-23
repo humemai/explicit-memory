@@ -28,7 +28,7 @@ from explicit_memory.policy import (
     explore,
     manage_memory,
 )
-from explicit_memory.utils import ReplayBuffer, is_running_notebook, write_yaml
+from explicit_memory.utils import ReplayBuffer, is_running_notebook, write_yaml, argmax
 
 from ..handcrafted import HandcraftedAgent
 
@@ -185,6 +185,9 @@ class DQNAgent(HandcraftedAgent):
         # optimizer
         self.optimizer = optim.Adam(self.dqn.parameters())
 
+        self.train_val_test = None
+        self.q_values = {"train": [], "val": [], "test": []}
+
     def select_action(self, state: dict, greedy: bool) -> int:
         """Select an action from the input state.
 
@@ -197,6 +200,9 @@ class DQNAgent(HandcraftedAgent):
         """
         # epsilon greedy policy
         if self.epsilon < np.random.random() or greedy:
+            q_values = self.dqn(np.array([state])).detach().cpu().numpy().tolist()
+            self.q_values[self.train_val_test].append(q_values)
+            selected_action = argmax(q_values)
             selected_action = self.dqn(np.array([state])).argmax()
             selected_action = selected_action.detach().cpu().numpy().item()
 
@@ -255,14 +261,17 @@ class DQNAgent(HandcraftedAgent):
                 self.val_filenames.remove(filename)
 
     def validate(self) -> None:
+        self.train_val_test = "val"
         self.dqn.eval()
         scores = self.validate_test_middle()
         self.save_validation(scores)
         self.env.close()
         self.num_validation += 1
         self.dqn.train()
+        self.train_val_test = "train"
 
     def test(self, checkpoint: str = None) -> None:
+        self.train_val_test = "test"
         self.dqn.eval()
         self.env_config["seed"] = self.test_seed
         self.env = gym.make(self.env_str, **self.env_config)
@@ -296,6 +305,7 @@ class DQNAgent(HandcraftedAgent):
             self.memory_systems.return_as_a_dict_list(),
             os.path.join(self.default_root_dir, "last_memory_state.yaml"),
         )
+        write_yaml(self.q_values, os.path.join(self.default_root_dir, "q_values.yaml"))
 
         self._plot()
 

@@ -227,6 +227,7 @@ class DQNMMAgent(DQNAgent):
 
     def train(self) -> None:
         """Train the memory management agent."""
+        self.train_val_test = "train"
         self.fill_replay_buffer()  # fill up the buffer till warm start size
         self.num_validation = 0
 

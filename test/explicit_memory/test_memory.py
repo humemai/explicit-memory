@@ -179,27 +179,12 @@ class MemoryTest(unittest.TestCase):
         mems_found[0][0] = "qux"
         self.assertEqual(self.memory.entries[0], ["foo", "bar", "baz", 1])
 
-    def test_is_valid_query(self):
-        self.memory.add(["foo", "bar", "baz", 1])
-        self.memory.add(["foo", "bar", "baz", 2])
-        self.memory.add(["foo", "bar", "baz", 3])
-        self.memory.add(["baz", "foo", "bar", 5])
-
-        self.assertFalse(self.memory.is_valid_query(["foo", "bar", "baz"]))
-        self.assertFalse(self.memory.is_valid_query(["foo", "bar", "baz", "qux"]))
-        self.assertFalse(self.memory.is_valid_query(["foo", "?", "?"]))
-        self.assertFalse(self.memory.is_valid_query(["foo", "?", 42]))
-
-        self.assertTrue(self.memory.is_valid_query(["foo", "bar", "?"]))
-        self.assertTrue(self.memory.is_valid_query(["foo", "?", "baz"]))
-        self.assertTrue(self.memory.is_valid_query(["?", "bar", "baz"]))
-
     def test_answer_random(self):
         self.memory.add(["foo", "bar", "baz", 1])
         self.memory.add(["foo", "bar", "baz", 2])
         self.memory.add(["foo", "bar", "baz", 3])
 
-        self.assertEqual(self.memory.answer_random(["foo", "bar", "?"])[0], "baz")
+        self.assertEqual(self.memory.answer_random(["foo", "bar", "?", 42])[0], "baz")
 
     def test_answer_with_smallest_num(self):
         self.memory.add(["foo", "bar", "baz", 1])
@@ -207,16 +192,16 @@ class MemoryTest(unittest.TestCase):
         self.memory.add(["foo", "bar", "baz", 3])
         self.memory.add(["baz", "foo", "bar", 5])
 
-        pred, num = self.memory.answer_with_smallest_num(["foo", "bar", "?"])
+        pred, num = self.memory.answer_with_smallest_num(["foo", "bar", "?", 42])
         self.assertEqual((pred, num), ("baz", 1))
 
-        pred, num = self.memory.answer_with_smallest_num(["foo", "baz", "?"])
+        pred, num = self.memory.answer_with_smallest_num(["foo", "baz", "?", 42])
         self.assertEqual((pred, num), (None, None))
 
-        pred, num = self.memory.answer_with_smallest_num(["?", "bar", "baz"])
+        pred, num = self.memory.answer_with_smallest_num(["?", "bar", "baz", 42])
         self.assertEqual((pred, num), ("foo", 1))
 
-        pred, num = self.memory.answer_with_smallest_num(["?", "foo", "bar"])
+        pred, num = self.memory.answer_with_smallest_num(["?", "foo", "bar", 42])
         self.assertEqual((pred, num), ("baz", 5))
 
     def test_answer_with_largest_num(self):
@@ -225,16 +210,16 @@ class MemoryTest(unittest.TestCase):
         self.memory.add(["foo", "bar", "baz", 3])
         self.memory.add(["baz", "foo", "bar", 5])
 
-        pred, num = self.memory.answer_with_largest_num(["foo", "bar", "?"])
+        pred, num = self.memory.answer_with_largest_num(["foo", "bar", "?", 42])
         self.assertEqual((pred, num), ("baz", 3))
 
-        pred, num = self.memory.answer_with_largest_num(["foo", "baz", "?"])
+        pred, num = self.memory.answer_with_largest_num(["foo", "baz", "?", 42])
         self.assertEqual((pred, num), (None, None))
 
-        pred, num = self.memory.answer_with_largest_num(["?", "bar", "baz"])
+        pred, num = self.memory.answer_with_largest_num(["?", "bar", "baz", 42])
         self.assertEqual((pred, num), ("foo", 3))
 
-        pred, num = self.memory.answer_with_largest_num(["?", "foo", "bar"])
+        pred, num = self.memory.answer_with_largest_num(["?", "foo", "bar", 42])
         self.assertEqual((pred, num), ("baz", 5))
 
 
@@ -339,16 +324,16 @@ class EpisodicMemoryTest(unittest.TestCase):
         self.memory.add(["foo", "bar", "baz", 3])
         self.memory.add(["baz", "foo", "bar", 5])
 
-        pred, num = self.memory.answer_oldest(["foo", "bar", "?"])
+        pred, num = self.memory.answer_oldest(["foo", "bar", "?", 42])
         self.assertEqual((pred, num), ("baz", 1))
 
-        pred, num = self.memory.answer_oldest(["foo", "baz", "?"])
+        pred, num = self.memory.answer_oldest(["foo", "baz", "?", 42])
         self.assertEqual((pred, num), (None, None))
 
-        pred, num = self.memory.answer_oldest(["?", "bar", "baz"])
+        pred, num = self.memory.answer_oldest(["?", "bar", "baz", 42])
         self.assertEqual((pred, num), ("foo", 1))
 
-        pred, num = self.memory.answer_oldest(["?", "foo", "bar"])
+        pred, num = self.memory.answer_oldest(["?", "foo", "bar", 42])
         self.assertEqual((pred, num), ("baz", 5))
 
     def test_answer_latest(self):
@@ -357,16 +342,16 @@ class EpisodicMemoryTest(unittest.TestCase):
         self.memory.add(["foo", "bar", "baz", 3])
         self.memory.add(["baz", "foo", "bar", 5])
 
-        pred, num = self.memory.answer_latest(["foo", "bar", "?"])
+        pred, num = self.memory.answer_latest(["foo", "bar", "?", 42])
         self.assertEqual((pred, num), ("baz", 3))
 
-        pred, num = self.memory.answer_latest(["foo", "baz", "?"])
+        pred, num = self.memory.answer_latest(["foo", "baz", "?", 42])
         self.assertEqual((pred, num), (None, None))
 
-        pred, num = self.memory.answer_latest(["?", "bar", "baz"])
+        pred, num = self.memory.answer_latest(["?", "bar", "baz", 42])
         self.assertEqual((pred, num), ("foo", 3))
 
-        pred, num = self.memory.answer_latest(["?", "foo", "bar"])
+        pred, num = self.memory.answer_latest(["?", "foo", "bar", 42])
         self.assertEqual((pred, num), ("baz", 5))
 
     def test_ob2epi(self):
@@ -668,16 +653,16 @@ class EpisodicMemoryRemoveDuplicatesTest(unittest.TestCase):
         self.memory.add(["foo", "bar", "baz", 3])
         self.memory.add(["baz", "foo", "bar", 5])
 
-        pred, num = self.memory.answer_oldest(["foo", "bar", "?"])
+        pred, num = self.memory.answer_oldest(["foo", "bar", "?", 42])
         self.assertEqual((pred, num), ("baz", 3))
 
-        pred, num = self.memory.answer_oldest(["foo", "baz", "?"])
+        pred, num = self.memory.answer_oldest(["foo", "baz", "?", 42])
         self.assertEqual((pred, num), (None, None))
 
-        pred, num = self.memory.answer_oldest(["?", "bar", "baz"])
+        pred, num = self.memory.answer_oldest(["?", "bar", "baz", 42])
         self.assertEqual((pred, num), ("foo", 3))
 
-        pred, num = self.memory.answer_oldest(["?", "foo", "bar"])
+        pred, num = self.memory.answer_oldest(["?", "foo", "bar", 42])
         self.assertEqual((pred, num), ("baz", 5))
 
     def test_answer_latest(self):
@@ -686,16 +671,16 @@ class EpisodicMemoryRemoveDuplicatesTest(unittest.TestCase):
         self.memory.add(["foo", "bar", "baz", 3])
         self.memory.add(["baz", "foo", "bar", 5])
 
-        pred, num = self.memory.answer_latest(["foo", "bar", "?"])
+        pred, num = self.memory.answer_latest(["foo", "bar", "?", 42])
         self.assertEqual((pred, num), ("baz", 3))
 
-        pred, num = self.memory.answer_latest(["foo", "baz", "?"])
+        pred, num = self.memory.answer_latest(["foo", "baz", "?", 42])
         self.assertEqual((pred, num), (None, None))
 
-        pred, num = self.memory.answer_latest(["?", "bar", "baz"])
+        pred, num = self.memory.answer_latest(["?", "bar", "baz", 42])
         self.assertEqual((pred, num), ("foo", 3))
 
-        pred, num = self.memory.answer_latest(["?", "foo", "bar"])
+        pred, num = self.memory.answer_latest(["?", "foo", "bar", 42])
         self.assertEqual((pred, num), ("baz", 5))
 
     def test_ob2epi(self):
@@ -1035,16 +1020,16 @@ class SemanticMemoryTest(unittest.TestCase):
         self.memory.add(["foo", "bar", "baz", 1])
         self.memory.add(["qux", "bar", "baz", 1])
 
-        pred, num = self.memory.answer_weakest(["foo", "bar", "?"])
+        pred, num = self.memory.answer_weakest(["foo", "bar", "?", 42])
         self.assertEqual((pred, num), ("baz", 4))
 
-        pred, num = self.memory.answer_weakest(["foo", "baz", "?"])
+        pred, num = self.memory.answer_weakest(["foo", "baz", "?", 42])
         self.assertEqual((pred, num), ("bar", 1))
 
-        pred, num = self.memory.answer_weakest(["?", "bar", "baz"])
+        pred, num = self.memory.answer_weakest(["?", "bar", "baz", 42])
         self.assertEqual((pred, num), ("qux", 1))
 
-        pred, num = self.memory.answer_weakest(["?", "foo", "bar"])
+        pred, num = self.memory.answer_weakest(["?", "foo", "bar", 42])
         self.assertEqual((pred, num), ("baz", 2))
 
     def test_answer_strongest(self):
@@ -1054,16 +1039,16 @@ class SemanticMemoryTest(unittest.TestCase):
         self.memory.add(["foo", "bar", "baz", 1])
         self.memory.add(["qux", "bar", "baz", 1])
 
-        pred, num = self.memory.answer_strongest(["foo", "bar", "?"])
+        pred, num = self.memory.answer_strongest(["foo", "bar", "?", 42])
         self.assertEqual((pred, num), ("baz", 4))
 
-        pred, num = self.memory.answer_strongest(["foo", "baz", "?"])
+        pred, num = self.memory.answer_strongest(["foo", "baz", "?", 42])
         self.assertEqual((pred, num), ("bar", 1))
 
-        pred, num = self.memory.answer_strongest(["?", "bar", "baz"])
+        pred, num = self.memory.answer_strongest(["?", "bar", "baz", 42])
         self.assertEqual((pred, num), ("foo", 4))
 
-        pred, num = self.memory.answer_strongest(["?", "foo", "bar"])
+        pred, num = self.memory.answer_strongest(["?", "foo", "bar", 42])
         self.assertEqual((pred, num), ("baz", 2))
 
     def test_ob2sem(self):

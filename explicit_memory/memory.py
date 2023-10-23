@@ -174,24 +174,13 @@ class Memory:
         """
         return deepcopy(self.entries[-1])
 
-    def is_valid_query(self, query: List[str]) -> bool:
-        """Check if the query can be answered or not."""
-        if not (
-            len(query) == 3
-            and query.count("?") == 1
-            and all([isinstance(foo, str) for foo in query])
-        ):
-            return False
-        else:
-            return True
-
     def answer_random(self, query: List) -> Tuple[str, int]:
         """Answer the question with a uniform-randomly chosen memory.
 
         Args
         ----
-        query: e.g., ["bob", "atlocation", "?"],
-            ["?", "atlocation", "officeroom"], ["bob", "?", "officeroom"]
+        query: e.g., ["bob", "atlocation", "?", 42],
+            ["?", "atlocation", "officeroom", 42], ["bob", "?", "officeroom", 42]
 
         Returns
         -------
@@ -199,12 +188,6 @@ class Memory:
         num: either a timestamp or num generalized, for episodic / short and semantic,
 
         """
-        if not self.is_valid_query(query):
-            raise ValueError(
-                f"query {query} is not valid. It should be a triple with a single "
-                f"question mark."
-            )
-
         if self.is_empty:
             logging.warning("Memory is empty. I can't answer any questions!")
             pred = None
@@ -225,8 +208,8 @@ class Memory:
 
         Args
         ----
-        query: a triple, e.g., ["bob", "atlocation", "?"],
-            ["?", "atlocation", "officeroom"], ["bob", "?", "officeroom"]
+        query: a quadruple, e.g., ["bob", "atlocation", "?", 42],
+            ["?", "atlocation", "officeroom", 42]
 
         Returns
         -------
@@ -234,13 +217,7 @@ class Memory:
         num
 
         """
-        if not self.is_valid_query(query):
-            raise ValueError(
-                f"query {query} is not valid. It should be a triple with a single "
-                f"question mark."
-            )
-
-        candidates = self.find_memory(query + ["?"])
+        candidates = self.find_memory(query[:-1] + ["?"])
 
         if len(candidates) == 0:
             logging.info("no relevant memories found.")
@@ -263,8 +240,8 @@ class Memory:
 
         Args
         ----
-        query: a triple, e.g., ["bob", "atlocation", "?"],
-            ["?", "atlocation", "officeroom"], ["bob", "?", "officeroom"]
+        query: a quadruple, e.g., ["bob", "atlocation", "?", 42],
+            ["?", "atlocation", "officeroom", 42]
 
         Returns
         -------
@@ -272,13 +249,7 @@ class Memory:
         num
 
         """
-        if not self.is_valid_query(query):
-            raise ValueError(
-                f"query {query} is not valid. It should be a triple with a single "
-                f"question mark."
-            )
-
-        candidates = self.find_memory(query + ["?"])
+        candidates = self.find_memory(query[:-1] + ["?"])
 
         if len(candidates) == 0:
             logging.info("no relevant memories found.")
@@ -462,8 +433,8 @@ class EpisodicMemory(Memory):
 
         Args
         ----
-        query: a triple, e.g., ["bob", "atlocation", "?"],
-            ["?", "atlocation", "officeroom"], ["bob", "?", "officeroom"]
+        query: a quadruple, e.g., ["bob", "atlocation", "?", 42],
+            ["?", "atlocation", "officeroom", 42]
 
         Returns
         -------
@@ -478,8 +449,8 @@ class EpisodicMemory(Memory):
 
         Args
         ----
-        query: a triple, e.g., ["bob", "atlocation", "?"],
-            ["?", "atlocation", "officeroom"], ["bob", "?", "officeroom"]
+        query: a quadruple, e.g., ["bob", "atlocation", "?", 42],
+            ["?", "atlocation", "officeroom", 42]
 
         Returns
         -------
@@ -846,8 +817,8 @@ class SemanticMemory(Memory):
 
         Args
         ----
-        query: e.g., ["bob", "atlocation", "?"],
-            ["?", "atlocation", "officeroom"], ["bob", "?", "officeroom"]
+        query: a quadruple, e.g., ["bob", "atlocation", "?", 42],
+            ["?", "atlocation", "officeroom", 42]
 
         Returns
         -------
@@ -858,7 +829,7 @@ class SemanticMemory(Memory):
         logging.debug("answering a question with the answer_strongest policy ...")
 
         if split_possessive:
-            query = [remove_posession(elem) for elem in query]
+            query = [remove_posession(e) for e in query[:-1]] + [query[-1]]
 
         return self.answer_with_smallest_num(query)
 
@@ -869,8 +840,8 @@ class SemanticMemory(Memory):
 
         Args
         ----
-        query: e.g., ["bob", "atlocation", "?"],
-            ["?", "atlocation", "officeroom"], ["bob", "?", "officeroom"]
+        query: a quadruple, e.g., ["bob", "atlocation", "?", 42],
+            ["?", "atlocation", "officeroom", 42]
 
         Returns
         -------
@@ -881,7 +852,7 @@ class SemanticMemory(Memory):
         logging.debug("answering a question with the answer_strongest policy ...")
 
         if split_possessive:
-            query = [remove_posession(elem) for elem in query]
+            query = [remove_posession(e) for e in query[:-1]] + [query[-1]]
 
         return self.answer_with_largest_num(query)
 

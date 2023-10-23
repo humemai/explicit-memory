@@ -516,29 +516,22 @@ class PolicyTest(unittest.TestCase):
             answer_question(
                 self.memory_systems,
                 policy="foo",
-                question=["foo", "bar", "?"],
+                question=["foo", "bar", "?", 42],
                 split_possessive=False,
             )
         self.memory_systems.short.forget_all()
 
-        with self.assertRaises(ValueError):
-            answer_question(
-                self.memory_systems,
-                policy="random",
-                question=["foo", "bar", "?", 1],
-                split_possessive=False,
-            )
         with self.assertRaises(NotImplementedError):
             answer_question(
                 self.memory_systems,
                 policy="neural",
-                question=["foo", "bar", "?"],
+                question=["foo", "bar", "?", 42],
                 split_possessive=False,
             )
         answer = answer_question(
             self.memory_systems,
             policy="episodic_semantic",
-            question=["foo", "bar", "?"],
+            question=["foo", "bar", "?", 42],
             split_possessive=False,
         )
         self.assertEqual(answer, "none")
@@ -556,7 +549,7 @@ class PolicyTest(unittest.TestCase):
         answer = answer_question(
             self.memory_systems,
             policy="episodic_semantic",
-            question=["foo", "bar", "?"],
+            question=["foo", "bar", "?", 42],
             split_possessive=False,
         )
         self.assertEqual(answer, "qux")
@@ -564,7 +557,7 @@ class PolicyTest(unittest.TestCase):
         answer = answer_question(
             self.memory_systems,
             policy="episodic",
-            question=["foo", "bar", "?"],
+            question=["foo", "bar", "?", 42],
             split_possessive=False,
         )
         self.assertEqual(answer, "qux")
@@ -573,7 +566,7 @@ class PolicyTest(unittest.TestCase):
         answer = answer_question(
             self.memory_systems,
             policy="episodic_semantic",
-            question=["?", "bar", "baz"],
+            question=["?", "bar", "baz", 42],
             split_possessive=False,
         )
         self.assertEqual(answer, "baz")
@@ -582,7 +575,7 @@ class PolicyTest(unittest.TestCase):
         answer = answer_question(
             self.memory_systems,
             policy="episodic",
-            question=["?", "bar", "baz"],
+            question=["?", "bar", "baz", 42],
             split_possessive=False,
         )
         self.assertEqual(answer, "baz")
@@ -591,7 +584,7 @@ class PolicyTest(unittest.TestCase):
         answer = answer_question(
             self.memory_systems,
             policy="episodic_semantic",
-            question=["foo", "?", "baz"],
+            question=["foo", "?", "baz", 42],
             split_possessive=False,
         )
         self.assertEqual(answer, "bar")
@@ -600,7 +593,7 @@ class PolicyTest(unittest.TestCase):
         answer = answer_question(
             self.memory_systems,
             policy="episodic",
-            question=["foo", "?", "baz"],
+            question=["foo", "?", "baz", 42],
             split_possessive=False,
         )
         self.assertEqual(answer, "bar")
@@ -609,7 +602,7 @@ class PolicyTest(unittest.TestCase):
         answer = answer_question(
             self.memory_systems,
             policy="semantic_episodic",
-            question=["foo", "bar", "?"],
+            question=["foo", "bar", "?", 42],
             split_possessive=False,
         )
         self.assertEqual(answer, "qux")
@@ -618,7 +611,7 @@ class PolicyTest(unittest.TestCase):
         answer = answer_question(
             self.memory_systems,
             policy="semantic",
-            question=["foo", "bar", "?"],
+            question=["foo", "bar", "?", 42],
             split_possessive=False,
         )
         self.assertEqual(answer, "qux")
@@ -627,7 +620,7 @@ class PolicyTest(unittest.TestCase):
         answer = answer_question(
             self.memory_systems,
             policy="semantic_episodic",
-            question=["?", "bar", "baz"],
+            question=["?", "bar", "baz", 42],
             split_possessive=False,
         )
         self.assertEqual(answer, "baz")
@@ -636,7 +629,7 @@ class PolicyTest(unittest.TestCase):
         answer = answer_question(
             self.memory_systems,
             policy="semantic",
-            question=["?", "bar", "baz"],
+            question=["?", "bar", "baz", 42],
             split_possessive=False,
         )
         self.assertEqual(answer, "baz")
@@ -645,7 +638,7 @@ class PolicyTest(unittest.TestCase):
         answer = answer_question(
             self.memory_systems,
             policy="semantic_episodic",
-            question=["foo", "?", "baz"],
+            question=["foo", "?", "baz", 42],
             split_possessive=False,
         )
         self.assertEqual(answer, "bar")
@@ -654,7 +647,7 @@ class PolicyTest(unittest.TestCase):
         answer = answer_question(
             self.memory_systems,
             policy="semantic",
-            question=["foo", "?", "baz"],
+            question=["foo", "?", "baz", 42],
             split_possessive=False,
         )
         self.assertEqual(answer, "bar")
@@ -663,7 +656,7 @@ class PolicyTest(unittest.TestCase):
         answer = answer_question(
             self.memory_systems,
             policy="random",
-            question=["foo", "bar", "?"],
+            question=["foo", "bar", "?", 42],
             split_possessive=False,
         )
         self.assertEqual(answer, "qux")
@@ -672,7 +665,7 @@ class PolicyTest(unittest.TestCase):
         answer = answer_question(
             self.memory_systems,
             policy="random",
-            question=["?", "bar", "baz"],
+            question=["?", "bar", "baz", 42],
             split_possessive=False,
         )
         self.assertEqual(answer, "baz")
@@ -681,7 +674,7 @@ class PolicyTest(unittest.TestCase):
         answer = answer_question(
             self.memory_systems,
             policy="random",
-            question=["foo", "?", "baz"],
+            question=["foo", "?", "baz", 42],
             split_possessive=False,
         )
         self.assertEqual(answer, "bar")

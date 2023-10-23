@@ -133,7 +133,6 @@ class HandcraftedAgent:
                     )
                 else:
                     raise ValueError("Unknown policy.")
-
                 answer = str(
                     answer_question(self.memory_systems, qa_policy, question)
                 ).lower()

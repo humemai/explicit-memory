@@ -208,7 +208,7 @@ def answer_question(
     MemorySystems
     qa_policy: "episodic_semantic", "semantic_episodic", "episodic", "semantic",
             "random", or "neural",
-    question: e.g., [laptop, atlocation, ?]
+    question: e.g., [laptop, atlocation, ?, current_time]
     split_possessive: whether to split the possessive, i.e., 's, or not.
 
     Returns
@@ -216,6 +216,13 @@ def answer_question(
     pred: prediction
 
     """
+    if (
+        len(question) != 4
+        and isinstance(question[-1], int)
+        and not (all([isinstance(e, str) for e in question[:-1]]))
+    ):
+        raise ValueError("Question is not in the correct format.")
+
     assert memory_systems.short.is_empty
     assert policy.lower() in [
         "episodic_semantic",

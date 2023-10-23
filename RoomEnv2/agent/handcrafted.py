@@ -80,9 +80,22 @@ class HandcraftedAgent:
         self.env_str = env_str
         self.env_config = env_config
         self.mm_policy = mm_policy
-        assert self.mm_policy in ["random", "generalize", "rl", "neural"]
+        assert self.mm_policy in [
+            "random",
+            "episodic",
+            "semantic",
+            "generalize",
+            "rl",
+            "neural",
+        ]
         self.qa_policy = qa_policy
-        assert self.qa_policy in ["episodic_semantic", "random", "neural"]
+        assert self.qa_policy in [
+            "episodic_semantic",
+            "episodic",
+            "semantic",
+            "random",
+            "neural",
+        ]
         self.explore_policy = explore_policy
         assert self.explore_policy in ["random", "avoid_walls", "rl", "neural"]
         self.num_samples_for_results = num_samples_for_results

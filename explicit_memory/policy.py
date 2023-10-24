@@ -107,7 +107,7 @@ def manage_memory(
     ]
     if policy.lower() == "agent":
         mem_short = memory_systems.short.get_oldest_memory()
-        if "agent" not in [mem_short[0], mem_short[1], mem_short[2]]:
+        if "agent" != mem_short[0]:
             raise ValueError("Agent is not in the memory.")
         assert memory_systems.episodic_agent.capacity > 0
         if memory_systems.episodic_agent.is_full:

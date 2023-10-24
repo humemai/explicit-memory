@@ -64,7 +64,6 @@ class DQNAgent(HandcraftedAgent):
             "v1_params": None,
             "v2_params": {},
         },
-        run_validation: bool = True,
         run_test: bool = True,
         num_samples_for_results: int = 10,
         plotting_interval: int = 10,
@@ -78,6 +77,7 @@ class DQNAgent(HandcraftedAgent):
             "question_prob": 1.0,
             "terminates_at": 99,
             "room_size": "dev",
+            "randomize_observations": True,
         },
         ddqn: bool = False,
         dueling_dqn: bool = False,
@@ -101,7 +101,6 @@ class DQNAgent(HandcraftedAgent):
         capacity: The capacity of each human-like memory systems.
         pretrain_semantic: Whether or not to pretrain the semantic memory system.
         nn_params: The parameters for the DQN (function approximator).
-        run_validation: Whether or not to run validation.
         run_test: Whether or not to run test.
         num_samples_for_results: The number of samples to validate / test the agent.
         plotting_interval: The interval to plot the results.
@@ -158,7 +157,6 @@ class DQNAgent(HandcraftedAgent):
         self.is_notebook = is_running_notebook()
         self.num_iterations = num_iterations
         self.plotting_interval = plotting_interval
-        self.run_validation = run_validation
         self.run_test = run_test
 
         self.replay_buffer_size = replay_buffer_size
@@ -199,13 +197,12 @@ class DQNAgent(HandcraftedAgent):
 
         """
         # epsilon greedy policy
-        if self.epsilon < np.random.random() or greedy:
-            q_values = self.dqn(np.array([state])).detach().cpu().numpy().tolist()
+        q_values = self.dqn(np.array([state])).detach().cpu().numpy().tolist()[0]
+        if self.train_val_test != "filling_replay_buffer":
             self.q_values[self.train_val_test].append(q_values)
-            selected_action = argmax(q_values)
-            selected_action = self.dqn(np.array([state])).argmax()
-            selected_action = selected_action.detach().cpu().numpy().item()
 
+        if self.epsilon < np.random.random() or greedy:
+            selected_action = argmax(q_values)
         else:
             selected_action = self.action_space.sample()
 
@@ -223,15 +220,16 @@ class DQNAgent(HandcraftedAgent):
 
         return loss.item()
 
-    def fill_replay_buffer_mm(self) -> None:
+    def fill_replay_buffer(self) -> None:
         """Make the replay buffer full in the beginning with the uniformly-sampled
         actions. The filling continues until it reaches the warm start size.
 
         """
+        self.train_val_test = "filling_replay_buffer"
 
     def train(self) -> None:
         """Code for training"""
-        pass
+        self.train_val_test = "train"
 
     def save_validation(self, scores) -> None:
         """Keep the best validation model.
@@ -276,11 +274,10 @@ class DQNAgent(HandcraftedAgent):
         self.env_config["seed"] = self.test_seed
         self.env = gym.make(self.env_str, **self.env_config)
 
-        if self.run_validation:
-            assert len(self.val_filenames) == 1
-            self.dqn.load_state_dict(torch.load(self.val_filenames[0]))
-            if checkpoint is not None:
-                self.dqn.load_state_dict(torch.load(checkpoint))
+        assert len(self.val_filenames) == 1
+        self.dqn.load_state_dict(torch.load(self.val_filenames[0]))
+        if checkpoint is not None:
+            self.dqn.load_state_dict(torch.load(checkpoint))
 
         scores = self.validate_test_middle()
         self.scores["test"] = scores
@@ -401,6 +398,16 @@ class DQNAgent(HandcraftedAgent):
         plt.plot(self.epsilons)
         plt.xlabel("update counts")
 
+        plt.subplot(233)
+        plt.title("Q-values, train")
+        for action_number in range(self.action_space.n.item()):
+            plt.plot(
+                [q_values[action_number] for q_values in self.q_values["train"]],
+                label=f"action {action_number}",
+            )
+        plt.legend(loc="upper left")
+        plt.xlabel("number of actions")
+
         plt.subplots_adjust(hspace=0.5)
         plt.savefig(f"{self.default_root_dir}/plot.png")
         if self.is_notebook:
@@ -431,5 +438,6 @@ class DQNAgent(HandcraftedAgent):
             )
 
         tqdm.write(
-            f"training loss: {self.training_loss[-1]}\nepsilons: {self.epsilons[-1]}\n"
+            f"training loss: {self.training_loss[-1]}\nepsilons: "
+            f"{self.epsilons[-1]}\ntraining q-values: {self.q_values['train']}"
         )

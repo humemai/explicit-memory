@@ -31,7 +31,6 @@ train_config = {
         "v2_params": {},
         "memory_of_interest": [
             "episodic",
-            "episodic_agent",
             "semantic",
             "short",
         ],
@@ -42,7 +41,6 @@ train_config = {
     "batch_size": 1024,
     "target_update_rate": 10,
     "pretrain_semantic": False,
-    "run_validation": True,
     "run_test": True,
     "num_samples_for_results": 10,
     "train_seed": 0 + 5,

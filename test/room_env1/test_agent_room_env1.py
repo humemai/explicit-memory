@@ -63,7 +63,6 @@ class RLAgentTest(unittest.TestCase):
                     "batch_size": 2,
                     "target_update_rate": 10,
                     "pretrain_semantic": pretrain_semantic,
-                    "run_validation": True,
                     "run_test": True,
                     "num_samples_for_results": 3,
                     "train_seed": test_seed + 5,

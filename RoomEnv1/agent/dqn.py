@@ -65,7 +65,6 @@ class DQNAgent(HandcraftedAgent):
             },
             "v2_params": None,
         },
-        run_validation: bool = True,
         run_test: bool = True,
         num_samples_for_results: int = 10,
         plotting_interval: int = 10,
@@ -94,7 +93,6 @@ class DQNAgent(HandcraftedAgent):
         capacity: The capacity of each human-like memory systems.
         pretrain_semantic: Whether or not to pretrain the semantic memory system.
         nn_params: The parameters for the DQN (function approximator).
-        run_validation: Whether or not to run validation.
         run_test: Whether or not to run test.
         num_samples_for_results: The number of samples to validate / test the agent.
         plotting_interval: The interval to plot the results.
@@ -124,7 +122,6 @@ class DQNAgent(HandcraftedAgent):
         self.is_notebook = is_running_notebook()
         self.num_iterations = num_iterations
         self.plotting_interval = plotting_interval
-        self.run_validation = run_validation
         self.run_test = run_test
         self.device = torch.device(device)
         print(f"Running on {self.device}")
@@ -295,9 +292,8 @@ class DQNAgent(HandcraftedAgent):
             if done:
                 self.scores["train"].append(score)
                 score = 0
-                if self.run_validation:
-                    with torch.no_grad():
-                        self.validate()
+                with torch.no_grad():
+                    self.validate()
 
                 self.init_memory_systems()
                 (observation, question), info = self.env.reset()
@@ -409,11 +405,10 @@ class DQNAgent(HandcraftedAgent):
         self.env = gym.make(self.env_str, seed=self.test_seed)
         self.dqn.eval()
 
-        if self.run_validation:
-            assert len(self.val_filenames) == 1
-            self.dqn.load_state_dict(torch.load(self.val_filenames[0]))
-            if checkpoint is not None:
-                self.dqn.load_state_dict(torch.load(checkpoint))
+        assert len(self.val_filenames) == 1
+        self.dqn.load_state_dict(torch.load(self.val_filenames[0]))
+        if checkpoint is not None:
+            self.dqn.load_state_dict(torch.load(checkpoint))
 
         scores = []
         for _ in range(self.num_samples_for_results):

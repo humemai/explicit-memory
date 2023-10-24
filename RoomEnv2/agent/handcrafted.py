@@ -45,6 +45,7 @@ class HandcraftedAgent:
             "question_prob": 1.0,
             "seed": 42,
             "terminates_at": 99,
+            "randomize_observations": True,
             "room_size": "dev",
         },
         mm_policy: str = "generalize",

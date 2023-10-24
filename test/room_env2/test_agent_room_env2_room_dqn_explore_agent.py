@@ -51,7 +51,6 @@ class DQNExploreAgenttTest(unittest.TestCase):
                             "batch_size": 4,
                             "target_update_rate": 10,
                             "pretrain_semantic": pretrain_semantic,
-                            "run_validation": True,
                             "run_test": True,
                             "num_samples_for_results": 3,
                             "train_seed": test_seed + 5,
@@ -101,7 +100,6 @@ class DQNMMAgenttTest(unittest.TestCase):
                                     "v2_params": {},
                                     "memory_of_interest": [
                                         "episodic",
-                                        "episodic_agent",
                                         "semantic",
                                         "short",
                                     ],
@@ -112,7 +110,6 @@ class DQNMMAgenttTest(unittest.TestCase):
                                 "batch_size": 4,
                                 "target_update_rate": 10,
                                 "pretrain_semantic": pretrain_semantic,
-                                "run_validation": True,
                                 "run_test": True,
                                 "num_samples_for_results": 3,
                                 "train_seed": test_seed + 5,

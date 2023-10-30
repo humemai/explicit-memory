@@ -7,13 +7,19 @@ import pickle
 import random
 import shutil
 from collections import deque
+from copy import deepcopy
 from glob import glob
 from pprint import pformat
 from typing import Deque, Dict, List, Tuple
 
+import gymnasium as gym
+import matplotlib.pyplot as plt
 import numpy as np
 import torch
+import torch.nn.functional as F
 import yaml
+from IPython.display import clear_output
+from tqdm.auto import tqdm, trange
 
 from .segment_tree import MinSegmentTree, SumSegmentTree
 
@@ -271,6 +277,173 @@ def is_running_notebook() -> bool:
             return False  # Other type (?)
     except NameError:
         return False  # Probably standard Python interpreter
+
+
+def plot_dqn(
+    scores: dict,
+    training_loss: list,
+    epsilons: list,
+    q_values: dict,
+    iteration_idx: int,
+    number_of_actions: int,
+    num_iterations: int,
+    total_episode_rewards: int,
+    num_validation: int,
+    num_samples_for_results: int,
+    default_root_dir: str,
+) -> None:
+    """Plot things for DQN training."""
+    all_params = deepcopy(locals())
+
+    is_notebook = is_running_notebook()
+
+    if is_notebook:
+        clear_output(True)
+    plt.figure(figsize=(20, 20))
+
+    if scores["train"]:
+        plt.subplot(334)
+        plt.title(
+            f"iteration {iteration_idx} out of {num_iterations}. "
+            f"training score: {scores['train'][-1]} out of {total_episode_rewards}"
+        )
+        plt.plot(scores["train"])
+        plt.xlabel("episode")
+
+    if scores["validation"]:
+        plt.subplot(335)
+        val_means = [round(np.mean(scores).item()) for scores in scores["validation"]]
+        plt.title(f"validation score: {val_means[-1]} out of {total_episode_rewards}")
+        plt.plot(val_means)
+        plt.xlabel("episode")
+
+    if scores["test"]:
+        plt.subplot(336)
+        plt.title(
+            f"test score: {np.mean(scores['test'])} out of {total_episode_rewards}"
+        )
+        plt.plot(round(np.mean(scores["test"]).item(), 2))
+        plt.xlabel("episode")
+
+    plt.subplot(331)
+    plt.title("training td loss")
+    plt.plot(training_loss)
+    plt.xlabel("update counts")
+
+    plt.subplot(332)
+    plt.title("epsilons")
+    plt.plot(epsilons)
+    plt.xlabel("update counts")
+
+    plt.subplot(337)
+    plt.title("Q-values, train")
+    for action_number in range(number_of_actions):
+        plt.plot(
+            [q_values_[action_number] for q_values_ in q_values["train"]],
+            label=f"action {action_number}",
+        )
+    plt.legend(loc="upper left")
+    plt.xlabel("number of actions")
+
+    plt.subplot(338)
+    plt.title("Q-values, val")
+    for action_number in range(number_of_actions):
+        plt.plot(
+            [q_values_[action_number] for q_values_ in q_values["val"]],
+            label=f"action {action_number}",
+        )
+    plt.legend(loc="upper left")
+    plt.xlabel("number of actions")
+
+    plt.subplot(339)
+    plt.title("Q-values, test")
+    for action_number in range(number_of_actions):
+        plt.plot(
+            [q_values_[action_number] for q_values_ in q_values["test"]],
+            label=f"action {action_number}",
+        )
+    plt.legend(loc="upper left")
+    plt.xlabel("number of actions")
+
+    plt.subplots_adjust(hspace=0.5)
+    plt.savefig(f"{default_root_dir}/plot.pdf")
+
+    if is_notebook:
+        plt.show()
+    else:
+        console_dqn(**all_params)
+
+
+def console_dqn(
+    scores: dict,
+    training_loss: list,
+    epsilons: list,
+    q_values: dict,
+    iteration_idx: int,
+    number_of_actions: int,
+    num_iterations: int,
+    total_episode_rewards: int,
+    num_validation: int,
+    num_samples_for_results: int,
+    default_root_dir: str,
+) -> None:
+    """Print the dqn training to the console."""
+    if scores["train"]:
+        tqdm.write(
+            f"iteration {iteration_idx} out of {num_iterations}.\n"
+            f"episode {num_validation} training score: "
+            f"{scores['train'][-1]} out of {total_episode_rewards}"
+        )
+
+    if scores["validation"]:
+        val_means = [round(np.mean(scores).item()) for scores in scores["validation"]]
+        tqdm.write(
+            f"episode {num_validation} validation score: {val_means[-1]} "
+            "out of {total_episode_rewards}"
+        )
+
+    if scores["test"]:
+        tqdm.write(
+            f"test score: {np.mean(scores['test'])} out of {total_episode_rewards}"
+        )
+
+    # tqdm.write(
+    #     f"training loss: {training_loss[-1]}\nepsilons: "
+    #     f"{epsilons[-1]}\ntraining q-values: {q_values['train']}"
+    # )
+
+    tqdm.write(f"training loss: {training_loss[-1]}")
+
+
+def save_dqn_results(
+    scores: dict,
+    training_loss: list,
+    default_root_dir: str,
+    q_values: dict,
+    memory_systems: dict,
+) -> None:
+    """Save dqn train / val / test results."""
+    results = {
+        "train_score": scores["train"],
+        "validation_score": [
+            {
+                "mean": round(np.mean(scores).item(), 2),
+                "std": round(np.std(scores).item(), 2),
+            }
+            for scores in scores["validation"]
+        ],
+        "test_score": {
+            "mean": round(np.mean(scores["test"]).item(), 2),
+            "std": round(np.std(scores["test"]).item(), 2),
+        },
+        "training_loss": training_loss,
+    }
+    write_yaml(results, os.path.join(default_root_dir, "results.yaml"))
+    write_yaml(
+        memory_systems.return_as_a_dict_list(),
+        os.path.join(default_root_dir, "last_memory_state.yaml"),
+    )
+    write_yaml(q_values, os.path.join(default_root_dir, "q_values.yaml"))
 
 
 class ReplayBuffer:
@@ -592,3 +765,148 @@ class PrioritizedReplayBuffer(ReplayBufferNStep):
         weight = weight / max_weight
 
         return weight
+
+
+def compute_dqn_loss(
+    samples: Dict[str, np.ndarray],
+    device: str,
+    dqn: torch.nn.Module,
+    dqn_target: torch.nn.Module,
+    ddqn: str,
+    gamma: float,
+) -> torch.Tensor:
+    """Return dqn loss.
+
+    Args
+    ----
+    samples: A dictionary of samples from the replay buffer.
+        obs: np.ndarray,
+        act: np.ndarray,
+        rew: float,
+        next_obs: np.ndarray,
+        done: bool,
+
+    device
+    """
+    state = samples["obs"]
+    next_state = samples["next_obs"]
+    action = torch.LongTensor(samples["acts"].reshape(-1, 1)).to(device)
+    reward = torch.FloatTensor(samples["rews"].reshape(-1, 1)).to(device)
+    done = torch.FloatTensor(samples["done"].reshape(-1, 1)).to(device)
+
+    # G_t   = r + gamma * v(s_{t+1})  if state != Terminal
+    #       = r                       otherwise
+    curr_q_value = dqn(state).gather(1, action)
+    if ddqn:
+        next_q_value = (
+            dqn_target(next_state)
+            .gather(1, dqn(next_state).argmax(dim=1, keepdim=True))
+            .detach()
+        )
+    else:
+        next_q_value = dqn_target(next_state).max(dim=1, keepdim=True)[0].detach()
+    mask = 1 - done
+    target = (reward + gamma * next_q_value * mask).to(device)
+
+    # calculate dqn loss
+    loss = F.smooth_l1_loss(curr_q_value, target)
+
+    return loss
+
+
+def select_dqn_action(
+    state: dict,
+    greedy: bool,
+    dqn: torch.nn.Module,
+    train_val_test: str,
+    q_values: dict,
+    epsilon: float,
+    action_space: gym.spaces.Discrete,
+    save_q_value: bool = False,
+) -> int:
+    """Select an action from the input state.
+
+    Args
+    ----
+    state: The current state of the memory systems. This is NOT what the gym env
+    gives you. This is made by the agent.
+    greedy: always pick greedy action if True
+    save_q_value: whether to save the q values or not.
+
+    """
+    # epsilon greedy policy
+    q_values_ = dqn(np.array([state])).detach().cpu().numpy().tolist()[0]
+
+    if save_q_value:
+        if train_val_test == "train":
+            q_values["train"].append(q_values_)
+        elif train_val_test == "val":
+            q_values["val"].append(q_values_)
+        elif train_val_test == "test":
+            q_values["test"].append(q_values_)
+
+    if epsilon < np.random.random() or greedy:
+        selected_action = argmax(q_values_)
+    else:
+        selected_action = action_space.sample()
+
+    return selected_action
+
+
+def update_dqn_model(
+    replay_buffer: ReplayBuffer,
+    optimizer: torch.optim.Adam,
+    device: str,
+    dqn: torch.nn.Module,
+    dqn_target: torch.nn.Module,
+    ddqn: str,
+    gamma: float,
+) -> torch.Tensor:
+    """Update the model by gradient descent."""
+    samples = replay_buffer.sample_batch()
+
+    loss = compute_dqn_loss(samples, device, dqn, dqn_target, ddqn, gamma)
+
+    optimizer.zero_grad()
+    loss.backward()
+    optimizer.step()
+
+    return loss.item()
+
+
+def save_dqn_validation(
+    scores_temp: list,
+    scores: dict,
+    default_root_dir: str,
+    num_validation: int,
+    val_filenames: list,
+    dqn: torch.nn.Module,
+) -> None:
+    """Keep the best validation model.
+
+    Args
+    ----
+    """
+    mean_score = round(np.mean(scores_temp).item())
+    filename = (
+        f"{default_root_dir}/" f"episode={num_validation}_val-score={mean_score}.pt"
+    )
+    val_filenames.append(filename)
+    torch.save(dqn.state_dict(), filename)
+    scores["validation"].append(scores_temp)
+
+    scores_to_compare = []
+    for filename in val_filenames:
+        scores_to_compare.append(int(filename.split("val-score=")[-1].split(".pt")[0]))
+
+    file_to_keep = val_filenames[scores_to_compare.index(max(scores_to_compare))]
+
+    for filename in deepcopy(val_filenames):
+        if filename != file_to_keep:
+            os.remove(filename)
+            val_filenames.remove(filename)
+
+
+def dqn_target_hard_update(dqn: torch.nn.Module, dqn_target: torch.nn.Module) -> None:
+    """Hard update: target <- local."""
+    dqn_target.load_state_dict(dqn.state_dict())

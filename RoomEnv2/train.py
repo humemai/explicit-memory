@@ -1,5 +1,5 @@
-import logging
 import argparse
+import logging
 
 logger = logging.getLogger()
 logger.disabled = True

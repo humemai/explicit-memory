@@ -14,19 +14,16 @@ import torch.optim as optim
 from IPython.display import clear_output
 from tqdm.auto import tqdm, trange
 
-from explicit_memory.memory import (
-    EpisodicMemory,
-    MemorySystems,
-    SemanticMemory,
-    ShortMemory,
-)
+from explicit_memory.memory import (EpisodicMemory, MemorySystems,
+                                    SemanticMemory, ShortMemory)
 from explicit_memory.nn import LSTM
-from explicit_memory.policy import answer_question, encode_observation, manage_memory
-from explicit_memory.utils import (
-    ReplayBuffer,
-    is_running_notebook,
-    write_yaml,
-)
+from explicit_memory.policy import (answer_question, encode_observation,
+                                    manage_memory)
+from explicit_memory.utils import (ReplayBuffer, argmax,
+                                   dqn_target_hard_update, plot_dqn,
+                                   save_dqn_results, save_dqn_validation,
+                                   select_dqn_action, update_dqn_model,
+                                   write_yaml)
 
 from .handcrafted import HandcraftedAgent
 
@@ -40,7 +37,7 @@ class DQNAgent(HandcraftedAgent):
     def __init__(
         self,
         env_str: str = "room_env:RoomEnv-v1",
-        num_iterations: int = 1280,
+        num_iterations: int = 128 * 16,
         replay_buffer_size: int = 1024,
         warm_start: int = 1024,
         batch_size: int = 1024,
@@ -119,7 +116,6 @@ class DQNAgent(HandcraftedAgent):
         self.test_seed = test_seed
 
         self.val_filenames = []
-        self.is_notebook = is_running_notebook()
         self.num_iterations = num_iterations
         self.plotting_interval = plotting_interval
         self.run_test = run_test
@@ -173,42 +169,12 @@ class DQNAgent(HandcraftedAgent):
         # optimizer
         self.optimizer = optim.Adam(self.dqn.parameters())
 
-    def select_action(self, state: dict, greedy: bool) -> int:
-        """Select an action from the input state.
-
-        Args
-        ----
-        state: The current state of the memory systems. This is NOT what the gym env
-        gives you. This is made by the agent.
-        greedy: always pick greedy action if True
-
-        """
-        # epsilon greedy policy
-        if self.epsilon < np.random.random() or greedy:
-            selected_action = self.dqn(np.array([state])).argmax()
-            selected_action = selected_action.detach().cpu().numpy().item()
-
-        else:
-            selected_action = self.action_space.sample()
-
-        return selected_action
-
-    def update_model(self) -> torch.Tensor:
-        """Update the model by gradient descent."""
-        samples = self.replay_buffer.sample_batch()
-
-        loss = self._compute_dqn_loss(samples)
-
-        self.optimizer.zero_grad()
-        loss.backward()
-        self.optimizer.step()
-
-        return loss.item()
+        self.train_val_test = None
+        self.q_values = {"train": [], "val": [], "test": []}
 
     def fill_replay_buffer(self) -> None:
         """Make the replay buffer full in the beginning with the uniformly-sampled
         actions. The filling continues until it reaches the warm start size."""
-
         self.dqn.eval()
 
         while len(self.replay_buffer) < self.warm_start:
@@ -216,10 +182,18 @@ class DQNAgent(HandcraftedAgent):
             (observation, question), info = self.env.reset()
             encode_observation(self.memory_systems, observation)
 
-            done = False
-            while not done and len(self.replay_buffer) < self.warm_start:
+            while True:
                 state = self.memory_systems.return_as_a_dict_list()
-                action = self.select_action(state, greedy=False)
+                action = select_dqn_action(
+                    state=state,
+                    greedy=False,
+                    dqn=self.dqn,
+                    train_val_test=self.train_val_test,
+                    q_values=self.q_values,
+                    epsilon=self.epsilon,
+                    action_space=self.action_space,
+                    save_q_value=False,
+                )
                 manage_memory(
                     self.memory_systems, self.action2str[action], split_possessive=True
                 )
@@ -235,9 +209,12 @@ class DQNAgent(HandcraftedAgent):
                     truncated,
                     info,
                 ) = self.env.step(answer)
+                done = done or truncated
+
+                if done or len(self.replay_buffer) >= self.warm_start:
+                    break
 
                 encode_observation(self.memory_systems, observation)
-                done = done or truncated
                 next_state = self.memory_systems.return_as_a_dict_list()
 
                 transition = [state, action, reward, next_state, done]
@@ -248,6 +225,7 @@ class DQNAgent(HandcraftedAgent):
     def train(self):
         """Train the agent."""
         self.fill_replay_buffer()  # fill up the buffer till warm start size
+        self.train_val_test = "train"
         self.num_validation = 0
 
         self.epsilons = []
@@ -262,7 +240,16 @@ class DQNAgent(HandcraftedAgent):
         bar = trange(1, self.num_iterations + 1)
         for self.iteration_idx in bar:
             state = self.memory_systems.return_as_a_dict_list()
-            action = self.select_action(state, greedy=False)
+            action = select_dqn_action(
+                state=state,
+                greedy=False,
+                dqn=self.dqn,
+                train_val_test=self.train_val_test,
+                q_values=self.q_values,
+                epsilon=self.epsilon,
+                action_space=self.action_space,
+                save_q_value=True,
+            )
 
             manage_memory(
                 self.memory_systems, self.action2str[action], split_possessive=True
@@ -299,7 +286,15 @@ class DQNAgent(HandcraftedAgent):
                 (observation, question), info = self.env.reset()
                 encode_observation(self.memory_systems, observation)
 
-            loss = self.update_model()
+            loss = update_dqn_model(
+                replay_buffer=self.replay_buffer,
+                optimizer=self.optimizer,
+                device=self.device,
+                dqn=self.dqn,
+                dqn_target=self.dqn_target,
+                ddqn=self.ddqn,
+                gamma=self.gamma,
+            )
             self.training_loss.append(loss)
 
             # linearly decrease epsilon
@@ -312,14 +307,26 @@ class DQNAgent(HandcraftedAgent):
 
             # if hard update is needed
             if self.iteration_idx % self.target_update_rate == 0:
-                self._target_hard_update()
+                dqn_target_hard_update(dqn=self.dqn, dqn_target=self.dqn_target)
 
             # plotting & show training results
             if (
                 self.iteration_idx == self.num_iterations
                 or self.iteration_idx % self.plotting_interval == 0
             ):
-                self._plot()
+                plot_dqn(
+                    self.scores,
+                    self.training_loss,
+                    self.epsilons,
+                    self.q_values,
+                    self.iteration_idx,
+                    self.action_space.n.item(),
+                    self.num_iterations,
+                    self.env.total_episode_rewards,
+                    self.num_validation,
+                    self.num_samples_for_results,
+                    self.default_root_dir,
+                )
         with torch.no_grad():
             self.test()
 
@@ -327,10 +334,11 @@ class DQNAgent(HandcraftedAgent):
 
     def validate(self) -> None:
         """Validate the agent."""
+        self.train_val_test = "val"
         self.dqn.eval()
 
-        scores = []
-        for _ in range(self.num_samples_for_results):
+        scores_temp = []
+        for idx in range(self.num_samples_for_results):
             self.init_memory_systems()
             (observation, question), info = self.env.reset()
             encode_observation(self.memory_systems, observation)
@@ -339,7 +347,23 @@ class DQNAgent(HandcraftedAgent):
             score = 0
             while not done:
                 state = self.memory_systems.return_as_a_dict_list()
-                action = self.select_action(state, greedy=True)
+
+                if idx == self.num_samples_for_results - 1:
+                    save_q_value = True
+                else:
+                    save_q_value = False
+
+                action = select_dqn_action(
+                    state=state,
+                    greedy=True,
+                    dqn=self.dqn,
+                    train_val_test=self.train_val_test,
+                    q_values=self.q_values,
+                    epsilon=self.epsilon,
+                    action_space=self.action_space,
+                    save_q_value=save_q_value,
+                )
+
                 manage_memory(
                     self.memory_systems, self.action2str[action], split_possessive=True
                 )
@@ -359,39 +383,20 @@ class DQNAgent(HandcraftedAgent):
                 encode_observation(self.memory_systems, observation)
                 done = done or truncated
 
-            scores.append(score)
+            scores_temp.append(score)
 
-        self.save_validation(scores)
+        save_dqn_validation(
+            scores_temp=scores_temp,
+            scores=self.scores,
+            default_root_dir=self.default_root_dir,
+            num_validation=self.num_validation,
+            val_filenames=self.val_filenames,
+            dqn=self.dqn,
+        )
         self.env.close()
         self.num_validation += 1
         self.dqn.train()
-
-    def save_validation(self, scores) -> None:
-        """Keep the best validation model.
-
-        Args
-        ----
-        scores: The scores of one validation episode
-        """
-        mean_score = round(np.mean(scores).item())
-        filename = (
-            f"{self.default_root_dir}/"
-            f"episode={self.num_validation}_val-score={mean_score}.pt"
-        )
-        self.val_filenames.append(filename)
-        torch.save(self.dqn.state_dict(), filename)
-        self.scores["validation"].append(scores)
-
-        scores = []
-        for filename in self.val_filenames:
-            scores.append(int(filename.split("val-score=")[-1].split(".pt")[0]))
-
-        file_to_keep = self.val_filenames[scores.index(max(scores))]
-
-        for filename in deepcopy(self.val_filenames):
-            if filename != file_to_keep:
-                os.remove(filename)
-                self.val_filenames.remove(filename)
+        self.train_val_test = "train"
 
     def test(self, checkpoint: str = None) -> None:
         """Test the agent.
@@ -402,6 +407,7 @@ class DQNAgent(HandcraftedAgent):
             best validation is used.
 
         """
+        self.train_val_test = "test"
         self.env = gym.make(self.env_str, seed=self.test_seed)
         self.dqn.eval()
 
@@ -411,7 +417,7 @@ class DQNAgent(HandcraftedAgent):
             self.dqn.load_state_dict(torch.load(checkpoint))
 
         scores = []
-        for _ in range(self.num_samples_for_results):
+        for idx in range(self.num_samples_for_results):
             self.init_memory_systems()
             (observation, question), info = self.env.reset()
             encode_observation(self.memory_systems, observation)
@@ -420,7 +426,23 @@ class DQNAgent(HandcraftedAgent):
             score = 0
             while not done:
                 state = self.memory_systems.return_as_a_dict_list()
-                action = self.select_action(state, greedy=True)
+
+                if idx == self.num_samples_for_results - 1:
+                    save_q_value = True
+                else:
+                    save_q_value = False
+
+                action = select_dqn_action(
+                    state=state,
+                    greedy=True,
+                    dqn=self.dqn,
+                    train_val_test=self.train_val_test,
+                    q_values=self.q_values,
+                    epsilon=self.epsilon,
+                    action_space=self.action_space,
+                    save_q_value=save_q_value,
+                )
+
                 manage_memory(
                     self.memory_systems, self.action2str[action], split_possessive=True
                 )
@@ -444,140 +466,26 @@ class DQNAgent(HandcraftedAgent):
 
         self.scores["test"] = scores
 
-        results = {
-            "train_score": self.scores["train"],
-            "validation_score": [
-                {
-                    "mean": round(np.mean(scores).item(), 2),
-                    "std": round(np.std(scores).item(), 2),
-                }
-                for scores in self.scores["validation"]
-            ],
-            "test_score": {
-                "mean": round(np.mean(self.scores["test"]).item(), 2),
-                "std": round(np.std(self.scores["test"]).item(), 2),
-            },
-            "training_loss": self.training_loss,
-        }
-        write_yaml(results, os.path.join(self.default_root_dir, "results.yaml"))
-        write_yaml(
-            self.memory_systems.return_as_a_dict_list(),
-            os.path.join(self.default_root_dir, "last_memory_state.yaml"),
+        save_dqn_results(
+            self.scores,
+            self.training_loss,
+            self.default_root_dir,
+            self.q_values,
+            self.memory_systems,
         )
 
-        self._plot()
+        plot_dqn(
+            self.scores,
+            self.training_loss,
+            self.epsilons,
+            self.q_values,
+            self.iteration_idx,
+            self.action_space.n.item(),
+            self.num_iterations,
+            self.env.total_episode_rewards,
+            self.num_validation,
+            self.num_samples_for_results,
+            self.default_root_dir,
+        )
         self.env.close()
         self.dqn.train()
-
-    def _compute_dqn_loss(self, samples: Dict[str, np.ndarray]) -> torch.Tensor:
-        """Return dqn loss.
-
-        Args
-        ----
-        samples: A dictionary of samples from the replay buffer.
-            obs: np.ndarray,
-            act: np.ndarray,
-            rew: float,
-            next_obs: np.ndarray,
-            done: bool,
-        """
-        state = samples["obs"]
-        next_state = samples["next_obs"]
-        action = torch.LongTensor(samples["acts"].reshape(-1, 1)).to(self.device)
-        reward = torch.FloatTensor(samples["rews"].reshape(-1, 1)).to(self.device)
-        done = torch.FloatTensor(samples["done"].reshape(-1, 1)).to(self.device)
-
-        # G_t   = r + gamma * v(s_{t+1})  if state != Terminal
-        #       = r                       otherwise
-        curr_q_value = self.dqn(state).gather(1, action)
-        if self.ddqn:
-            next_q_value = (
-                self.dqn_target(next_state)
-                .gather(1, self.dqn(next_state).argmax(dim=1, keepdim=True))
-                .detach()
-            )
-        else:
-            next_q_value = (
-                self.dqn_target(next_state).max(dim=1, keepdim=True)[0].detach()
-            )
-        mask = 1 - done
-        target = (reward + self.gamma * next_q_value * mask).to(self.device)
-
-        # calculate dqn loss
-        loss = F.smooth_l1_loss(curr_q_value, target)
-
-        return loss
-
-    def _target_hard_update(self):
-        """Hard update: target <- local."""
-        self.dqn_target.load_state_dict(self.dqn.state_dict())
-
-    def _plot(self):
-        """Plot the training progresses."""
-        if self.is_notebook:
-            clear_output(True)
-        plt.figure(figsize=(20, 8))
-
-        if self.scores["train"]:
-            plt.subplot(234)
-            plt.title(
-                f"iteration {self.iteration_idx} out of {self.num_iterations}. "
-                f"training score: {self.scores['train'][-1]} out of 128"
-            )
-            plt.plot(self.scores["train"])
-            plt.xlabel("episode")
-
-        if self.scores["validation"]:
-            plt.subplot(235)
-            val_means = [
-                round(np.mean(scores).item()) for scores in self.scores["validation"]
-            ]
-            plt.title(f"validation score: {val_means[-1]} out of 128")
-            plt.plot(val_means)
-            plt.xlabel("episode")
-
-        if self.scores["test"]:
-            plt.subplot(236)
-            plt.title(f"test score: {np.mean(self.scores['test'])} out of 128")
-            plt.plot(round(np.mean(self.scores["test"]).item(), 2))
-            plt.xlabel("episode")
-
-        plt.subplot(231)
-        plt.title("training loss")
-        plt.plot(self.training_loss)
-        plt.xlabel("update counts")
-
-        plt.subplot(232)
-        plt.title("epsilons")
-        plt.plot(self.epsilons)
-        plt.xlabel("update counts")
-
-        plt.subplots_adjust(hspace=0.5)
-        plt.savefig(f"{self.default_root_dir}/plot.png")
-        if self.is_notebook:
-            plt.show()
-
-    def _console(self):
-        """Print the training progresses to the console."""
-        if self.scores["train"]:
-            tqdm.write(
-                f"iteration {self.iteration_idx} out of {self.num_iterations}.\n"
-                f"episode {self.num_validation} training score: "
-                f"{self.scores['train'][-1]} out of 128"
-            )
-
-        if self.scores["validation"]:
-            val_means = [
-                round(np.mean(scores).item()) for scores in self.scores["validation"]
-            ]
-            tqdm.write(
-                f"episode {self.num_validation} validation score: {val_means[-1]} "
-                "out of 128"
-            )
-
-        if self.scores["test"]:
-            tqdm.write(f"test score: {np.mean(self.scores['test'])} out of 128")
-
-        tqdm.write(
-            f"training loss: {self.training_loss[-1]}\nepsilons: {self.epsilons[-1]}\n"
-        )

@@ -15,20 +15,16 @@ import torch.optim as optim
 from IPython.display import clear_output
 from tqdm.auto import tqdm, trange
 
-from explicit_memory.memory import (
-    EpisodicMemory,
-    MemorySystems,
-    SemanticMemory,
-    ShortMemory,
-)
+from explicit_memory.memory import (EpisodicMemory, MemorySystems,
+                                    SemanticMemory, ShortMemory)
 from explicit_memory.nn import LSTM
-from explicit_memory.policy import (
-    answer_question,
-    encode_observation,
-    explore,
-    manage_memory,
-)
-from explicit_memory.utils import ReplayBuffer, is_running_notebook, write_yaml
+from explicit_memory.policy import (answer_question, encode_observation,
+                                    explore, manage_memory)
+from explicit_memory.utils import (ReplayBuffer, argmax,
+                                   dqn_target_hard_update, plot_dqn,
+                                   save_dqn_results, save_dqn_validation,
+                                   select_dqn_action, update_dqn_model,
+                                   write_yaml)
 
 from .dqn import DQNAgent
 
@@ -143,16 +139,14 @@ class DQNExploreAgent(DQNAgent):
         For explore_policy == "rl"
 
         """
-        super().fill_replay_buffer()
         while len(self.replay_buffer) < self.warm_start:
             self.init_memory_systems()
-            (observations, question), info = self.env.reset()
+            observations, info = self.env.reset()
 
-            obs = observations[0]
-            encode_observation(self.memory_systems, obs)
+            encode_observation(self.memory_systems, observations["self"])
             manage_memory(self.memory_systems, "agent", split_possessive=False)
 
-            for obs in observations[1:]:
+            for obs in observations["room"]:
                 encode_observation(self.memory_systems, obs)
                 manage_memory(
                     self.memory_systems,
@@ -164,14 +158,23 @@ class DQNExploreAgent(DQNAgent):
                 action_qa = answer_question(
                     self.memory_systems,
                     self.qa_policy,
-                    question,
+                    observations["question"],
                     split_possessive=False,
                 )
                 state = self.memory_systems.return_as_a_dict_list()
-                action = self.select_action(state, greedy=False)
+                action = select_dqn_action(
+                    state=state,
+                    greedy=False,
+                    dqn=self.dqn,
+                    train_val_test=self.train_val_test,
+                    q_values=self.q_values,
+                    epsilon=self.epsilon,
+                    action_space=self.action_space,
+                    save_q_value=False,
+                )
                 action_pair = (action_qa, self.action2str[action])
                 (
-                    (observations, question),
+                    observations,
                     reward,
                     done,
                     truncated,
@@ -182,11 +185,10 @@ class DQNExploreAgent(DQNAgent):
                 if done or len(self.replay_buffer) >= self.warm_start:
                     break
 
-                obs = observations[0]
-                encode_observation(self.memory_systems, obs)
+                encode_observation(self.memory_systems, observations["self"])
                 manage_memory(self.memory_systems, "agent", split_possessive=False)
 
-                for obs in observations[1:]:
+                for obs in observations["room"]:
                     encode_observation(self.memory_systems, obs)
                     manage_memory(
                         self.memory_systems,
@@ -210,13 +212,12 @@ class DQNExploreAgent(DQNAgent):
 
         self.dqn.train()
         self.init_memory_systems()
-        (observations, question), info = self.env.reset()
+        observations, info = self.env.reset()
 
-        obs = observations[0]
-        encode_observation(self.memory_systems, obs)
+        encode_observation(self.memory_systems, observations["self"])
         manage_memory(self.memory_systems, "agent", split_possessive=False)
 
-        for obs in observations[1:]:
+        for obs in observations["room"]:
             encode_observation(self.memory_systems, obs)
             manage_memory(
                 self.memory_systems,
@@ -230,14 +231,23 @@ class DQNExploreAgent(DQNAgent):
             action_qa = answer_question(
                 self.memory_systems,
                 self.qa_policy,
-                question,
+                observations["question"],
                 split_possessive=False,
             )
             state = self.memory_systems.return_as_a_dict_list()
-            action = self.select_action(state, greedy=False)
+            action = select_dqn_action(
+                state=state,
+                greedy=False,
+                dqn=self.dqn,
+                train_val_test=self.train_val_test,
+                q_values=self.q_values,
+                epsilon=self.epsilon,
+                action_space=self.action_space,
+                save_q_value=True,
+            )
             action_pair = (action_qa, self.action2str[action])
             (
-                (observations, question),
+                observations,
                 reward,
                 done,
                 truncated,
@@ -247,11 +257,10 @@ class DQNExploreAgent(DQNAgent):
             done = done or truncated
 
             if not done:
-                obs = observations[0]
-                encode_observation(self.memory_systems, obs)
+                encode_observation(self.memory_systems, observations["self"])
                 manage_memory(self.memory_systems, "agent", split_possessive=False)
 
-                for obs in observations[1:]:
+                for obs in observations["room"]:
                     encode_observation(self.memory_systems, obs)
                     manage_memory(
                         self.memory_systems,
@@ -269,21 +278,27 @@ class DQNExploreAgent(DQNAgent):
                     self.validate()
 
                 self.init_memory_systems()
-                (observations, question), info = self.env.reset()
+                observations, info = self.env.reset()
 
-                obs = observations[0]
-                encode_observation(self.memory_systems, obs)
+                encode_observation(self.memory_systems, observations["self"])
                 manage_memory(self.memory_systems, "agent", split_possessive=False)
 
-                for obs in observations[1:]:
+                for obs in observations["room"]:
                     encode_observation(self.memory_systems, obs)
                     manage_memory(
                         self.memory_systems,
                         self.mm_policy,
                         split_possessive=False,
                     )
-
-            loss = self.update_model()
+            loss = update_dqn_model(
+                replay_buffer=self.replay_buffer,
+                optimizer=self.optimizer,
+                device=self.device,
+                dqn=self.dqn,
+                dqn_target=self.dqn_target,
+                ddqn=self.ddqn,
+                gamma=self.gamma,
+            )
             self.training_loss.append(loss)
 
             # linearly decrease epsilon
@@ -296,14 +311,26 @@ class DQNExploreAgent(DQNAgent):
 
             # if hard update is needed
             if self.iteration_idx % self.target_update_rate == 0:
-                self._target_hard_update()
+                dqn_target_hard_update(dqn=self.dqn, dqn_target=self.dqn_target)
 
             # plotting & show training results
             if (
                 self.iteration_idx == self.num_iterations
                 or self.iteration_idx % self.plotting_interval == 0
             ):
-                self._plot()
+                plot_dqn(
+                    self.scores,
+                    self.training_loss,
+                    self.epsilons,
+                    self.q_values,
+                    self.iteration_idx,
+                    self.action_space.n.item(),
+                    self.num_iterations,
+                    self.env.total_episode_rewards,
+                    self.num_validation,
+                    self.num_samples_for_results,
+                    self.default_root_dir,
+                )
 
         with torch.no_grad():
             self.test()
@@ -322,13 +349,12 @@ class DQNExploreAgent(DQNAgent):
         scores = []
         for _ in range(self.num_samples_for_results):
             self.init_memory_systems()
-            (observations, question), info = self.env.reset()
+            observations, info = self.env.reset()
 
-            obs = observations[0]
-            encode_observation(self.memory_systems, obs)
+            encode_observation(self.memory_systems, observations["self"])
             manage_memory(self.memory_systems, "agent", split_possessive=False)
 
-            for obs in observations[1:]:
+            for obs in observations["room"]:
                 encode_observation(self.memory_systems, obs)
                 manage_memory(
                     self.memory_systems,
@@ -341,14 +367,23 @@ class DQNExploreAgent(DQNAgent):
                 action_qa = answer_question(
                     self.memory_systems,
                     self.qa_policy,
-                    question,
+                    observations["question"],
                     split_possessive=False,
                 )
                 state = self.memory_systems.return_as_a_dict_list()
-                action = self.select_action(state, greedy=True)
+                action = select_dqn_action(
+                    state=state,
+                    greedy=True,
+                    dqn=self.dqn,
+                    train_val_test=self.train_val_test,
+                    q_values=self.q_values,
+                    epsilon=self.epsilon,
+                    action_space=self.action_space,
+                    save_q_value=True,
+                )
                 action_pair = (action_qa, self.action2str[action])
                 (
-                    (observations, question),
+                    observations,
                     reward,
                     done,
                     truncated,
@@ -360,11 +395,10 @@ class DQNExploreAgent(DQNAgent):
                 if done:
                     break
 
-                obs = observations[0]
-                encode_observation(self.memory_systems, obs)
+                encode_observation(self.memory_systems, observations["self"])
                 manage_memory(self.memory_systems, "agent", split_possessive=False)
 
-                for obs in observations[1:]:
+                for obs in observations["room"]:
                     encode_observation(self.memory_systems, obs)
                     manage_memory(
                         self.memory_systems,

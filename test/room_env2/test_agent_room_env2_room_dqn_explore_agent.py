@@ -13,7 +13,7 @@ from tqdm.auto import tqdm
 from RoomEnv2.agent import DQNExploreAgent, DQNMMAgent
 
 
-class DQNExploreAgenttTest(unittest.TestCase):
+class DQNExploreAgentTest(unittest.TestCase):
     def test_agent(self) -> None:
         for pretrain_semantic in [False, True]:
             for test_seed in [42]:
@@ -72,7 +72,7 @@ class DQNExploreAgenttTest(unittest.TestCase):
                         agent.remove_results_from_disk()
 
 
-class DQNMMAgenttTest(unittest.TestCase):
+class DQNMMAgentTest(unittest.TestCase):
     def test_agent(self) -> None:
         for pretrain_semantic in [False, True]:
             for test_seed in [42]:

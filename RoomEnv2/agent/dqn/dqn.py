@@ -15,20 +15,16 @@ import torch.optim as optim
 from IPython.display import clear_output
 from tqdm.auto import tqdm, trange
 
-from explicit_memory.memory import (
-    EpisodicMemory,
-    MemorySystems,
-    SemanticMemory,
-    ShortMemory,
-)
+from explicit_memory.memory import (EpisodicMemory, MemorySystems,
+                                    SemanticMemory, ShortMemory)
 from explicit_memory.nn import LSTM
-from explicit_memory.policy import (
-    answer_question,
-    encode_observation,
-    explore,
-    manage_memory,
-)
-from explicit_memory.utils import ReplayBuffer, is_running_notebook, write_yaml, argmax
+from explicit_memory.policy import (answer_question, encode_observation,
+                                    explore, manage_memory)
+from explicit_memory.utils import (ReplayBuffer, argmax,
+                                   dqn_target_hard_update, is_running_notebook,
+                                   plot_dqn, save_dqn_results,
+                                   save_dqn_validation, select_dqn_action,
+                                   update_dqn_model, write_yaml)
 
 from ..handcrafted import HandcraftedAgent
 
@@ -186,83 +182,29 @@ class DQNAgent(HandcraftedAgent):
         self.train_val_test = None
         self.q_values = {"train": [], "val": [], "test": []}
 
-    def select_action(self, state: dict, greedy: bool) -> int:
-        """Select an action from the input state.
-
-        Args
-        ----
-        state: The current state of the memory systems. This is NOT what the gym env
-        gives you. This is made by the agent.
-        greedy: always pick greedy action if True
-
-        """
-        # epsilon greedy policy
-        q_values = self.dqn(np.array([state])).detach().cpu().numpy().tolist()[0]
-        if self.train_val_test != "filling_replay_buffer":
-            self.q_values[self.train_val_test].append(q_values)
-
-        if self.epsilon < np.random.random() or greedy:
-            selected_action = argmax(q_values)
-        else:
-            selected_action = self.action_space.sample()
-
-        return selected_action
-
-    def update_model(self) -> torch.Tensor:
-        """Update the model by gradient descent."""
-        samples = self.replay_buffer.sample_batch()
-
-        loss = self._compute_dqn_loss(samples)
-
-        self.optimizer.zero_grad()
-        loss.backward()
-        self.optimizer.step()
-
-        return loss.item()
-
     def fill_replay_buffer(self) -> None:
         """Make the replay buffer full in the beginning with the uniformly-sampled
         actions. The filling continues until it reaches the warm start size.
 
         """
-        self.train_val_test = "filling_replay_buffer"
+        pass
 
     def train(self) -> None:
         """Code for training"""
         self.train_val_test = "train"
 
-    def save_validation(self, scores) -> None:
-        """Keep the best validation model.
-
-        Args
-        ----
-        scores: The scores of one validation episode
-        """
-        mean_score = round(np.mean(scores).item())
-        filename = (
-            f"{self.default_root_dir}/"
-            f"episode={self.num_validation}_val-score={mean_score}.pt"
-        )
-        self.val_filenames.append(filename)
-        torch.save(self.dqn.state_dict(), filename)
-        self.scores["validation"].append(scores)
-
-        scores = []
-        for filename in self.val_filenames:
-            scores.append(int(filename.split("val-score=")[-1].split(".pt")[0]))
-
-        file_to_keep = self.val_filenames[scores.index(max(scores))]
-
-        for filename in deepcopy(self.val_filenames):
-            if filename != file_to_keep:
-                os.remove(filename)
-                self.val_filenames.remove(filename)
-
     def validate(self) -> None:
         self.train_val_test = "val"
         self.dqn.eval()
-        scores = self.validate_test_middle()
-        self.save_validation(scores)
+        scores_temp = self.validate_test_middle()
+        save_dqn_validation(
+            scores_temp=scores_temp,
+            scores=self.scores,
+            default_root_dir=self.default_root_dir,
+            num_validation=self.num_validation,
+            val_filenames=self.val_filenames,
+            dqn=self.dqn,
+        )
         self.env.close()
         self.num_validation += 1
         self.dqn.train()
@@ -282,162 +224,27 @@ class DQNAgent(HandcraftedAgent):
         scores = self.validate_test_middle()
         self.scores["test"] = scores
 
-        results = {
-            "train_score": self.scores["train"],
-            "validation_score": [
-                {
-                    "mean": round(np.mean(scores).item(), 2),
-                    "std": round(np.std(scores).item(), 2),
-                }
-                for scores in self.scores["validation"]
-            ],
-            "test_score": {
-                "mean": round(np.mean(self.scores["test"]).item(), 2),
-                "std": round(np.std(self.scores["test"]).item(), 2),
-            },
-            "training_loss": self.training_loss,
-        }
-        write_yaml(results, os.path.join(self.default_root_dir, "results.yaml"))
-        write_yaml(
-            self.memory_systems.return_as_a_dict_list(),
-            os.path.join(self.default_root_dir, "last_memory_state.yaml"),
+        save_dqn_results(
+            self.scores,
+            self.training_loss,
+            self.default_root_dir,
+            self.q_values,
+            self.memory_systems,
         )
-        write_yaml(self.q_values, os.path.join(self.default_root_dir, "q_values.yaml"))
 
-        self._plot()
+        plot_dqn(
+            self.scores,
+            self.training_loss,
+            self.epsilons,
+            self.q_values,
+            self.iteration_idx,
+            self.action_space.n.item(),
+            self.num_iterations,
+            self.env.total_episode_rewards,
+            self.num_validation,
+            self.num_samples_for_results,
+            self.default_root_dir,
+        )
 
         self.env.close()
         self.dqn.train()
-
-    def _compute_dqn_loss(self, samples: Dict[str, np.ndarray]) -> torch.Tensor:
-        """Return dqn loss.
-
-        Args
-        ----
-        samples: A dictionary of samples from the replay buffer.
-            obs: np.ndarray,
-            act: np.ndarray,
-            rew: float,
-            next_obs: np.ndarray,
-            done: bool,
-        """
-        state = samples["obs"]
-        next_state = samples["next_obs"]
-        action = torch.LongTensor(samples["acts"].reshape(-1, 1)).to(self.device)
-        reward = torch.FloatTensor(samples["rews"].reshape(-1, 1)).to(self.device)
-        done = torch.FloatTensor(samples["done"].reshape(-1, 1)).to(self.device)
-
-        # G_t   = r + gamma * v(s_{t+1})  if state != Terminal
-        #       = r                       otherwise
-        curr_q_value = self.dqn(state).gather(1, action)
-        if self.ddqn:
-            next_q_value = (
-                self.dqn_target(next_state)
-                .gather(1, self.dqn(next_state).argmax(dim=1, keepdim=True))
-                .detach()
-            )
-        else:
-            next_q_value = (
-                self.dqn_target(next_state).max(dim=1, keepdim=True)[0].detach()
-            )
-        mask = 1 - done
-        target = (reward + self.gamma * next_q_value * mask).to(self.device)
-
-        # calculate dqn loss
-        loss = F.smooth_l1_loss(curr_q_value, target)
-
-        return loss
-
-    def _target_hard_update(self):
-        """Hard update: target <- local."""
-        self.dqn_target.load_state_dict(self.dqn.state_dict())
-
-    def _plot(self):
-        """Plot the training progresses."""
-        if self.is_notebook:
-            clear_output(True)
-        plt.figure(figsize=(20, 8))
-
-        if self.scores["train"]:
-            plt.subplot(234)
-            plt.title(
-                f"iteration {self.iteration_idx} out of {self.num_iterations}. "
-                f"training score: {self.scores['train'][-1]} out of "
-                f"{self.max_total_rewards}"
-            )
-            plt.plot(self.scores["train"])
-            plt.xlabel("episode")
-
-        if self.scores["validation"]:
-            plt.subplot(235)
-            val_means = [
-                round(np.mean(scores).item()) for scores in self.scores["validation"]
-            ]
-            plt.title(
-                f"validation score: {val_means[-1]} out of {self.max_total_rewards}"
-            )
-            plt.plot(val_means)
-            plt.xlabel("episode")
-
-        if self.scores["test"]:
-            plt.subplot(236)
-            plt.title(
-                f"test score: {np.mean(self.scores['test'])} out of "
-                f"{self.max_total_rewards}"
-            )
-            plt.plot(round(np.mean(self.scores["test"]).item(), 2))
-            plt.xlabel("episode")
-
-        plt.subplot(231)
-        plt.title("training loss")
-        plt.plot(self.training_loss)
-        plt.xlabel("update counts")
-
-        plt.subplot(232)
-        plt.title("epsilons")
-        plt.plot(self.epsilons)
-        plt.xlabel("update counts")
-
-        plt.subplot(233)
-        plt.title("Q-values, train")
-        for action_number in range(self.action_space.n.item()):
-            plt.plot(
-                [q_values[action_number] for q_values in self.q_values["train"]],
-                label=f"action {action_number}",
-            )
-        plt.legend(loc="upper left")
-        plt.xlabel("number of actions")
-
-        plt.subplots_adjust(hspace=0.5)
-        plt.savefig(f"{self.default_root_dir}/plot.png")
-        if self.is_notebook:
-            plt.show()
-
-    def _console(self):
-        """Print the training progresses to the console."""
-        if self.scores["train"]:
-            tqdm.write(
-                f"iteration {self.iteration_idx} out of {self.num_iterations}.\n"
-                f"episode {self.num_validation} training score: "
-                f"{self.scores['train'][-1]} out of {self.max_total_rewards}"
-            )
-
-        if self.scores["validation"]:
-            val_means = [
-                round(np.mean(scores).item()) for scores in self.scores["validation"]
-            ]
-            tqdm.write(
-                f"episode {self.num_validation} validation score: {val_means[-1]} "
-                f"out of {self.max_total_rewards}"
-            )
-
-        if self.scores["test"]:
-            tqdm.write(
-                f"test score: {np.mean(self.scores['test'])} out of "
-                f"{self.max_total_rewards}"
-            )
-
-        tqdm.write(
-            f"training loss: {self.training_loss[-1]}\nepsilons: "
-            f"{self.epsilons[-1]}\ntraining q-values: {self.q_values['train']}"
-        )

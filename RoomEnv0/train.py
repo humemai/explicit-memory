@@ -13,7 +13,6 @@ import yaml
 from agent import HandcraftedAgent
 from tqdm import tqdm
 
-
 from explicit_memory.utils import is_running_notebook
 
 is_notebook = is_running_notebook()

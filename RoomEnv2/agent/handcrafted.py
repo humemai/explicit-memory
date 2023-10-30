@@ -15,18 +15,10 @@ import torch.optim as optim
 from IPython.display import clear_output
 from tqdm.auto import tqdm, trange
 
-from explicit_memory.memory import (
-    EpisodicMemory,
-    MemorySystems,
-    SemanticMemory,
-    ShortMemory,
-)
-from explicit_memory.policy import (
-    answer_question,
-    encode_observation,
-    explore,
-    manage_memory,
-)
+from explicit_memory.memory import (EpisodicMemory, MemorySystems,
+                                    SemanticMemory, ShortMemory)
+from explicit_memory.policy import (answer_question, encode_observation,
+                                    explore, manage_memory)
 from explicit_memory.utils import write_yaml
 
 
@@ -136,7 +128,7 @@ class HandcraftedAgent:
             while not done:
                 if env_started:
                     (
-                        (observations, question),
+                        observations,
                         reward,
                         done,
                         truncated,
@@ -147,13 +139,13 @@ class HandcraftedAgent:
                         break
 
                 else:
-                    (observations, question), info = self.env.reset()
+                    observations, info = self.env.reset()
                     env_started = True
 
-                encode_observation(self.memory_systems, observations[0])
+                encode_observation(self.memory_systems, observations["self"])
                 assert self.memory_systems.short.get_oldest_memory()[0] == "agent"
                 manage_memory(self.memory_systems, "agent", split_possessive=False)
-                for obs in observations[1:]:
+                for obs in observations["room"]:
                     encode_observation(self.memory_systems, obs)
                     assert self.memory_systems.short.get_oldest_memory()[0] != "agent"
                     manage_memory(
@@ -166,7 +158,7 @@ class HandcraftedAgent:
                     answer_question(
                         self.memory_systems,
                         self.qa_policy,
-                        question,
+                        observations["question"],
                         split_possessive=False,
                     )
                 )

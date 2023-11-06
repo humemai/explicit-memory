@@ -10,7 +10,7 @@ import gymnasium as gym
 import numpy as np
 from tqdm.auto import tqdm
 
-from RoomEnv2.agent import HandcraftedAgent
+from AgentRoomEnv2.agent import HandcraftedAgent
 
 
 class HandcraftedAgentTest(unittest.TestCase):

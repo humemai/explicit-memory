@@ -9,7 +9,7 @@ import unittest
 import gymnasium as gym
 from tqdm.auto import tqdm
 
-from RoomEnv1.agent import DQNAgent, HandcraftedAgent
+from AgentRoomEnv1.agent import DQNAgent, HandcraftedAgent
 
 
 class HandcraftedAgentTest(unittest.TestCase):

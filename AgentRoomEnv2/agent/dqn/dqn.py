@@ -15,16 +15,31 @@ import torch.optim as optim
 from IPython.display import clear_output
 from tqdm.auto import tqdm, trange
 
-from explicit_memory.memory import (EpisodicMemory, MemorySystems,
-                                    SemanticMemory, ShortMemory)
+from explicit_memory.memory import (
+    EpisodicMemory,
+    MemorySystems,
+    SemanticMemory,
+    ShortMemory,
+)
 from explicit_memory.nn import LSTM
-from explicit_memory.policy import (answer_question, encode_observation,
-                                    explore, manage_memory)
-from explicit_memory.utils import (ReplayBuffer, argmax,
-                                   dqn_target_hard_update, is_running_notebook,
-                                   plot_dqn, save_dqn_results,
-                                   save_dqn_validation, select_dqn_action,
-                                   update_dqn_model, write_yaml)
+from explicit_memory.policy import (
+    answer_question,
+    encode_observation,
+    explore,
+    manage_memory,
+)
+from explicit_memory.utils import (
+    ReplayBuffer,
+    argmax,
+    dqn_target_hard_update,
+    is_running_notebook,
+    plot_dqn,
+    save_dqn_results,
+    save_dqn_validation,
+    select_dqn_action,
+    update_dqn_model,
+    write_yaml,
+)
 
 from ..handcrafted import HandcraftedAgent
 
@@ -196,7 +211,15 @@ class DQNAgent(HandcraftedAgent):
     def validate(self) -> None:
         self.train_val_test = "val"
         self.dqn.eval()
-        scores_temp = self.validate_test_middle()
+        scores_temp, last_memory_state = self.validate_test_middle()
+        write_yaml(
+            last_memory_state,
+            os.path.join(
+                self.default_root_dir,
+                f"last_memory_state_validation_{str(self.num_validation).zfill(2)}.yaml",
+            ),
+        )
+
         save_dqn_validation(
             scores_temp=scores_temp,
             scores=self.scores,
@@ -221,7 +244,7 @@ class DQNAgent(HandcraftedAgent):
         if checkpoint is not None:
             self.dqn.load_state_dict(torch.load(checkpoint))
 
-        scores = self.validate_test_middle()
+        scores, last_memory_state = self.validate_test_middle()
         self.scores["test"] = scores
 
         save_dqn_results(
@@ -229,7 +252,7 @@ class DQNAgent(HandcraftedAgent):
             self.training_loss,
             self.default_root_dir,
             self.q_values,
-            self.memory_systems,
+            last_memory_state,
         )
 
         plot_dqn(

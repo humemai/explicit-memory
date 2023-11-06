@@ -12,7 +12,7 @@ import numpy as np
 import yaml
 from tqdm.auto import tqdm
 
-from RoomEnv0.agent import HandcraftedAgent
+from AgentRoomEnv0.agent import HandcraftedAgent
 
 
 class RoomEnv0Test(unittest.TestCase):

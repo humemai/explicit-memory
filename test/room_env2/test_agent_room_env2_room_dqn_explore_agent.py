@@ -10,7 +10,7 @@ import gymnasium as gym
 import numpy as np
 from tqdm.auto import tqdm
 
-from RoomEnv2.agent import DQNExploreAgent, DQNMMAgent
+from AgentRoomEnv2.agent import DQNExploreAgent, DQNMMAgent
 
 
 class DQNExploreAgentTest(unittest.TestCase):

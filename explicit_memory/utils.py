@@ -420,7 +420,7 @@ def save_dqn_results(
     training_loss: list,
     default_root_dir: str,
     q_values: dict,
-    memory_systems: dict,
+    last_memory_state: dict,
 ) -> None:
     """Save dqn train / val / test results."""
     results = {
@@ -440,8 +440,8 @@ def save_dqn_results(
     }
     write_yaml(results, os.path.join(default_root_dir, "results.yaml"))
     write_yaml(
-        memory_systems.return_as_a_dict_list(),
-        os.path.join(default_root_dir, "last_memory_state.yaml"),
+        last_memory_state,
+        os.path.join(default_root_dir, "last_memory_state_test.yaml"),
     )
     write_yaml(q_values, os.path.join(default_root_dir, "q_values.yaml"))
 

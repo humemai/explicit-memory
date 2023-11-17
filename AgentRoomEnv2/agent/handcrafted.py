@@ -47,9 +47,10 @@ class HandcraftedAgent:
         capacity: dict = {
             "episodic": 16,
             "semantic": 16,
-            "short": 16,
+            "short": 1,
         },
         pretrain_semantic: bool = False,
+        default_root_dir: str = "./training_results/",
     ) -> None:
         """Initialize the agent.
 
@@ -66,6 +67,7 @@ class HandcraftedAgent:
         num_samples_for_results: The number of samples to validate / test the agent.
         capacity: The capacity of each human-like memory systems.
         pretrain_semantic: Whether or not to pretrain the semantic memory system.
+        default_root_dir: default root directory to store the results.
         """
         params_to_save = deepcopy(locals())
         del params_to_save["self"]
@@ -96,22 +98,69 @@ class HandcraftedAgent:
         self.pretrain_semantic = pretrain_semantic
         self.env = gym.make(self.env_str, **self.env_config)
         self.max_total_rewards = self.env_config["terminates_at"] + 1
+        self.default_root_dir = os.path.join(
+            default_root_dir, str(datetime.datetime.now())
+        )
         self._create_directory(params_to_save)
 
     def _create_directory(self, params_to_save: dict) -> None:
         """Create the directory to store the results."""
-        if "RoomEnv2" in os.listdir():
-            self.default_root_dir = (
-                f"./RoomEnv2/training_results/{str(datetime.datetime.now())}"
-            )
-        else:
-            self.default_root_dir = f"./training_results/{str(datetime.datetime.now())}"
         os.makedirs(self.default_root_dir, exist_ok=True)
         write_yaml(params_to_save, os.path.join(self.default_root_dir, "train.yaml"))
 
     def remove_results_from_disk(self) -> None:
         """Remove the results from the disk."""
         shutil.rmtree(self.default_root_dir)
+
+    def manage_agent_and_map_memory(
+        self, observations: list[list[str]]
+    ) -> list[list[str]]:
+        """Manage episodic_agent and semantic_map memories.
+
+        Args
+        ----
+        observations: The observations["room"] from the environment.
+
+        Returns
+        -------
+        observations_others: The observations["room"] - (episodic_agent and semantic_map
+            memories) from the environment.
+
+        """
+        if hasattr(self.memory_systems, "episodic_agent"):
+            observations_agent = [obs for obs in observations if obs[0] == "agent"]
+            for obs in observations_agent:
+                encode_observation(self.memory_systems, obs)
+                manage_memory(self.memory_systems, "episodic_agent", False)
+
+        else:
+            observations_agent = []
+
+        if hasattr(self.memory_systems, "semantic_map"):
+            observations_map = [
+                obs
+                for obs in observations
+                if obs[1] in ["north", "east", "south", "west"]
+            ]
+
+            for obs in observations_map:
+                encode_observation(self.memory_systems, obs)
+                manage_memory(self.memory_systems, "semantic_map", True)
+
+        else:
+            observations_map = []
+
+        observations_others = [
+            obs
+            for obs in observations
+            if obs not in observations_map and obs not in observations_agent
+        ]
+
+        assert len(observations_agent) + len(observations_map) + len(
+            observations_others
+        ) == len(observations)
+
+        return observations_others
 
     def test(self):
         """Test the agent. There is no training for this agent, since it is
@@ -142,12 +191,11 @@ class HandcraftedAgent:
                     observations, info = self.env.reset()
                     env_started = True
 
-                encode_observation(self.memory_systems, observations["self"])
-                assert self.memory_systems.short.get_oldest_memory()[0] == "agent"
-                manage_memory(self.memory_systems, "agent", split_possessive=False)
+                observations["room"] = self.manage_agent_and_map_memory(
+                    observations["room"]
+                )
                 for obs in observations["room"]:
                     encode_observation(self.memory_systems, obs)
-                    assert self.memory_systems.short.get_oldest_memory()[0] != "agent"
                     manage_memory(
                         self.memory_systems,
                         self.mm_policy,
@@ -186,13 +234,14 @@ class HandcraftedAgent:
                 capacity=self.capacity["episodic"], remove_duplicates=False
             ),
             episodic_agent=EpisodicMemory(
-                capacity=self.capacity["episodic"], remove_duplicates=False
+                capacity=self.capacity["episodic_agent"], remove_duplicates=False
             ),
             semantic=SemanticMemory(capacity=self.capacity["semantic"]),
+            semantic_map=SemanticMemory(capacity=self.capacity["semantic_map"]),
             short=ShortMemory(capacity=self.capacity["short"]),
         )
 
-        if self.pretrain_semantic is not None:
+        if self.pretrain_semantic:
             assert self.capacity["semantic"] > 0
             room_layout = self.env.return_room_layout()
             _ = self.memory_systems.semantic.pretrain_semantic(

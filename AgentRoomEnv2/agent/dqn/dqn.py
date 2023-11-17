@@ -15,31 +15,16 @@ import torch.optim as optim
 from IPython.display import clear_output
 from tqdm.auto import tqdm, trange
 
-from explicit_memory.memory import (
-    EpisodicMemory,
-    MemorySystems,
-    SemanticMemory,
-    ShortMemory,
-)
+from explicit_memory.memory import (EpisodicMemory, MemorySystems,
+                                    SemanticMemory, ShortMemory)
 from explicit_memory.nn import LSTM
-from explicit_memory.policy import (
-    answer_question,
-    encode_observation,
-    explore,
-    manage_memory,
-)
-from explicit_memory.utils import (
-    ReplayBuffer,
-    argmax,
-    dqn_target_hard_update,
-    is_running_notebook,
-    plot_dqn,
-    save_dqn_results,
-    save_dqn_validation,
-    select_dqn_action,
-    update_dqn_model,
-    write_yaml,
-)
+from explicit_memory.policy import (answer_question, encode_observation,
+                                    explore, manage_memory)
+from explicit_memory.utils import (ReplayBuffer, argmax,
+                                   dqn_target_hard_update, is_running_notebook,
+                                   plot_dqn, save_dqn_results,
+                                   save_dqn_validation, select_dqn_action,
+                                   update_dqn_model, write_yaml)
 
 from ..handcrafted import HandcraftedAgent
 
@@ -92,6 +77,7 @@ class DQNAgent(HandcraftedAgent):
         },
         ddqn: bool = False,
         dueling_dqn: bool = False,
+        default_root_dir: str = "./training_results/",
     ):
         """Initialization.
 
@@ -134,6 +120,7 @@ class DQNAgent(HandcraftedAgent):
                 "s", "m", or "l".
         ddqn: wehther to use double dqn
         dueling_dqn: whether to use dueling dqn
+        default_root_dir: default root directory to store the results.
 
         """
         self.train_seed = train_seed
@@ -149,6 +136,7 @@ class DQNAgent(HandcraftedAgent):
             num_samples_for_results=num_samples_for_results,
             capacity=capacity,
             pretrain_semantic=pretrain_semantic,
+            default_root_dir=default_root_dir,
         )
 
         self.device = torch.device(device)

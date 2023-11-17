@@ -93,7 +93,7 @@ class LSTM(nn.Module):
 
         if "episodic_agent" in self.memory_of_interest:
             self.lstm_e_agent = nn.LSTM(
-                self.input_size_e_agent,
+                self.input_size_e,
                 hidden_size,
                 num_layers,
                 batch_first=batch_first,
@@ -112,6 +112,17 @@ class LSTM(nn.Module):
             )
             self.fc_s0 = nn.Linear(hidden_size, hidden_size, device=self.device)
             self.fc_s1 = nn.Linear(hidden_size, hidden_size, device=self.device)
+
+        if "semantic_map" in self.memory_of_interest:
+            self.lstm_s_map = nn.LSTM(
+                self.input_size_s,
+                hidden_size,
+                num_layers,
+                batch_first=batch_first,
+                device=self.device,
+            )
+            self.fc_s0_map = nn.Linear(hidden_size, hidden_size, device=self.device)
+            self.fc_s1_map = nn.Linear(hidden_size, hidden_size, device=self.device)
 
         if "short" in self.memory_of_interest:
             self.lstm_o = nn.LSTM(
@@ -190,7 +201,6 @@ class LSTM(nn.Module):
         elif self.version == "v2":  # [head, relation, tail]
             self.input_size_s = self.embedding_dim * 3
             self.input_size_e = self.embedding_dim * 3
-            self.input_size_e_agent = self.embedding_dim * 3
             self.input_size_o = self.embedding_dim * 3
 
         else:
@@ -363,6 +373,15 @@ class LSTM(nn.Module):
                 self.fc_s1(self.relu(self.fc_s0(lstm_out_s[:, -1, :])))
             )
             to_concat.append(fc_out_s)
+
+        if "semantic_map" in self.memory_of_interest:
+            batch_s_map = [sample["semantic_map"] for sample in x]
+            batch_s_map = self.create_batch(batch_s_map, memory_type="semantic_map")
+            lstm_out_s_map, _ = self.lstm_s_map(batch_s_map)
+            fc_out_s_map = self.relu(
+                self.fc_s1_map(self.relu(self.fc_s0_map(lstm_out_s_map[:, -1, :])))
+            )
+            to_concat.append(fc_out_s_map)
 
         if "short" in self.memory_of_interest:
             batch_o = [sample["short"] for sample in x]

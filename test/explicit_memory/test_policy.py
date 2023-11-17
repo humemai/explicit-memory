@@ -43,7 +43,7 @@ class PolicyTest(unittest.TestCase):
 
         obs = ["agent", "bar", "baz", 1]
         encode_observation(self.memory_systems, obs)
-        manage_memory(self.memory_systems, "agent", split_possessive=False)
+        manage_memory(self.memory_systems, "episodic_agent", split_possessive=False)
 
         obs = ["foo", "bar", "baz", 1]
         encode_observation(self.memory_systems, obs)
@@ -53,13 +53,13 @@ class PolicyTest(unittest.TestCase):
         self.assertTrue(action in ["north", "east", "south", "west", "stay"])
 
     def test_explore_avoid_walls(self):
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(IndexError):
             explore(self.memory_systems, "avoid_walls")
 
         for i in range(3):
             obs = ["agent", "atlocation", "livingroom", i]
             encode_observation(self.memory_systems, obs)
-            manage_memory(self.memory_systems, "agent", split_possessive=False)
+            manage_memory(self.memory_systems, "episodic_agent", split_possessive=False)
 
         self.assertEqual(self.memory_systems.episodic_agent.size, 3)
 
@@ -151,11 +151,11 @@ class PolicyTest(unittest.TestCase):
         self.memory_systems.short.forget_all()
         self.memory_systems.short.add(["foo", "bar", "baz", 1])
         with self.assertRaises(ValueError):
-            manage_memory(self.memory_systems, "agent", split_possessive=False)
+            manage_memory(self.memory_systems, "episodic_agent", split_possessive=False)
 
         self.memory_systems.short.forget_oldest()
         self.memory_systems.short.add(["agent", "atlocation", "officeroom", 5])
-        manage_memory(self.memory_systems, "agent", split_possessive=True)
+        manage_memory(self.memory_systems, "episodic_agent", split_possessive=True)
         self.assertEqual(
             self.memory_systems.episodic_agent.get_latest_memory(),
             ["agent", "atlocation", "officeroom", 5],
@@ -254,42 +254,42 @@ class PolicyTest(unittest.TestCase):
         self.assertTrue(self.memory_systems.short.is_empty)
 
         encode_observation(self.memory_systems, ["agent", "atlocation", "room1", 11])
-        manage_memory(self.memory_systems, "agent", split_possessive=False)
+        manage_memory(self.memory_systems, "episodic_agent", split_possessive=False)
         self.assertEqual(self.memory_systems.episodic.size, 3)
         self.assertEqual(self.memory_systems.episodic_agent.size, 1)
         self.assertEqual(self.memory_systems.semantic.size, 2)
         self.assertTrue(self.memory_systems.short.is_empty)
 
         encode_observation(self.memory_systems, ["agent", "atlocation", "room2", 12])
-        manage_memory(self.memory_systems, "agent", split_possessive=False)
+        manage_memory(self.memory_systems, "episodic_agent", split_possessive=False)
         self.assertEqual(self.memory_systems.episodic.size, 3)
         self.assertEqual(self.memory_systems.episodic_agent.size, 2)
         self.assertEqual(self.memory_systems.semantic.size, 2)
         self.assertTrue(self.memory_systems.short.is_empty)
 
         encode_observation(self.memory_systems, ["agent", "atlocation", "room2", 13])
-        manage_memory(self.memory_systems, "agent", split_possessive=False)
+        manage_memory(self.memory_systems, "episodic_agent", split_possessive=False)
         self.assertEqual(self.memory_systems.episodic.size, 3)
         self.assertEqual(self.memory_systems.episodic_agent.size, 3)
         self.assertEqual(self.memory_systems.semantic.size, 2)
         self.assertTrue(self.memory_systems.short.is_empty)
 
         encode_observation(self.memory_systems, ["agent", "atlocation", "room3", 13])
-        manage_memory(self.memory_systems, "agent", split_possessive=False)
+        manage_memory(self.memory_systems, "episodic_agent", split_possessive=False)
         self.assertEqual(self.memory_systems.episodic.size, 3)
         self.assertEqual(self.memory_systems.episodic_agent.size, 4)
         self.assertEqual(self.memory_systems.semantic.size, 2)
         self.assertTrue(self.memory_systems.short.is_empty)
 
         encode_observation(self.memory_systems, ["agent", "atlocation", "room7", 7])
-        manage_memory(self.memory_systems, "agent", split_possessive=False)
+        manage_memory(self.memory_systems, "episodic_agent", split_possessive=False)
         self.assertEqual(self.memory_systems.episodic.size, 3)
         self.assertEqual(self.memory_systems.episodic_agent.size, 4)
         self.assertEqual(self.memory_systems.semantic.size, 2)
         self.assertTrue(self.memory_systems.short.is_empty)
 
         encode_observation(self.memory_systems, ["agent", "atlocation", "room3", 2])
-        manage_memory(self.memory_systems, "agent", split_possessive=False)
+        manage_memory(self.memory_systems, "episodic_agent", split_possessive=False)
         self.assertEqual(self.memory_systems.episodic.size, 3)
         self.assertEqual(self.memory_systems.episodic_agent.size, 4)
         self.assertEqual(self.memory_systems.semantic.size, 2)
@@ -307,7 +307,7 @@ class PolicyTest(unittest.TestCase):
         encode_observation(self.memory_systems, ["foo", "bar", "baz", 0])
 
         with self.assertRaises(ValueError):
-            manage_memory(self.memory_systems, "agent", split_possessive=True)
+            manage_memory(self.memory_systems, "episodic_agent", split_possessive=True)
 
         self.memory_systems.short.forget_latest()
         encode_observation(self.memory_systems, ["livingroom", "south", "wall", 11])

@@ -70,6 +70,8 @@ class DQNAgent(HandcraftedAgent):
         device: str = "cpu",
         ddqn: bool = False,
         dueling_dqn: bool = False,
+        default_root_dir: str = "./training_results/",
+        des_size: str = "l",
     ):
         """Initialization.
 
@@ -96,6 +98,8 @@ class DQNAgent(HandcraftedAgent):
         train_seed: The random seed for train.
         test_seed: The random seed for test.
         device: The device to run the agent on. This is either "cpu" or "cuda".
+        default_root_dir: default root directory to store the results.
+        des_size: The size of the DES, e.g., xxs, xs, s, m, or, l
 
         """
         all_params = deepcopy(locals())
@@ -109,6 +113,8 @@ class DQNAgent(HandcraftedAgent):
             seed=train_seed,
             capacity=capacity,
             pretrain_semantic=pretrain_semantic,
+            default_root_dir=default_root_dir,
+            des_size=des_size,
         )
         write_yaml(self.all_params, os.path.join(self.default_root_dir, "train.yaml"))
 
@@ -408,7 +414,9 @@ class DQNAgent(HandcraftedAgent):
 
         """
         self.train_val_test = "test"
-        self.env = gym.make(self.env_str, seed=self.test_seed)
+        self.env = gym.make(
+            self.env_str, seed=self.test_seed, des_size=self.all_params["des_size"]
+        )
         self.dqn.eval()
 
         assert len(self.val_filenames) == 1

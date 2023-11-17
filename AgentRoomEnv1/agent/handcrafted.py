@@ -41,6 +41,8 @@ class HandcraftedAgent:
             "short": 1,
         },
         pretrain_semantic: bool = False,
+        default_root_dir: str = "./training_results/",
+        des_size: str = "l",
     ) -> None:
         """Initialization.
 
@@ -53,6 +55,8 @@ class HandcraftedAgent:
         seed: The random seed for test.
         capacity: The capacity of each human-like memory systems.
         pretrain_semantic: Whether or not to pretrain the semantic memory system.
+        default_root_dir: default root directory to store the results.
+        des_size: The size of the DES. Choose one of "xxs", "xs", "s", "m", or "l".
 
         """
         params_to_save = deepcopy(locals())
@@ -64,18 +68,14 @@ class HandcraftedAgent:
         self.seed = seed
         self.capacity = capacity
         self.pretrain_semantic = pretrain_semantic
-
-        self.env = gym.make(self.env_str, seed=self.seed)
+        self.env = gym.make(self.env_str, seed=self.seed, des_size=des_size)
+        self.default_root_dir = os.path.join(
+            default_root_dir, str(datetime.datetime.now())
+        )
         self._create_directory(params_to_save)
 
     def _create_directory(self, params_to_save: dict) -> None:
         """Create the directory to store the results."""
-        if "RoomEnv2" in os.listdir():
-            self.default_root_dir = (
-                f"./RoomEnv1/training_results/{str(datetime.datetime.now())}"
-            )
-        else:
-            self.default_root_dir = f"./training_results/{str(datetime.datetime.now())}"
         os.makedirs(self.default_root_dir, exist_ok=True)
         write_yaml(params_to_save, os.path.join(self.default_root_dir, "train.yaml"))
 

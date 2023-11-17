@@ -931,6 +931,7 @@ class MemorySystems:
         episodic: EpisodicMemory = None,
         episodic_agent: EpisodicMemory = None,
         semantic: SemanticMemory = None,
+        semantic_map: SemanticMemory = None,
         short: ShortMemory = None,
     ) -> None:
         """Bundle memory systems.
@@ -940,37 +941,48 @@ class MemorySystems:
         episodic: episodic memory system
         episodic_agent: episodic memory system for agent-related memories
         semantic: semantic memory system
+        semantic_map: semantic memory system for the map
         short: short-term memory system
 
         """
-        self.episodic = episodic
-        self.episodic_agent = episodic_agent
-        self.semantic = semantic
-        self.short = short
+        if episodic is not None and episodic.capacity > 0:
+            self.episodic = episodic
+        if episodic_agent is not None and episodic_agent.capacity > 0:
+            self.episodic_agent = episodic_agent
+        if semantic is not None and semantic.capacity > 0:
+            self.semantic = semantic
+        if semantic_map is not None and semantic_map.capacity > 0:
+            self.semantic_map = semantic_map
+        if short is not None and short.capacity > 0:
+            self.short = short
 
     def return_as_a_dict_list(self) -> Dict[str, List[list[str]]]:
         """Return memory systems as a dictionary of lists."""
         to_return = {}
-        if self.episodic is not None:
+        if hasattr(self, "episodic"):
             to_return["episodic"] = self.episodic.return_as_list()
-        if self.episodic_agent is not None:
+        if hasattr(self, "episodic_agent"):
             to_return["episodic_agent"] = self.episodic_agent.return_as_list()
-        if self.semantic is not None:
+        if hasattr(self, "semantic"):
             to_return["semantic"] = self.semantic.return_as_list()
-        if self.short is not None:
+        if hasattr(self, "semantic_map"):
+            to_return["semantic_map"] = self.semantic_map.return_as_list()
+        if hasattr(self, "short"):
             to_return["short"] = self.short.return_as_list()
 
         return to_return
 
     def forget_all(self) -> None:
         """Forget everything in the memory systems."""
-        if self.episodic is not None:
+        if hasattr(self, "episodic"):
             self.episodic.forget_all()
-        if self.episodic_agent is not None:
+        if hasattr(self, "episodic_agent"):
             self.episodic_agent.forget_all()
-        if self.semantic is not None:
+        if hasattr(self, "semantic"):
             self.semantic.forget_all()
-        if self.short is not None:
+        if hasattr(self, "semantic_map"):
+            self.semantic_map.forget_all()
+        if hasattr(self, "short"):
             self.short.forget_all()
 
     def __repr__(self):

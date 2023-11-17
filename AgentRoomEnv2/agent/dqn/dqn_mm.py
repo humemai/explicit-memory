@@ -15,30 +15,16 @@ import torch.optim as optim
 from IPython.display import clear_output
 from tqdm.auto import tqdm, trange
 
-from explicit_memory.memory import (
-    EpisodicMemory,
-    MemorySystems,
-    SemanticMemory,
-    ShortMemory,
-)
+from explicit_memory.memory import (EpisodicMemory, MemorySystems,
+                                    SemanticMemory, ShortMemory)
 from explicit_memory.nn import LSTM
-from explicit_memory.policy import (
-    answer_question,
-    encode_observation,
-    explore,
-    manage_memory,
-)
-from explicit_memory.utils import (
-    ReplayBuffer,
-    argmax,
-    dqn_target_hard_update,
-    plot_dqn,
-    save_dqn_results,
-    save_dqn_validation,
-    select_dqn_action,
-    update_dqn_model,
-    write_yaml,
-)
+from explicit_memory.policy import (answer_question, encode_observation,
+                                    explore, manage_memory)
+from explicit_memory.utils import (ReplayBuffer, argmax,
+                                   dqn_target_hard_update, plot_dqn,
+                                   save_dqn_results, save_dqn_validation,
+                                   select_dqn_action, update_dqn_model,
+                                   write_yaml)
 
 from .dqn import DQNAgent
 
@@ -63,8 +49,9 @@ class DQNMMAgent(DQNAgent):
         gamma: float = 0.65,
         capacity: dict = {
             "episodic": 16,
-            "episodic_agent": 16,
+            "episodic_agent": 0,
             "semantic": 16,
+            "semantic_map": 0,
             "short": 1,
         },
         pretrain_semantic: bool = None,
@@ -92,6 +79,7 @@ class DQNMMAgent(DQNAgent):
         ddqn: bool = False,
         dueling_dqn: bool = False,
         split_reward_training: bool = False,
+        default_root_dir: str = "./training_results/",
     ):
         """Initialization.
 
@@ -133,6 +121,7 @@ class DQNMMAgent(DQNAgent):
         ddqn: wehther to use double dqn
         dueling_dqn: whether to use dueling dqn
         split_reward_training: whether to split the reward in memory management
+        default_root_dir: default root directory to store the results.
 
         """
         all_params = deepcopy(locals())
@@ -160,8 +149,9 @@ class DQNMMAgent(DQNAgent):
             self.init_memory_systems()
             observations, info = self.env.reset()
 
-            encode_observation(self.memory_systems, observations["self"])
-            manage_memory(self.memory_systems, "agent", split_possessive=False)
+            observations["room"] = self.manage_agent_and_map_memory(
+                observations["room"]
+            )
 
             obs = observations["room"][0]
             encode_observation(self.memory_systems, obs)
@@ -219,8 +209,9 @@ class DQNMMAgent(DQNAgent):
                 if done or len(self.replay_buffer) >= self.warm_start:
                     break
 
-                encode_observation(self.memory_systems, observations["self"])
-                manage_memory(self.memory_systems, "agent", split_possessive=False)
+                observations["room"] = self.manage_agent_and_map_memory(
+                    observations["room"]
+                )
 
                 obs = observations["room"][0]
                 encode_observation(self.memory_systems, obs)
@@ -284,8 +275,9 @@ class DQNMMAgent(DQNAgent):
                 self.init_memory_systems()
                 observations, info = self.env.reset()
 
-                encode_observation(self.memory_systems, observations["self"])
-                manage_memory(self.memory_systems, "agent", split_possessive=False)
+                observations["room"] = self.manage_agent_and_map_memory(
+                    observations["room"]
+                )
 
                 obs = observations["room"][0]
                 encode_observation(self.memory_systems, obs)
@@ -345,8 +337,9 @@ class DQNMMAgent(DQNAgent):
             done = done or truncated
 
             if not done:
-                encode_observation(self.memory_systems, observations["self"])
-                manage_memory(self.memory_systems, "agent", split_possessive=False)
+                observations["room"] = self.manage_agent_and_map_memory(
+                    observations["room"]
+                )
 
                 obs = observations["room"][0]
                 encode_observation(self.memory_systems, obs)
@@ -464,8 +457,9 @@ class DQNMMAgent(DQNAgent):
             self.init_memory_systems()
             observations, info = self.env.reset()
 
-            encode_observation(self.memory_systems, observations["self"])
-            manage_memory(self.memory_systems, "agent", split_possessive=False)
+            observations["room"] = self.manage_agent_and_map_memory(
+                observations["room"]
+            )
 
             if idx == self.num_samples_for_results - 1:
                 save_q_value = True
@@ -527,8 +521,9 @@ class DQNMMAgent(DQNAgent):
                 if done:
                     break
 
-                encode_observation(self.memory_systems, observations["self"])
-                manage_memory(self.memory_systems, "agent", split_possessive=False)
+                observations["room"] = self.manage_agent_and_map_memory(
+                    observations["room"]
+                )
 
                 obs = observations["room"][0]
                 encode_observation(self.memory_systems, obs)

@@ -25,6 +25,47 @@ def encode_observation(memory_systems: MemorySystems, obs: List[List]) -> None:
     memory_systems.short.add(mem_short)
 
 
+def find_agent_current_location(memory_systems: MemorySystems) -> str:
+    """Find the current location of the agent.
+
+    If memory_systems has episodic_agent, then it is used to find the current location
+    if not, it looks up the episodic. If fails, it looks up the semantic.
+    If all fails, it returns None.
+
+    Args
+    ----
+    MemorySystems
+
+    Returns
+    -------
+    agent_current_location: str
+
+    """
+    if hasattr(memory_systems, "episodic_agent"):
+        agent_current_location = memory_systems.episodic_agent.get_latest_memory()[2]
+        return agent_current_location
+
+    mems = [
+        mem
+        for mem in memory_systems.episodic.entries
+        if mem[0] == "agent" and mem[1] == "atlocation"
+    ]
+    if len(mems) > 0:
+        agent_current_location = mems[-1][2]
+        return agent_current_location
+
+    mems = [
+        mem
+        for mem in memory_systems.semantic.entries
+        if mem[0] == "agent" and mem[1] == "atlocation"
+    ]
+    if len(mems) > 0:
+        agent_current_location = mems[-1][2]
+        return agent_current_location
+
+    return None
+
+
 def explore(memory_systems: MemorySystems, explore_policy: str) -> str:
     """Explore the room (sub-graph).
 
@@ -42,34 +83,53 @@ def explore(memory_systems: MemorySystems, explore_policy: str) -> str:
     if explore_policy == "random":
         action = random.choice(["north", "east", "south", "west", "stay"])
     elif explore_policy == "avoid_walls":
-        assert not memory_systems.episodic_agent.is_empty
+        agent_current_location = find_agent_current_location(memory_systems)
 
-        agent_current_location = memory_systems.episodic_agent.get_latest_memory()[2]
-
-        memories_rooms = []
-        MARKER = "^^^"  # to allow hashing for the set operation
-
-        memories_rooms += [
-            MARKER.join(entry[:-1])
-            for entry in memory_systems.episodic.entries
-            if entry[1] in ["north", "east", "south", "west"] and entry[2] != "wall"
-        ]
-
-        memories_rooms += [
-            MARKER.join(entry[:-1])
-            for entry in memory_systems.semantic.entries
-            if entry[1] in ["north", "east", "south", "west"] and entry[2] != "wall"
-        ]
-
-        memories_rooms = [mem.split(MARKER) for mem in list(set(memories_rooms))]
-        memories_rooms = [
-            mem for mem in memories_rooms if mem[0] == agent_current_location
-        ]
-
-        if len(memories_rooms) == 0:
+        # no information about the agent's location
+        if agent_current_location is None:
             action = random.choice(["north", "east", "south", "west", "stay"])
-        else:
-            action = random.choice(memories_rooms)[1]
+            return action
+
+        # if there is a semantic map, then use it
+        if hasattr(memory_systems, "semantic_map"):
+            mems = [
+                mem
+                for mem in memory_systems.semantic_map.entries
+                if mem[0] == agent_current_location
+                and mem[1] in ["north", "east", "south", "west"]
+                and mem[2] != "wall"
+            ]
+            if len(mems) > 0:
+                action = random.choice(mems)[1]
+                return action
+
+        # if there is an semantic memory, then use it
+        mems = [
+            mem
+            for mem in memory_systems.semantic.entries
+            if mem[0] == agent_current_location
+            and mem[1] in ["north", "east", "south", "west"]
+            and mem[2] != "wall"
+        ]
+        if len(mems) > 0:
+            action = random.choice(mems)[1]
+            return action
+
+        # if there is an episodic memory, then use it
+        mems = [
+            mem
+            for mem in memory_systems.episodic.entries
+            if mem[0] == agent_current_location
+            and mem[1] in ["north", "east", "south", "west"]
+            and mem[2] != "wall"
+        ]
+        if len(mems) > 0:
+            action = random.choice(mems)[1]
+            return action
+
+        # we know the agent's current location but there is no memory about the map
+        action = random.choice(["north", "east", "south", "west", "stay"])
+        return action
 
     elif explore_policy == "neural":
         raise NotImplementedError
@@ -91,7 +151,8 @@ def manage_memory(
     Args
     ----
     MemorySystems
-    policy: "episodic", "semantic", "generalize", "forget", "random", "neural", "agent"
+    policy: "episodic", "semantic", "generalize", "forget", "random", "neural",
+        "episodic_agent", or "semantic_map",
     split_possessive: whether to split the possessive, i.e., 's, or not.
 
     """
@@ -103,17 +164,28 @@ def manage_memory(
         "random",
         "generalize",
         "neural",
-        "agent",
+        "episodic_agent",
+        "semantic_map",
     ]
-    if policy.lower() == "agent":
+    if policy.lower() == "episodic_agent":
         mem_short = memory_systems.short.get_oldest_memory()
         if "agent" != mem_short[0]:
-            raise ValueError("Agent is not in the memory.")
+            raise ValueError("This is not an agent location related memory!")
         assert memory_systems.episodic_agent.capacity > 0
         if memory_systems.episodic_agent.is_full:
             memory_systems.episodic_agent.forget_oldest()
         mem_epi = ShortMemory.short2epi(mem_short)
         memory_systems.episodic_agent.add(mem_epi)
+
+    elif policy.lower() == "semantic_map":
+        mem_short = memory_systems.short.get_oldest_memory()
+        if mem_short[1] not in ["north", "east", "south", "west"]:
+            raise ValueError("This is not a room-map-related memory.")
+        assert memory_systems.semantic_map.capacity > 0
+        if memory_systems.semantic_map.is_full:
+            memory_systems.semantic_map.forget_weakest()
+        mem_sem = ShortMemory.short2sem(mem_short, split_possessive=split_possessive)
+        memory_systems.semantic_map.add(mem_sem)
 
     elif policy.lower() == "episodic":
         assert memory_systems.episodic.capacity != 0
@@ -232,8 +304,17 @@ def answer_question(
         "random",
         "neural",
     ]
-    pred_epi, _ = memory_systems.episodic.answer_latest(question)
-    pred_sem, _ = memory_systems.semantic.answer_strongest(question, split_possessive)
+    if hasattr(memory_systems, "episodic"):
+        pred_epi, _ = memory_systems.episodic.answer_latest(question)
+    else:
+        pred_epi = None
+
+    if hasattr(memory_systems, "semantic"):
+        pred_sem, _ = memory_systems.semantic.answer_strongest(
+            question, split_possessive
+        )
+    else:
+        pred_sem = None
 
     if policy.lower() == "episodic_semantic":
         if pred_epi is None:

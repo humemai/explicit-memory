@@ -4,7 +4,6 @@ import os
 import random
 import shutil
 from copy import deepcopy
-from typing import Dict, List, Tuple
 
 import gymnasium as gym
 import matplotlib.pyplot as plt
@@ -74,7 +73,7 @@ class DQNExploreAgent(DQNAgent):
         env_config: dict = {
             "question_prob": 1.0,
             "terminates_at": 99,
-            "room_size": "dev",
+            "room_size": "xxs",
         },
         ddqn: bool = False,
         dueling_dqn: bool = False,
@@ -82,44 +81,43 @@ class DQNExploreAgent(DQNAgent):
     ):
         """Initialization.
 
-        Args
-        ----
-        env_str: This has to be "room_env:RoomEnv-v2"
-        num_iterations: The number of iterations to train the agent.
-        replay_buffer_size: The size of the replay buffer.
-        warm_start: The number of samples to fill the replay buffer with, before
-            starting
-        batch_size: The batch size for training This is the amount of samples sampled
-            from the replay buffer.
-        target_update_rate: The rate to update the target network.
-        epsilon_decay_until: The iteration index until which to decay epsilon.
-        max_epsilon: The maximum epsilon.
-        min_epsilon: The minimum epsilon.
-        gamma: The discount factor.
-        capacity: The capacity of each human-like memory systems.
-        pretrain_semantic: Whether or not to pretrain the semantic memory system.
-        nn_params: The parameters for the DQN (function approximator).
-        run_test: Whether or not to run test.
-        num_samples_for_results: The number of samples to validate / test the agent.
-        plotting_interval: The interval to plot the results.
-        train_seed: The random seed for train.
-        test_seed: The random seed for test.
-        device: The device to run the agent on. This is either "cpu" or "cuda".
-        mm_policy: Memory management policy. Choose one of "generalize",
-            "random", "rl", or "neural"
-        qa_policy: question answering policy Choose one of "episodic_semantic",
-            "random", or "neural". qa_policy shouldn't be trained with RL. There is no
-            sequence of states / actions to learn from.
-        env_config: The configuration of the environment.
-            question_prob: The probability of a question being asked at every
-                observation.
-            terminates_at: The maximum number of steps to take in an episode.
-            seed: seed for env
-            room_size: The room configuration to use. Choose one of "dev", "xxs", "xs",
-                "s", "m", or "l".
-        ddqn: wehther to use double dqn
-        dueling_dqn: whether to use dueling dqn
-        default_root_dir: default root directory to store the results.
+        Args:
+            env_str: This has to be "room_env:RoomEnv-v2"
+            num_iterations: The number of iterations to train the agent.
+            replay_buffer_size: The size of the replay buffer.
+            warm_start: The number of samples to fill the replay buffer with, before
+                starting
+            batch_size: The batch size for training This is the amount of samples sampled
+                from the replay buffer.
+            target_update_rate: The rate to update the target network.
+            epsilon_decay_until: The iteration index until which to decay epsilon.
+            max_epsilon: The maximum epsilon.
+            min_epsilon: The minimum epsilon.
+            gamma: The discount factor.
+            capacity: The capacity of each human-like memory systems.
+            pretrain_semantic: Whether or not to pretrain the semantic memory system.
+            nn_params: The parameters for the DQN (function approximator).
+            run_test: Whether or not to run test.
+            num_samples_for_results: The number of samples to validate / test the agent.
+            plotting_interval: The interval to plot the results.
+            train_seed: The random seed for train.
+            test_seed: The random seed for test.
+            device: The device to run the agent on. This is either "cpu" or "cuda".
+            mm_policy: Memory management policy. Choose one of "generalize",
+                "random", "rl", or "neural"
+            qa_policy: question answering policy Choose one of "episodic_semantic",
+                "random", or "neural". qa_policy shouldn't be trained with RL. There is no
+                sequence of states / actions to learn from.
+            env_config: The configuration of the environment.
+                question_prob: The probability of a question being asked at every
+                    observation.
+                terminates_at: The maximum number of steps to take in an episode.
+                seed: seed for env
+                room_size: The room configuration to use. Choose one of "dev", "xxs", "xs",
+                    "s", "m", or "l".
+            ddqn: wehther to use double dqn
+            dueling_dqn: whether to use dueling dqn
+            default_root_dir: default root directory to store the results.
 
         """
         all_params = deepcopy(locals())
@@ -339,14 +337,13 @@ class DQNExploreAgent(DQNAgent):
 
         self.env.close()
 
-    def validate_test_middle(self) -> Tuple[List[float], Dict]:
+    def validate_test_middle(self) -> tuple[list[float], dict]:
         """A function shared by explore validation and test in the middle.
 
 
-        Returns
-        -------
-        scores: a list of scores
-        last_memory_state: the last memory state
+        Returns:
+            scores: a list of scores
+            last_memory_state: the last memory state
 
         """
         scores = []

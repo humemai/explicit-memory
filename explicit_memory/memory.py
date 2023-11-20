@@ -4,7 +4,7 @@ import os
 import random
 from copy import deepcopy
 from pprint import pformat
-from typing import Dict, List, Tuple, Union
+from typing import Union
 
 import numpy as np
 
@@ -23,10 +23,9 @@ class Memory:
     def __init__(self, memory_type: str, capacity: int) -> None:
         """
 
-        Args
-        ----
-        memory_type: episodic, semantic, or short
-        capacity: memory capacity
+        Args:
+            memory_type: episodic, semantic, or short
+            capacity: memory capacity
 
         """
         logging.debug(
@@ -45,17 +44,15 @@ class Memory:
     def __repr__(self):
         return pformat(vars(self), indent=4, width=1)
 
-    def can_be_added(self, mem: List[str]) -> Tuple[bool, str]:
+    def can_be_added(self, mem: list[str]) -> tuple[bool, str]:
         """Check if a memory can be added to the system or not.
 
-        Args
-        ----
-        mem: A memory as a quadraple: [head, relation, tail, num]
+        Args:
+            mem: A memory as a quadraple: [head, relation, tail, num]
 
-        Returns
-        -------
-        True or False
-        error_msg
+        Returns:
+            True or False
+            error_msg
 
         """
         if self.capacity == 0:
@@ -69,12 +66,11 @@ class Memory:
 
         return True, ""
 
-    def add(self, mem: List[str]) -> None:
+    def add(self, mem: list[str]) -> None:
         """Add memory to the memory system.
 
-        Args
-        ----
-        mem: A memory as a quadraple: [head, relation, tail, num]
+        Args:
+           mem: A memory as a quadraple: [head, relation, tail, num]
 
         """
         check, error_msg = self.can_be_added(mem)
@@ -92,17 +88,15 @@ class Memory:
         # sort ascending
         self.entries.sort(key=lambda x: x[-1])
 
-    def can_be_forgotten(self, mem: List[str]) -> Tuple[bool, str]:
+    def can_be_forgotten(self, mem: list[str]) -> tuple[bool, str]:
         """Check if a memory can be added to the system or not.
 
-        Args
-        ----
-        mem: A memory as a quadraple: [head, relation, tail, num]
+        Args:
+            mem: A memory as a quadraple: [head, relation, tail, num]
 
-        Returns
-        -------
-        True or False
-        error_msg
+        Returns:
+            True or False
+            error_msg
 
         """
         if self.capacity == 0:
@@ -119,14 +113,13 @@ class Memory:
 
         return True, None
 
-    def forget(self, mem: List) -> None:
+    def forget(self, mem: list) -> None:
         """forget the given memory.
 
-        Args
-        ----
-        mem: A memory as a quadraple: [head, relation, tail, num], where `num` is
-            either a timestamp or num generalized, for episodic / short and semantic,
-            respectively.
+        Args:
+            mem: A memory as a quadraple: [head, relation, tail, num], where `num` is
+                either a timestamp or num generalized, for episodic / short and semantic,
+                respectively.
 
         """
         check, error_msg = self.can_be_forgotten(mem)
@@ -157,9 +150,8 @@ class Memory:
     def get_first_memory(self) -> None:
         """Get the first memory in the memory system.
 
-        Returns
-        -------
-        mem: the first memory as a quadraple
+        Returns:
+            mem: the first memory as a quadraple
 
         """
         return deepcopy(self.entries[0])
@@ -167,25 +159,22 @@ class Memory:
     def get_last_memory(self) -> None:
         """Get the last memory in the memory system.
 
-        Returns
-        -------
-        mem: the last memory as a quadraple
+        Returns:
+            mem: the last memory as a quadraple
 
         """
         return deepcopy(self.entries[-1])
 
-    def answer_random(self, query: List) -> Tuple[str, int]:
+    def answer_random(self, query: list) -> tuple[str, int]:
         """Answer the question with a uniform-randomly chosen memory.
 
-        Args
-        ----
-        query: e.g., ["bob", "atlocation", "?", 42],
-            ["?", "atlocation", "officeroom", 42], ["bob", "?", "officeroom", 42]
+        Args:
+            query: e.g., ["bob", "atlocation", "?", 42],
+                ["?", "atlocation", "officeroom", 42], ["bob", "?", "officeroom", 42]
 
-        Returns
-        -------
-        pred: prediction (e.g., desk)
-        num: either a timestamp or num generalized, for episodic / short and semantic,
+        Returns:
+            pred: prediction (e.g., desk)
+            num: either a timestamp or num generalized, for episodic / short and semantic,
 
         """
         if self.is_empty:
@@ -203,18 +192,16 @@ class Memory:
 
         return pred, num
 
-    def answer_with_smallest_num(self, query: List[str]) -> Tuple[str, int]:
+    def answer_with_smallest_num(self, query: list[str]) -> tuple[str, int]:
         """Answer the question with the memory with the smallest num.
 
-        Args
-        ----
-        query: a quadruple, e.g., ["bob", "atlocation", "?", 42],
-            ["?", "atlocation", "officeroom", 42]
+        Args:
+            query: a quadruple, e.g., ["bob", "atlocation", "?", 42],
+                ["?", "atlocation", "officeroom", 42]
 
-        Returns
-        -------
-        pred
-        num
+        Returns:
+            pred
+            num
 
         """
         candidates = self.find_memory(query[:-1] + ["?"])
@@ -235,18 +222,16 @@ class Memory:
 
         return pred, num
 
-    def answer_with_largest_num(self, query: List[str]) -> Tuple[str, int]:
+    def answer_with_largest_num(self, query: list[str]) -> tuple[str, int]:
         """Answer the question with the memory with the largest num.
 
-        Args
-        ----
-        query: a quadruple, e.g., ["bob", "atlocation", "?", 42],
-            ["?", "atlocation", "officeroom", 42]
+        Args:
+            query: a quadruple, e.g., ["bob", "atlocation", "?", 42],
+                ["?", "atlocation", "officeroom", 42]
 
-        Returns
-        -------
-        pred
-        num
+        Returns:
+            pred
+            num
 
         """
         candidates = self.find_memory(query[:-1] + ["?"])
@@ -304,9 +289,8 @@ class Memory:
     def increase_capacity(self, increase: int) -> None:
         """Increase the capacity.
 
-        Args
-        ----
-        increase: the amount of entries to increase.
+        Args:
+            increase: the amount of entries to increase.
 
         """
         assert isinstance(increase, int) and (not self.is_frozen)
@@ -320,9 +304,8 @@ class Memory:
     def decrease_capacity(self, decrease: int) -> None:
         """decrease the capacity.
 
-        Args
-        ----
-        decrease: the amount of entries to decrease.
+        Args:
+            decrease: the amount of entries to decrease.
 
         """
         assert (
@@ -337,25 +320,23 @@ class Memory:
             f"{self.capacity}!"
         )
 
-    def return_as_list(self) -> List[list]:
+    def return_as_list(self) -> list[list]:
         """
         Return the memories as a list of lists.
         """
         return deepcopy(self.entries)
 
-    def find_memory(self, mem_query: List) -> List:
+    def find_memory(self, mem_query: list) -> list:
         """Find memory.
 
-        Args
-        ----
-        head: head
-        relation: relation
-        tail: tail
-        num: a number
+        Args:
+            head: head
+            relation: relation
+            tail: tail
+            num: a number
 
-        Returns
-        -------
-        mem: A memory as a quadraple: [head, relation, tail, num]
+        Returns:
+            mem: A memory as a quadraple: [head, relation, tail, num]
 
         """
         assert len(mem_query) == 4
@@ -376,29 +357,27 @@ class EpisodicMemory(Memory):
     def __init__(self, capacity: int, remove_duplicates: bool = False) -> None:
         """Init an episodic memory system.
 
-        Args
-        ----
-        capacity: capacity of the memory system (i.e., number of entries)
-        remove_duplicates: if True, it'll remove the same memories with the older
-            timestamps.
+        Args:
+            capacity: capacity of the memory system (i.e., number of entries)
+            remove_duplicates: if True, it'll remove the same memories with the older
+                timestamps.
 
         """
         super().__init__("episodic", capacity)
         self.remove_duplicates = remove_duplicates
 
-    def add(self, mem: List[str]) -> None:
+    def add(self, mem: list[str]) -> None:
         """Append a memory to the episodic memory system.
 
-        Args
-        ----
-        mem: An episodic memory as a quadraple: [head, relation, tail, timestamp]
+        Args:
+            mem: An episodic memory as a quadraple: [head, relation, tail, timestamp]
 
         """
         super().add(mem)
         if self.remove_duplicates:
             self.clean_old_memories()
 
-    def get_oldest_memory(self) -> List:
+    def get_oldest_memory(self) -> list:
         return self.get_first_memory()
 
     def get_latest_memory(self) -> list:
@@ -428,52 +407,46 @@ class EpisodicMemory(Memory):
         mem = self.get_latest_memory()
         self.forget(mem)
 
-    def answer_oldest(self, query: List[str]) -> Tuple[str, int]:
+    def answer_oldest(self, query: list[str]) -> tuple[str, int]:
         """Answer the question with the oldest relevant memory.
 
-        Args
-        ----
-        query: a quadruple, e.g., ["bob", "atlocation", "?", 42],
-            ["?", "atlocation", "officeroom", 42]
+        Args:
+            query: a quadruple, e.g., ["bob", "atlocation", "?", 42],
+                ["?", "atlocation", "officeroom", 42]
 
-        Returns
-        -------
-        pred: prediction
-        timestamp: timestamp
+        Returns:
+            pred: prediction
+            timestamp: timestamp
 
         """
         return self.answer_with_smallest_num(query)
 
-    def answer_latest(self, query: List[str]) -> Tuple[str, int]:
+    def answer_latest(self, query: list[str]) -> tuple[str, int]:
         """Answer the question with the latest relevant memory.
 
-        Args
-        ----
-        query: a quadruple, e.g., ["bob", "atlocation", "?", 42],
-            ["?", "atlocation", "officeroom", 42]
+        Args:
+            query: a quadruple, e.g., ["bob", "atlocation", "?", 42],
+                ["?", "atlocation", "officeroom", 42]
 
-        Returns
-        -------
-        pred: prediction
-        timestamp: timestamp
+        Returns:
+            pred: prediction
+            timestamp: timestamp
 
         """
         return self.answer_with_largest_num(query)
 
     @staticmethod
-    def ob2epi(ob: List[str]) -> List[str]:
+    def ob2epi(ob: list[str]) -> list[str]:
         """Turn an observation into an episodic memory.
 
         At the moment, the observation format is the same as an episodic memory
         for simplification.
 
-        Args
-        ----
-        ob: An observation as a quadruple: [head, relation, tail, timestamp]
+        Args:
+            ob: An observation as a quadruple: [head, relation, tail, timestamp]
 
-        Returns
-        -------
-        mem: An episodic memory as a quadruple: [head, relation, tail, timestamp]
+        Returns:
+            mem: An episodic memory as a quadruple: [head, relation, tail, timestamp]
 
         """
         logging.debug(f"Turning an observation {ob} into a episodic memory ...")
@@ -484,7 +457,7 @@ class EpisodicMemory(Memory):
 
         return mem
 
-    def clean_old_memories(self) -> List:
+    def clean_old_memories(self) -> list:
         """Find if there are duplicate memories with different timestamps."""
         logging.debug("finding if duplicate memories exist ...")
 
@@ -510,22 +483,20 @@ class EpisodicMemory(Memory):
 
         logging.debug(f"There are {len(self.entries)} episodic memories after cleaning")
 
-    def find_similar_memories(self, split_possessive: bool = True) -> List:
+    def find_similar_memories(self, split_possessive: bool = True) -> list:
         """Find N episodic memories that can be compressed into one semantic.
 
         At the moment, this is simply done by matching string values. If there are more
         than one group of similar episodic memories, it'll return the one with the
         largest number of memories.
 
-        Args
-        ----
-        split_possessive: whether to split the possessive, i.e., 's, or not.
+        Args:
+            split_possessive: whether to split the possessive, i.e., 's, or not.
 
-        Returns
-        -------
-        episodic_memories: similar episodic memories
-        semantic_memory: encoded (compressed) semantic memory in a quadruple format
-            (i.e., (head, relation, tail, num_generalized_memories))
+        Returns:
+            episodic_memories: similar episodic memories
+            semantic_memory: encoded (compressed) semantic memory in a quadruple format
+                (i.e., (head, relation, tail, num_generalized_memories))
 
         """
         logging.debug("looking for episodic entries that can be compressed ...")
@@ -590,7 +561,7 @@ class ShortMemory(Memory):
     def __init__(self, capacity: int) -> None:
         super().__init__("short", capacity)
 
-    def get_oldest_memory(self) -> List:
+    def get_oldest_memory(self) -> list:
         return self.get_first_memory()
 
     def get_latest_memory(self) -> list:
@@ -621,19 +592,17 @@ class ShortMemory(Memory):
         self.forget(mem)
 
     @staticmethod
-    def ob2short(ob: List[str]) -> List[str]:
+    def ob2short(ob: list[str]) -> list[str]:
         """Turn an observation into an short memory.
 
         At the moment, the observation format is almost the same as an episodic memory
         for simplification.
 
-        Args
-        ----
-        ob: An observation as a quadruple: [head, relation, tail, timestamp]
+        Args:
+            ob: An observation as a quadruple: [head, relation, tail, timestamp]
 
-        Returns
-        -------
-        mem: A short-term memory as a quadruple: [head, relation, tail, timestamp]
+        Returns:
+            mem: A short-term memory as a quadruple: [head, relation, tail, timestamp]
 
         """
         logging.debug(f"Turning an observation {ob} into a short memory ...")
@@ -645,16 +614,15 @@ class ShortMemory(Memory):
         return mem
 
     @staticmethod
-    def short2epi(short: List[str]) -> List[str]:
+    def short2epi(short: list[str]) -> list[str]:
         """Turn a short memory into a episodic memory.
 
-        Args
-        ----
-        short: A short memory as a quadruple: [head, relation, tail, timestamp]
+        Args:
+            short: A short memory as a quadruple: [head, relation, tail, timestamp]
 
-        Returns
-        -------
-        epi: An episodic memory as a quadruple: [head, relation, tail, timestamp]
+        Returns:
+            epi: An episodic memory as a quadruple: [head, relation, tail, timestamp]
+
         """
         epi = deepcopy(short)
         return epi
@@ -663,15 +631,12 @@ class ShortMemory(Memory):
     def short2sem(short: list, split_possessive: bool = True) -> list:
         """Turn a short memory into a semantic memory.
 
-        Args
-        ----
-        short: A short memory as a quadruple: [head, relation, tail, timestamp]
-        split_possessive: whether to split the possessive, i.e., 's, or not.
+        Args:
+            short: A short memory as a quadruple: [head, relation, tail, timestamp]
+            split_possessive: whether to split the possessive, i.e., 's, or not.
 
-        Returns
-        -------
-        sem: A semantic memory as a quadruple: [head, relation, tail, NUM_GENERALIZED]
-
+        Returns:
+            sem: A semantic memory as a quadruple: [head, relation, tail, NUM_GENERALIZED]
 
         """
         sem = deepcopy(short)[:-1]
@@ -693,23 +658,20 @@ class SemanticMemory(Memory):
     ) -> None:
         """Init a semantic memory system.
 
-        Args
-        ----
-        capacity: capacity of the memory system (i.e., number of entries)
+        Args:
+            capacity: capacity of the memory system (i.e., number of entries)
 
         """
         super().__init__("semantic", capacity)
 
-    def can_be_added(self, mem: List[str]) -> bool:
+    def can_be_added(self, mem: list[str]) -> bool:
         """Checks if a memory can be added to the system or not.
 
-        Args
-        ----
-        mem: A semantic memory as a quadraple: [head, relation, tail, num_generalized]
+        Args:
+            mem: A semantic memory as a quadraple: [head, relation, tail, num_generalized]
 
-        Returns
-        -------
-        True or False
+        Returns:
+            True or False
 
         """
         if self.capacity == 0:
@@ -729,9 +691,8 @@ class SemanticMemory(Memory):
     def add(self, mem: dict):
         """Append a memory to the semantic memory system.
 
-        Args
-        ----
-        mem: A memory as a quadruple: [head, relation, tail, num_generalized]
+        Args:
+            mem: A memory as a quadruple: [head, relation, tail, num_generalized]
 
         """
         super().add(mem)
@@ -739,25 +700,24 @@ class SemanticMemory(Memory):
 
     def pretrain_semantic(
         self,
-        semantic_knowledge: List[List[str]],
+        semantic_knowledge: list[list[str]],
         return_remaining_space: bool = True,
         freeze: bool = True,
     ) -> int:
         """Pretrain (prepopulate) the semantic memory system.
 
-        Args
-        ----
-        semantic_knowledge: e.g., [["desk", "atlocation", "officeroom"],
-            ["chair", "atlocation", "officeroom",
-            ["officeroom", "north", "livingroom]]
-        return_remaining_space: whether or not to return the remaining space from the
-            semantic memory system.
-        freeze: whether or not to freeze the semantic memory system or not.
+        Args:
+            semantic_knowledge: e.g., [["desk", "atlocation", "officeroom"],
+                ["chair", "atlocation", "officeroom",
+                ["officeroom", "north", "livingroom]]
+            return_remaining_space: whether or not to return the remaining space from the
+                semantic memory system.
+            freeze: whether or not to freeze the semantic memory system or not.
 
-        Returns
-        -------
-        free_space: free space that was not used, if any, so that it can be added to
-            the episodic memory system.
+        Returns:
+            free_space: free space that was not used, if any, so that it can be added to
+                the episodic memory system.
+
         """
         self.semantic_knowledge = deepcopy(semantic_knowledge)
         for triple in self.semantic_knowledge:
@@ -785,10 +745,10 @@ class SemanticMemory(Memory):
 
         return free_space
 
-    def get_weakest_memory(self) -> List:
+    def get_weakest_memory(self) -> list:
         return self.get_first_memory()
 
-    def get_strongest_memory(self) -> List:
+    def get_strongest_memory(self) -> list:
         return self.get_last_memory()
 
     def forget_weakest(self) -> None:
@@ -811,19 +771,17 @@ class SemanticMemory(Memory):
         logging.info(f"{mem} is forgotten!")
 
     def answer_weakest(
-        self, query: List, split_possessive: bool = True
-    ) -> Tuple[str, int]:
+        self, query: list, split_possessive: bool = True
+    ) -> tuple[str, int]:
         """Answer the question with the strongest relevant memory.
 
-        Args
-        ----
-        query: a quadruple, e.g., ["bob", "atlocation", "?", 42],
-            ["?", "atlocation", "officeroom", 42]
+        Args:
+            query: a quadruple, e.g., ["bob", "atlocation", "?", 42],
+                ["?", "atlocation", "officeroom", 42]
 
-        Returns
-        -------
-        pred: prediction
-        num_generalized: number of generalized samples.
+        Returns:
+            pred: prediction
+            num_generalized: number of generalized samples.
 
         """
         logging.debug("answering a question with the answer_strongest policy ...")
@@ -834,19 +792,17 @@ class SemanticMemory(Memory):
         return self.answer_with_smallest_num(query)
 
     def answer_strongest(
-        self, query: List, split_possessive: bool = True
-    ) -> Tuple[str, int]:
+        self, query: list, split_possessive: bool = True
+    ) -> tuple[str, int]:
         """Answer the question with the strongest relevant memory.
 
-        Args
-        ----
-        query: a quadruple, e.g., ["bob", "atlocation", "?", 42],
-            ["?", "atlocation", "officeroom", 42]
+        Args:
+            query: a quadruple, e.g., ["bob", "atlocation", "?", 42],
+                ["?", "atlocation", "officeroom", 42]
 
-        Returns
-        -------
-        pred: prediction
-        num_generalized: number of generalized samples.
+        Returns:
+            pred: prediction
+            num_generalized: number of generalized samples.
 
         """
         logging.debug("answering a question with the answer_strongest policy ...")
@@ -863,14 +819,12 @@ class SemanticMemory(Memory):
         At the moment, this is simply done by removing the names from the head and the
         tail.
 
-        Args
-        ----
-        ob: An observation as a quadruple: [head, relation, tail, timestamp]
-        split_possessive: whether to split the possessive, i.e., 's, or not.
+        Args:
+            ob: An observation as a quadruple: [head, relation, tail, timestamp]
+            split_possessive: whether to split the possessive, i.e., 's, or not.
 
-        Returns
-        -------
-        mem: A semantic memory as a quadruple: [head, relation, tail, timestamp]
+        Returns:
+            mem: A semantic memory as a quadruple: [head, relation, tail, timestamp]
 
         """
 
@@ -892,7 +846,7 @@ class SemanticMemory(Memory):
 
         return mem
 
-    def clean_same_memories(self) -> List:
+    def clean_same_memories(self) -> list:
         """Find if there are duplicate memories cuz they should be summed out.
 
         At the moment, this is simply done by matching string values.
@@ -936,13 +890,12 @@ class MemorySystems:
     ) -> None:
         """Bundle memory systems.
 
-        Args
-        ----
-        episodic: episodic memory system
-        episodic_agent: episodic memory system for agent-related memories
-        semantic: semantic memory system
-        semantic_map: semantic memory system for the map
-        short: short-term memory system
+        Args:
+            episodic: episodic memory system
+            episodic_agent: episodic memory system for agent-related memories
+            semantic: semantic memory system
+            semantic_map: semantic memory system for the map
+            short: short-term memory system
 
         """
         if episodic is not None and episodic.capacity > 0:
@@ -956,7 +909,7 @@ class MemorySystems:
         if short is not None and short.capacity > 0:
             self.short = short
 
-    def return_as_a_dict_list(self) -> Dict[str, List[list[str]]]:
+    def return_as_a_dict_list(self) -> dict[str, list[list[str]]]:
         """Return memory systems as a dictionary of lists."""
         to_return = {}
         if hasattr(self, "episodic"):

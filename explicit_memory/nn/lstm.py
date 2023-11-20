@@ -1,5 +1,5 @@
 """Deep Q-network architecture. Currently only LSTM is implemented."""
-from typing import Dict, List, Tuple, Union
+from typing import Union
 
 import numpy as np
 import torch
@@ -206,7 +206,7 @@ class LSTM(nn.Module):
         else:
             raise ValueError(f"{self.version} is a wrong version!")
 
-    def make_embedding_v1(self, mem: List[str], memory_type: str) -> torch.Tensor:
+    def make_embedding_v1(self, mem: list[str], memory_type: str) -> torch.Tensor:
         """Create one embedding vector with summation and concatenation.
 
         Embeddings for v1
@@ -270,7 +270,7 @@ class LSTM(nn.Module):
 
         return final_embedding
 
-    def make_embedding_v2(self, mem: List[str], memory_type: str) -> torch.Tensor:
+    def make_embedding_v2(self, mem: list[str], memory_type: str) -> torch.Tensor:
         """Create one embedding vector with summation and concatenation.
 
         Embeddings for v1
@@ -299,7 +299,7 @@ class LSTM(nn.Module):
 
         return final_embedding
 
-    def create_batch(self, x: List[str], memory_type: str) -> torch.Tensor:
+    def create_batch(self, x: list[str], memory_type: str) -> torch.Tensor:
         """Create one batch from data.
 
         Args

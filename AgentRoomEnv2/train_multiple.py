@@ -53,7 +53,7 @@ train_config = {
     "env_config": {
         "question_prob": 1.0,
         "terminates_at": 99,
-        "room_size": "dev",
+        "room_size": "xxs",
     },
     "ddqn": False,
     "dueling_dqn": False,

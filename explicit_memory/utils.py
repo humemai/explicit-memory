@@ -10,7 +10,7 @@ from collections import deque
 from copy import deepcopy
 from glob import glob
 from pprint import pformat
-from typing import Deque, Dict, List, Tuple
+from typing import Deque
 
 import gymnasium as gym
 import matplotlib.pyplot as plt
@@ -30,17 +30,15 @@ logging.basicConfig(
 )
 
 
-def remove_timestamp(entry: List[str]) -> list:
+def remove_timestamp(entry: list[str]) -> list:
     """Remove the timestamp from a given observation/episodic memory.
 
-    Args
-    ----
-    entry: An observation / episodic memory in a quadruple format
-        (i.e., (head, relation, tail, timestamp))
+    Args:
+        entry: An observation / episodic memory in a quadruple format
+            (i.e., (head, relation, tail, timestamp))
 
-    Returns
-    -------
-    entry_without_timestamp: i.e., (head, relation, tail)
+    Returns:
+        entry_without_timestamp: i.e., (head, relation, tail)
 
     """
     assert len(entry) == 4
@@ -51,17 +49,15 @@ def remove_timestamp(entry: List[str]) -> list:
     return entry_without_timestamp
 
 
-def split_by_possessive(name_entity: str) -> Tuple[str, str]:
+def split_by_possessive(name_entity: str) -> tuple[str, str]:
     """Separate name and entity from the given string.
 
-    Args
-    ----
-    name_entity: e.g., "tae's laptop"
+    Args:
+        name_entity: e.g., "tae's laptop"
 
-    Returns
-    -------
-    name: e.g., tae
-    entity: e.g., laptop
+    Returns:
+        name: e.g., tae
+        entity: e.g., laptop
 
     """
     logging.debug(f"spliting name and entity from {name_entity}")
@@ -76,13 +72,11 @@ def split_by_possessive(name_entity: str) -> Tuple[str, str]:
 def remove_posession(entity: str) -> str:
     """Remove name from the entity.
 
-    Args
-    ----
-    entity: e.g., bob's laptop
+    Args:
+        entity: e.g., bob's laptop
 
-    Returns
-    -------
-    e.g., laptop
+    Returns:
+        e.g., laptop
 
     """
     return entity.split("'s ")[-1]
@@ -144,15 +138,14 @@ def write_csv(content: list, fname: str) -> None:
 def read_data(data_path: str) -> dict:
     """Read train, val, test spilts.
 
-    Args
-    ----
-    data_path: path to data.
+    Args:
+        data_path: path to data.
 
-    Returns
-    -------
-    data: {'train': list of training obs,
-           'val': list of val obs,
-           'test': list of test obs}
+    Returns:
+        data: {'train': list of training obs,
+            'val': list of val obs,
+            'test': list of test obs}
+
     """
     logging.debug(f"reading data from {data_path} ...")
     data = read_json(data_path)
@@ -164,9 +157,8 @@ def read_data(data_path: str) -> dict:
 def load_questions(path: str) -> dict:
     """Load premade questions.
 
-    Args
-    ----
-    path: path to the question json file.
+    Args:
+        path: path to the question json file.
 
     """
     logging.debug(f"loading questions from {path}...")
@@ -181,17 +173,15 @@ def argmax(iterable):
     return max(enumerate(iterable), key=lambda x: x[1])[0]
 
 
-def get_duplicate_dicts(search: dict, target: list) -> List:
+def get_duplicate_dicts(search: dict, target: list) -> list:
     """Find if there are duplicate dicts.
 
-    Args
-    ----
-    search: dict
-    target: target list to look up.
+    Args:
+        search: dict
+        target: target list to look up.
 
-    Returns
-    -------
-    duplicates: a list of dicts or None
+    Returns:
+        duplicates: a list of dicts or None
 
     """
     assert isinstance(search, dict)
@@ -209,7 +199,7 @@ def get_duplicate_dicts(search: dict, target: list) -> List:
     return duplicates
 
 
-def list_duplicates_of(seq, item) -> List:
+def list_duplicates_of(seq, item) -> list:
     # https://stackoverflow.com/questions/5419204/index-of-duplicates-items-in-a-python-list
     start_at = -1
     locs = []
@@ -463,11 +453,10 @@ class ReplayBuffer:
     ):
         """Initialize replay buffer.
 
-        Args
-        ----
-        observation_type: "dict" or "tensor"
-        size: size of the buffer
-        batch_size: batch size to sample
+        Args:
+            observation_type: "dict" or "tensor"
+            size: size of the buffer
+            batch_size: batch size to sample
 
         """
         if batch_size > size:
@@ -508,7 +497,7 @@ class ReplayBuffer:
         self.ptr = (self.ptr + 1) % self.max_size
         self.size = min(self.size + 1, self.max_size)
 
-    def sample_batch(self) -> Dict[str, np.ndarray]:
+    def sample_batch(self) -> dict[str, np.ndarray]:
         idxs = np.random.choice(self.size, size=self.batch_size, replace=False)
         return dict(
             obs=self.obs_buf[idxs],
@@ -539,11 +528,10 @@ class ReplayBufferNStep:
     ):
         """Initialize replay buffer.
 
-        Args
-        ----
-        observation_type: "dict" or "tensor"
-        size: size of the buffer
-        batch_size: batch size to sample
+        Args:
+            observation_type: "dict" or "tensor"
+            size: size of the buffer
+            batch_size: batch size to sample
 
         """
         if observation_type == "dict":
@@ -577,7 +565,7 @@ class ReplayBufferNStep:
         rew: float,
         next_obs: np.ndarray,
         done: bool,
-    ) -> Tuple[np.ndarray, np.ndarray, float, np.ndarray, bool]:
+    ) -> tuple[np.ndarray, np.ndarray, float, np.ndarray, bool]:
         transition = (obs, act, rew, next_obs, done)
         self.n_step_buffer.append(transition)
 
@@ -599,7 +587,7 @@ class ReplayBufferNStep:
 
         return self.n_step_buffer[0]
 
-    def sample_batch(self) -> Dict[str, np.ndarray]:
+    def sample_batch(self) -> dict[str, np.ndarray]:
         idxs = np.random.choice(self.size, size=self.batch_size, replace=False)
 
         return dict(
@@ -612,7 +600,7 @@ class ReplayBufferNStep:
             indices=idxs,
         )
 
-    def sample_batch_from_idxs(self, idxs: np.ndarray) -> Dict[str, np.ndarray]:
+    def sample_batch_from_idxs(self, idxs: np.ndarray) -> dict[str, np.ndarray]:
         # for N-step Learning
         return dict(
             obs=self.obs_buf[idxs],
@@ -624,7 +612,7 @@ class ReplayBufferNStep:
 
     def _get_n_step_info(
         self, n_step_buffer: Deque, gamma: float
-    ) -> Tuple[np.int64, np.ndarray, bool]:
+    ) -> tuple[np.int64, np.ndarray, bool]:
         """Return n step rew, next_obs, and done."""
         # info of the last transition
         rew, next_obs, done = n_step_buffer[-1][-3:]
@@ -690,7 +678,7 @@ class PrioritizedReplayBuffer(ReplayBufferNStep):
         rew: float,
         next_obs: np.ndarray,
         done: bool,
-    ) -> Tuple[np.ndarray, np.ndarray, float, np.ndarray, bool]:
+    ) -> tuple[np.ndarray, np.ndarray, float, np.ndarray, bool]:
         """Store experience and priority."""
         transition = super().store(obs, act, rew, next_obs, done)
 
@@ -701,7 +689,7 @@ class PrioritizedReplayBuffer(ReplayBufferNStep):
 
         return transition
 
-    def sample_batch(self, beta: float = 0.4) -> Dict[str, np.ndarray]:
+    def sample_batch(self, beta: float = 0.4) -> dict[str, np.ndarray]:
         """Sample a batch of experiences."""
         assert len(self) >= self.batch_size
         assert beta > 0
@@ -725,7 +713,7 @@ class PrioritizedReplayBuffer(ReplayBufferNStep):
             indices=indices,
         )
 
-    def update_priorities(self, indices: List[int], priorities: np.ndarray):
+    def update_priorities(self, indices: list[int], priorities: np.ndarray):
         """Update priorities of sampled transitions."""
         assert len(indices) == len(priorities)
 
@@ -738,7 +726,7 @@ class PrioritizedReplayBuffer(ReplayBufferNStep):
 
             self.max_priority = max(self.max_priority, priority)
 
-    def _sample_proportional(self) -> List[int]:
+    def _sample_proportional(self) -> list[int]:
         """Sample indices based on proportions."""
         indices = []
         p_total = self.sum_tree.sum(0, len(self) - 1)
@@ -768,7 +756,7 @@ class PrioritizedReplayBuffer(ReplayBufferNStep):
 
 
 def compute_dqn_loss(
-    samples: Dict[str, np.ndarray],
+    samples: dict[str, np.ndarray],
     device: str,
     dqn: torch.nn.Module,
     dqn_target: torch.nn.Module,
@@ -777,16 +765,22 @@ def compute_dqn_loss(
 ) -> torch.Tensor:
     """Return dqn loss.
 
-    Args
-    ----
-    samples: A dictionary of samples from the replay buffer.
-        obs: np.ndarray,
-        act: np.ndarray,
-        rew: float,
-        next_obs: np.ndarray,
-        done: bool,
+    Args:
+        samples: A dictionary of samples from the replay buffer.
+            obs: np.ndarray,
+            act: np.ndarray,
+            rew: float,
+            next_obs: np.ndarray,
+            done: bool,
+        device:
+        dqn:
+        dqn_target:
+        ddqn:
+        gamma:
 
-    device
+    Returns:
+        loss: torch.Tensor
+
     """
     state = samples["obs"]
     next_state = samples["next_obs"]
@@ -826,12 +820,11 @@ def select_dqn_action(
 ) -> int:
     """Select an action from the input state.
 
-    Args
-    ----
-    state: The current state of the memory systems. This is NOT what the gym env
-    gives you. This is made by the agent.
-    greedy: always pick greedy action if True
-    save_q_value: whether to save the q values or not.
+    Args:
+        state: The current state of the memory systems. This is NOT what the gym env
+        gives you. This is made by the agent.
+        greedy: always pick greedy action if True
+        save_q_value: whether to save the q values or not.
 
     """
     # epsilon greedy policy
@@ -884,8 +877,14 @@ def save_dqn_validation(
 ) -> None:
     """Keep the best validation model.
 
-    Args
-    ----
+    Args:
+        scores_temp: a list of validation scores for the current validation episode.
+        scores: a dictionary of scores for train, validation, and test.
+        default_root_dir: the root directory where the results are saved.
+        num_validation: the current validation episode.
+        val_filenames: a list of filenames for the validation models.
+        dqn: the dqn model.
+
     """
     mean_score = round(np.mean(scores_temp).item())
     filename = (

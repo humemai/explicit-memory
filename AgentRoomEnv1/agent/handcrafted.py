@@ -3,7 +3,6 @@ import os
 import random
 import shutil
 from copy import deepcopy
-from typing import Dict, List, Tuple
 
 import gymnasium as gym
 import matplotlib.pyplot as plt
@@ -46,17 +45,16 @@ class HandcraftedAgent:
     ) -> None:
         """Initialization.
 
-        Args
-        ----
-        env_str: This has to be "room_env:RoomEnv-v1"
-        policy: The memory management policy. Choose one of "random", "episodic_only",
-                or "semantic_only".
-        num_samples_for_results: The number of samples to validate / test the agent.
-        seed: The random seed for test.
-        capacity: The capacity of each human-like memory systems.
-        pretrain_semantic: Whether or not to pretrain the semantic memory system.
-        default_root_dir: default root directory to store the results.
-        des_size: The size of the DES. Choose one of "xxs", "xs", "s", "m", or "l".
+        Args:
+            env_str: This has to be "room_env:RoomEnv-v1"
+            policy: The memory management policy. Choose one of "random", "episodic_only",
+                    or "semantic_only".
+            num_samples_for_results: The number of samples to validate / test the agent.
+            seed: The random seed for test.
+            capacity: The capacity of each human-like memory systems.
+            pretrain_semantic: Whether or not to pretrain the semantic memory system.
+            default_root_dir: default root directory to store the results.
+            des_size: The size of the DES. Choose one of "xxs", "xs", "s", "m", or "l".
 
         """
         params_to_save = deepcopy(locals())

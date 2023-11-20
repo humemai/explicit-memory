@@ -24,14 +24,13 @@ class HandcraftedAgent:
     ) -> None:
         """Initialize the agent class.
 
-        Args
-        ----
-        seed: random seed
-        agent_type: episodic, semantic, episodic_semantic, or episodic_semantic_pretrain
-        forget_policy: see the code
-        answer_policy: see the code
-        episodic_capacity: number of memories the episodic memory system can have.
-        semantic_capacity: number of memories the semantic memory system can have.
+        Args:
+            seed: random seed
+            agent_type: episodic, semantic, episodic_semantic, or episodic_semantic_pretrain
+            forget_policy: see the code
+            answer_policy: see the code
+            episodic_capacity: number of memories the episodic memory system can have.
+            semantic_capacity: number of memories the semantic memory system can have.
 
         """
         self.seed = seed

@@ -7,7 +7,6 @@ logger.disabled = True
 import os
 from copy import deepcopy
 from glob import glob
-from typing import List, Tuple
 
 import gymnasium as gym
 import matplotlib.pyplot as plt
@@ -137,7 +136,7 @@ def plot_training_validation_results(
     ylog: bool = False,
     xlabel: str = "Step",
     des_size: str = "l",
-    figsize: Tuple = (10, 10),
+    figsize: tuple = (10, 10),
     legend_loc: str = "upper left",
 ) -> None:
     assert kind in [
@@ -247,7 +246,7 @@ def plot_test_results(
     ymin: int = 64,
     ymax: int = 128,
     des_size: str = "l",
-    figsize: Tuple = (10, 10),
+    figsize: tuple = (10, 10),
     legend_loc: str = "upper left",
     question_prob: float = 1.0,
     allow_random_human: str = False,
@@ -316,7 +315,7 @@ def plot_test_results_all_capacities(
     ymin: int = 0,
     ymax: int = 128,
     des_size: str = "l",
-    figsize: Tuple = (25, 8),
+    figsize: tuple = (25, 8),
     legend_loc: str = "upper left",
     question_prob: float = 1.0,
     allow_random_human: str = False,
@@ -464,12 +463,11 @@ class UnderstandModel:
     ) -> None:
         """Compute dimension reduction on the embeddings.
 
-        Args
-        ----
-        tsne_params: t-SNE parameters, e.g., {"n_components": 2, "perplexity": 3}
-            This is a non-linear reduction method. See the paper.
-        pca_params: PCA parameters, e.g., {"n_components": 2}
-            This is a linear reduction method. See wikipedia.
+        Args:
+            tsne_params: t-SNE parameters, e.g., {"n_components": 2, "perplexity": 3}
+                This is a non-linear reduction method. See the paper.
+            pca_params: PCA parameters, e.g., {"n_components": 2}
+                This is a linear reduction method. See wikipedia.
 
         """
         if tsne_params is None:
@@ -496,7 +494,7 @@ class UnderstandModel:
         self,
         semantic: str = "scratch",
         interest: str = "humans",
-        figsize: Tuple = (10, 10),
+        figsize: tuple = (10, 10),
         save_dir: str = "./figures/",
     ) -> None:
         self.semantic = semantic
@@ -536,7 +534,7 @@ class UnderstandModel:
         xmax: int,
         ymin: int,
         ymax: int,
-    ) -> List:
+    ) -> list:
         condition_xmin = xmin < self.X[self.semantic][self.interest][:, 0]
         condition_xmax = xmax > self.X[self.semantic][self.interest][:, 0]
         condition_ymin = ymin < self.X[self.semantic][self.interest][:, 1]

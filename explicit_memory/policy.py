@@ -3,22 +3,20 @@
 The trained neural network policies are not implemented yet.
 """
 import random
-from typing import List
 
 from .memory import EpisodicMemory, MemorySystems, SemanticMemory, ShortMemory
 
 
-def encode_observation(memory_systems: MemorySystems, obs: List[List]) -> None:
+def encode_observation(memory_systems: MemorySystems, obs: list[list]) -> None:
     """Non RL policy of encoding an observation into a short-term memory.
 
     At the moment, observation is the same as short-term memory. However, in the future
     we may want to encode the observation into a different format, e.g., when
     observatio is in the pixel space.
 
-    Args
-    ----
-    MemorySystems
-    obs: observation as a quadruple: [head, relation, tail, num]
+    Args:
+        MemorySystems
+        obs: observation as a quadruple: [head, relation, tail, num]
 
     """
     mem_short = ShortMemory.ob2short(obs)
@@ -32,13 +30,11 @@ def find_agent_current_location(memory_systems: MemorySystems) -> str:
     if not, it looks up the episodic. If fails, it looks up the semantic.
     If all fails, it returns None.
 
-    Args
-    ----
-    MemorySystems
+    Args:
+        MemorySystems
 
-    Returns
-    -------
-    agent_current_location: str
+    Returns:
+        agent_current_location: str
 
     """
     if hasattr(memory_systems, "episodic_agent"):
@@ -66,17 +62,55 @@ def find_agent_current_location(memory_systems: MemorySystems) -> str:
     return None
 
 
+def find_visited_locations(
+    memory_systems: MemorySystems,
+) -> dict[str, list[list[str, int]]]:
+    """Find the locations that the agent has visited so far.
+
+    Args:
+        MemorySystems: MemorySystems
+
+    Returns:
+        visited_locations: a dictionary of a list of [location, time/strength] pairs.
+
+    """
+    visited_locations = {"episodic": [], "semantic": []}
+    if hasattr(memory_systems, "episodic_agent"):
+        pair = [
+            [mem[2], mem[3]]
+            for mem in memory_systems.episodic_agent.entries
+            if mem[1] == "atlocation"
+        ]
+        visited_locations["episodic"].append(pair)
+
+    for mem in memory_systems.episodic.entries:
+        if mem[0] == "agent" and mem[1] == "atlocation":
+            pair = [mem[2], mem[3]]
+            visited_locations["episodic"].append(pair)
+
+    # ascending order
+    sorted(visited_locations["episodic"], key=lambda x: x[1])
+
+    for mem in memory_systems.semantic.entries:
+        if mem[0] == "agent" and mem[1] == "atlocation":
+            pair = [mem[2], mem[3]]
+            visited_locations["semantic"].append(pair)
+
+    # ascending order
+    sorted(visited_locations["semantic"], key=lambda x: x[1])
+
+    return visited_locations
+
+
 def explore(memory_systems: MemorySystems, explore_policy: str) -> str:
     """Explore the room (sub-graph).
 
-    Args
-    ----
-    memory_systems: MemorySystems
-    explore_policy: "random", "avoid_walls", or "neural"
+    Args:
+        memory_systems: MemorySystems
+        explore_policy: "random", "avoid_walls", or "neural"
 
-    Returns
-    -------
-    action: The exploration action to take.
+    Returns:
+        action: The exploration action to take.
 
     """
     assert memory_systems.short.is_empty, "Short-term memory should be empty."
@@ -131,6 +165,27 @@ def explore(memory_systems: MemorySystems, explore_policy: str) -> str:
         action = random.choice(["north", "east", "south", "west", "stay"])
         return action
 
+    elif explore_policy == "new_room":
+        # I think avoid_walls is not working well, since it's stochastic.
+        # so imma try this.
+        agent_current_location = find_agent_current_location(memory_systems)
+
+        visited_locations = find_visited_locations(memory_systems)
+        if len(visited_locations["episodic"]) > 0:
+            # use episodic memory
+            pass
+        else:
+            if len(visited_locations["semantic"]) > 0:
+                # use semantic memory
+                pass
+            else:
+                # use random
+                action = random.choice(["north", "east", "south", "west", "stay"])
+
+        raise NotImplementedError
+
+        return action
+
     elif explore_policy == "neural":
         raise NotImplementedError
     else:
@@ -148,12 +203,11 @@ def manage_memory(
 ) -> None:
     """Non RL memory management policy.
 
-    Args
-    ----
-    MemorySystems
-    policy: "episodic", "semantic", "generalize", "forget", "random", "neural",
-        "episodic_agent", or "semantic_map",
-    split_possessive: whether to split the possessive, i.e., 's, or not.
+    Args:
+        MemorySystems
+        policy: "episodic", "semantic", "generalize", "forget", "random", "neural",
+            "episodic_agent", or "semantic_map",
+        split_possessive: whether to split the possessive, i.e., 's, or not.
 
     """
     assert not memory_systems.short.is_empty
@@ -270,22 +324,20 @@ def manage_memory(
 def answer_question(
     memory_systems: MemorySystems,
     policy: str,
-    question: List[str],
+    question: list[str],
     split_possessive: bool = True,
 ) -> str:
     """Non RL question answering policy.
 
-    Args
-    ----
-    MemorySystems
-    qa_policy: "episodic_semantic", "semantic_episodic", "episodic", "semantic",
-            "random", or "neural",
-    question: e.g., [laptop, atlocation, ?, current_time]
-    split_possessive: whether to split the possessive, i.e., 's, or not.
+    Args:
+        MemorySystems
+        qa_policy: "episodic_semantic", "semantic_episodic", "episodic", "semantic",
+                "random", or "neural",
+        question: e.g., [laptop, atlocation, ?, current_time]
+        split_possessive: whether to split the possessive, i.e., 's, or not.
 
-    Returns
-    -------
-    pred: prediction
+    Returns:
+        pred: prediction
 
     """
     if (

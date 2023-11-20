@@ -4,7 +4,6 @@ import os
 import random
 import shutil
 from copy import deepcopy
-from typing import Dict, List, Tuple
 
 import gymnasium as gym
 import matplotlib.pyplot as plt
@@ -15,10 +14,18 @@ import torch.optim as optim
 from IPython.display import clear_output
 from tqdm.auto import tqdm, trange
 
-from explicit_memory.memory import (EpisodicMemory, MemorySystems,
-                                    SemanticMemory, ShortMemory)
-from explicit_memory.policy import (answer_question, encode_observation,
-                                    explore, manage_memory)
+from explicit_memory.memory import (
+    EpisodicMemory,
+    MemorySystems,
+    SemanticMemory,
+    ShortMemory,
+)
+from explicit_memory.policy import (
+    answer_question,
+    encode_observation,
+    explore,
+    manage_memory,
+)
 from explicit_memory.utils import write_yaml
 
 
@@ -38,7 +45,7 @@ class HandcraftedAgent:
             "seed": 42,
             "terminates_at": 99,
             "randomize_observations": True,
-            "room_size": "dev",
+            "room_size": "xxs",
         },
         mm_policy: str = "generalize",
         qa_policy: str = "episodic_semantic",
@@ -54,20 +61,20 @@ class HandcraftedAgent:
     ) -> None:
         """Initialize the agent.
 
-        Args
-        ----
-        env_str: This has to be "room_env:RoomEnv-v2"
-        env_config: The configuration of the environment.
-        mm_policy: Memory management policy. Choose one of "random" or
-            "generalize"
-        qa_policy: question answering policy Choose one of "episodic_semantic" or
-            "random"
-        explore_policy: The room exploration policy. Choose one of "random" or
-            "avoid_walls"
-        num_samples_for_results: The number of samples to validate / test the agent.
-        capacity: The capacity of each human-like memory systems.
-        pretrain_semantic: Whether or not to pretrain the semantic memory system.
-        default_root_dir: default root directory to store the results.
+        Args:
+            env_str: This has to be "room_env:RoomEnv-v2"
+            env_config: The configuration of the environment.
+            mm_policy: Memory management policy. Choose one of "random" or
+                "generalize"
+            qa_policy: question answering policy Choose one of "episodic_semantic" or
+                "random"
+            explore_policy: The room exploration policy. Choose one of "random",
+                "avoid_walls", or "new_room"
+            num_samples_for_results: The number of samples to validate / test the agent.
+            capacity: The capacity of each human-like memory systems.
+            pretrain_semantic: Whether or not to pretrain the semantic memory system.
+            default_root_dir: default root directory to store the results.
+
         """
         params_to_save = deepcopy(locals())
         del params_to_save["self"]
@@ -92,7 +99,13 @@ class HandcraftedAgent:
             "neural",
         ]
         self.explore_policy = explore_policy
-        assert self.explore_policy in ["random", "avoid_walls", "rl", "neural"]
+        assert self.explore_policy in [
+            "random",
+            "avoid_walls",
+            "new_room",
+            "rl",
+            "neural",
+        ]
         self.num_samples_for_results = num_samples_for_results
         self.capacity = capacity
         self.pretrain_semantic = pretrain_semantic
@@ -117,14 +130,12 @@ class HandcraftedAgent:
     ) -> list[list[str]]:
         """Manage episodic_agent and semantic_map memories.
 
-        Args
-        ----
-        observations: The observations["room"] from the environment.
+        Args:
+            observations: The observations["room"] from the environment.
 
-        Returns
-        -------
-        observations_others: The observations["room"] - (episodic_agent and semantic_map
-            memories) from the environment.
+        Returns:
+            observations_others: The observations["room"] - (episodic_agent and semantic_map
+                memories) from the environment.
 
         """
         if hasattr(self.memory_systems, "episodic_agent"):
@@ -140,7 +151,7 @@ class HandcraftedAgent:
             observations_map = [
                 obs
                 for obs in observations
-                if obs[1] in ["north", "east", "south", "west"]
+                if obs[1] in ["north", "east", "south", "west"] and obs[2] != "wall"
             ]
 
             for obs in observations_map:
@@ -242,10 +253,19 @@ class HandcraftedAgent:
         )
 
         if self.pretrain_semantic:
-            assert self.capacity["semantic"] > 0
             room_layout = self.env.return_room_layout()
-            _ = self.memory_systems.semantic.pretrain_semantic(
-                semantic_knowledge=room_layout,
-                return_remaining_space=False,
-                freeze=False,
-            )
+
+            if hasattr(self.memory_systems, "semantic_map"):
+                assert self.capacity["semantic_map"] > 0
+                _ = self.memory_systems.semantic_map.pretrain_semantic(
+                    semantic_knowledge=room_layout,
+                    return_remaining_space=False,
+                    freeze=False,
+                )
+            else:
+                assert self.capacity["semantic"] > 0
+                _ = self.memory_systems.semantic.pretrain_semantic(
+                    semantic_knowledge=room_layout,
+                    return_remaining_space=False,
+                    freeze=False,
+                )

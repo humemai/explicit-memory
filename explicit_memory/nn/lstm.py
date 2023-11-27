@@ -1,6 +1,4 @@
 """Deep Q-network architecture. Currently only LSTM is implemented."""
-from typing import Union
-
 import numpy as np
 import torch
 from torch import nn

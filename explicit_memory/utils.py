@@ -9,8 +9,7 @@ import shutil
 from collections import deque
 from copy import deepcopy
 from glob import glob
-from pprint import pformat
-from typing import Deque
+from typing import Deque, Optional
 
 import gymnasium as gym
 import matplotlib.pyplot as plt
@@ -19,7 +18,7 @@ import torch
 import torch.nn.functional as F
 import yaml
 from IPython.display import clear_output
-from tqdm.auto import tqdm, trange
+from tqdm.auto import tqdm
 
 from .segment_tree import MinSegmentTree, SumSegmentTree
 
@@ -121,9 +120,17 @@ def write_yaml(content: dict, fname: str) -> None:
         yaml.dump(content, stream, indent=2, sort_keys=False)
 
 
-def read_pickle(fname: str):
+def write_pickle(to_pickle: object, fname: str):
     """Read pickle"""
     logging.debug(f"writing pickle {fname} ...")
+    with open(fname, "wb") as stream:
+        foo = pickle.dump(to_pickle, stream)
+    return foo
+
+
+def read_pickle(fname: str):
+    """Read pickle"""
+    logging.debug(f"reading pickle {fname} ...")
     with open(fname, "rb") as stream:
         foo = pickle.load(stream)
     return foo
@@ -269,7 +276,7 @@ def is_running_notebook() -> bool:
         return False  # Probably standard Python interpreter
 
 
-def plot_dqn(
+def plot_results(
     scores: dict,
     training_loss: list,
     epsilons: list,
@@ -281,18 +288,123 @@ def plot_dqn(
     num_validation: int,
     num_samples_for_results: int,
     default_root_dir: str,
+    to_plot: str = "all",
+    save_fig: bool = False,
 ) -> None:
-    """Plot things for DQN training."""
+    """Plot things for DQN training.
+
+    Args:
+        to_plot: what to plot:
+            training_td_loss
+            epsilons
+            training_score
+            validation_score
+            test_score
+            q_values_train
+            q_values_val
+            q_values_test
+
+    """
     all_params = deepcopy(locals())
 
     is_notebook = is_running_notebook()
 
     if is_notebook:
         clear_output(True)
-    plt.figure(figsize=(20, 20))
 
-    if scores["train"]:
-        plt.subplot(334)
+    if to_plot == "all":
+        plt.figure(figsize=(20, 20))
+        if scores["train"]:
+            plt.subplot(334)
+            plt.title(
+                f"iteration {iteration_idx} out of {num_iterations}. "
+                f"training score: {scores['train'][-1]} out of {total_episode_rewards}"
+            )
+            plt.plot(scores["train"])
+            plt.xlabel("episode")
+
+        if scores["validation"]:
+            plt.subplot(335)
+            val_means = [
+                round(np.mean(scores).item()) for scores in scores["validation"]
+            ]
+            plt.title(
+                f"validation score: {val_means[-1]} out of {total_episode_rewards}"
+            )
+            plt.plot(val_means)
+            plt.xlabel("episode")
+
+        if scores["test"]:
+            plt.subplot(336)
+            plt.title(
+                f"test score: {np.mean(scores['test'])} out of {total_episode_rewards}"
+            )
+            plt.plot(round(np.mean(scores["test"]).item(), 2))
+            plt.xlabel("episode")
+
+        plt.subplot(331)
+        plt.title("training td loss")
+        plt.plot(training_loss)
+        plt.xlabel("update counts")
+
+        plt.subplot(332)
+        plt.title("epsilons")
+        plt.plot(epsilons)
+        plt.xlabel("update counts")
+
+        plt.subplot(337)
+        plt.title("Q-values, train")
+        for action_number in range(number_of_actions):
+            plt.plot(
+                [q_values_[action_number] for q_values_ in q_values["train"]],
+                label=f"action {action_number}",
+            )
+        plt.legend(loc="upper left")
+        plt.xlabel("number of actions")
+
+        plt.subplot(338)
+        plt.title("Q-values, val")
+        for action_number in range(number_of_actions):
+            plt.plot(
+                [q_values_[action_number] for q_values_ in q_values["val"]],
+                label=f"action {action_number}",
+            )
+        plt.legend(loc="upper left")
+        plt.xlabel("number of actions")
+
+        plt.subplot(339)
+        plt.title("Q-values, test")
+        for action_number in range(number_of_actions):
+            plt.plot(
+                [q_values_[action_number] for q_values_ in q_values["test"]],
+                label=f"action {action_number}",
+            )
+        plt.legend(loc="upper left")
+        plt.xlabel("number of actions")
+
+        plt.subplots_adjust(hspace=0.5)
+        if save_fig:
+            plt.savefig(os.path.join(default_root_dir, "plot.pdf"))
+
+        if is_notebook:
+            plt.show()
+        else:
+            console_dqn(**all_params)
+
+    elif to_plot == "training_td_loss":
+        plt.figure()
+        plt.title("training td loss")
+        plt.plot(training_loss)
+        plt.xlabel("update counts")
+
+    elif to_plot == "epsilons":
+        plt.figure()
+        plt.title("epsilons")
+        plt.plot(epsilons)
+        plt.xlabel("update counts")
+
+    elif to_plot == "training_score":
+        plt.figure()
         plt.title(
             f"iteration {iteration_idx} out of {num_iterations}. "
             f"training score: {scores['train'][-1]} out of {total_episode_rewards}"
@@ -300,68 +412,53 @@ def plot_dqn(
         plt.plot(scores["train"])
         plt.xlabel("episode")
 
-    if scores["validation"]:
-        plt.subplot(335)
+    elif to_plot == "validation_score":
+        plt.figure()
         val_means = [round(np.mean(scores).item()) for scores in scores["validation"]]
         plt.title(f"validation score: {val_means[-1]} out of {total_episode_rewards}")
         plt.plot(val_means)
         plt.xlabel("episode")
 
-    if scores["test"]:
-        plt.subplot(336)
+    elif to_plot == "test_score":
+        plt.figure()
         plt.title(
             f"test score: {np.mean(scores['test'])} out of {total_episode_rewards}"
         )
         plt.plot(round(np.mean(scores["test"]).item(), 2))
         plt.xlabel("episode")
 
-    plt.subplot(331)
-    plt.title("training td loss")
-    plt.plot(training_loss)
-    plt.xlabel("update counts")
+    elif to_plot == "q_values_train":
+        plt.figure()
+        plt.title("Q-values, train")
+        for action_number in range(number_of_actions):
+            plt.plot(
+                [q_values_[action_number] for q_values_ in q_values["train"]],
+                label=f"action {action_number}",
+            )
+        plt.legend(loc="upper left")
+        plt.xlabel("number of actions")
 
-    plt.subplot(332)
-    plt.title("epsilons")
-    plt.plot(epsilons)
-    plt.xlabel("update counts")
+    elif to_plot == "q_values_val":
+        plt.figure()
+        plt.title("Q-values, val")
+        for action_number in range(number_of_actions):
+            plt.plot(
+                [q_values_[action_number] for q_values_ in q_values["val"]],
+                label=f"action {action_number}",
+            )
+        plt.legend(loc="upper left")
+        plt.xlabel("number of actions")
 
-    plt.subplot(337)
-    plt.title("Q-values, train")
-    for action_number in range(number_of_actions):
-        plt.plot(
-            [q_values_[action_number] for q_values_ in q_values["train"]],
-            label=f"action {action_number}",
-        )
-    plt.legend(loc="upper left")
-    plt.xlabel("number of actions")
-
-    plt.subplot(338)
-    plt.title("Q-values, val")
-    for action_number in range(number_of_actions):
-        plt.plot(
-            [q_values_[action_number] for q_values_ in q_values["val"]],
-            label=f"action {action_number}",
-        )
-    plt.legend(loc="upper left")
-    plt.xlabel("number of actions")
-
-    plt.subplot(339)
-    plt.title("Q-values, test")
-    for action_number in range(number_of_actions):
-        plt.plot(
-            [q_values_[action_number] for q_values_ in q_values["test"]],
-            label=f"action {action_number}",
-        )
-    plt.legend(loc="upper left")
-    plt.xlabel("number of actions")
-
-    plt.subplots_adjust(hspace=0.5)
-    plt.savefig(f"{default_root_dir}/plot.pdf")
-
-    if is_notebook:
-        plt.show()
-    else:
-        console_dqn(**all_params)
+    elif to_plot == "q_values_test":
+        plt.figure()
+        plt.title("Q-values, test")
+        for action_number in range(number_of_actions):
+            plt.plot(
+                [q_values_[action_number] for q_values_ in q_values["test"]],
+                label=f"action {action_number}",
+            )
+        plt.legend(loc="upper left")
+        plt.xlabel("number of actions")
 
 
 def console_dqn(
@@ -405,12 +502,12 @@ def console_dqn(
     tqdm.write(f"training loss: {training_loss[-1]}")
 
 
-def save_dqn_results(
+def save_dqn_final_results(
     scores: dict,
     training_loss: list,
     default_root_dir: str,
     q_values: dict,
-    last_memory_state: dict,
+    self: object,
 ) -> None:
     """Save dqn train / val / test results."""
     results = {
@@ -429,11 +526,8 @@ def save_dqn_results(
         "training_loss": training_loss,
     }
     write_yaml(results, os.path.join(default_root_dir, "results.yaml"))
-    write_yaml(
-        last_memory_state,
-        os.path.join(default_root_dir, "last_memory_state_test.yaml"),
-    )
     write_yaml(q_values, os.path.join(default_root_dir, "q_values.yaml"))
+    write_pickle(self, os.path.join(default_root_dir, "agent.pkl"))
 
 
 class ReplayBuffer:
@@ -813,11 +907,9 @@ def select_dqn_action(
     greedy: bool,
     dqn: torch.nn.Module,
     train_val_test: str,
-    q_values: dict,
     epsilon: float,
     action_space: gym.spaces.Discrete,
-    save_q_value: bool = False,
-) -> int:
+) -> tuple[int, list]:
     """Select an action from the input state.
 
     Args:
@@ -826,24 +918,20 @@ def select_dqn_action(
         greedy: always pick greedy action if True
         save_q_value: whether to save the q values or not.
 
+    Returns:
+        selected_action: an action to take.
+        q_values: a list of q values for each action.
+
     """
     # epsilon greedy policy
-    q_values_ = dqn(np.array([state])).detach().cpu().numpy().tolist()[0]
-
-    if save_q_value:
-        if train_val_test == "train":
-            q_values["train"].append(q_values_)
-        elif train_val_test == "val":
-            q_values["val"].append(q_values_)
-        elif train_val_test == "test":
-            q_values["test"].append(q_values_)
+    q_values = dqn(np.array([state])).detach().cpu().numpy().tolist()[0]
 
     if epsilon < np.random.random() or greedy:
-        selected_action = argmax(q_values_)
+        selected_action = argmax(q_values)
     else:
         selected_action = action_space.sample()
 
-    return selected_action
+    return selected_action, q_values
 
 
 def update_dqn_model(
@@ -887,8 +975,8 @@ def save_dqn_validation(
 
     """
     mean_score = round(np.mean(scores_temp).item())
-    filename = (
-        f"{default_root_dir}/" f"episode={num_validation}_val-score={mean_score}.pt"
+    filename = os.path.join(
+        default_root_dir, f"episode={num_validation}_val-score={mean_score}.pt"
     )
     val_filenames.append(filename)
     torch.save(dqn.state_dict(), filename)
@@ -904,6 +992,38 @@ def save_dqn_validation(
         if filename != file_to_keep:
             os.remove(filename)
             val_filenames.remove(filename)
+
+
+def save_states_q_values_actions(
+    states: list,
+    q_values: list,
+    actions: list,
+    default_root_dir: str,
+    val_or_test: str,
+    num_validation: Optional[int] = None,
+) -> None:
+    """Save states, q_values, and actions.
+
+    Args:
+        states: a list of states.
+        q_values: a list of q_values.
+        actions: a list of actions.
+
+    """
+    if val_or_test.lower() == "val":
+        filename = os.path.join(
+            default_root_dir,
+            f"states_q_values_actions_val_episode={num_validation}.yaml",
+        )
+    else:
+        filename = os.path.join(default_root_dir, "states_q_values_actions_test.yaml")
+
+    assert len(states) == len(q_values) == len(actions)
+    to_save = [
+        {"state": s, "q_values": q, "action": a}
+        for s, q, a in zip(states, q_values, actions)
+    ]
+    write_yaml(to_save, filename)
 
 
 def dqn_target_hard_update(dqn: torch.nn.Module, dqn_target: torch.nn.Module) -> None:

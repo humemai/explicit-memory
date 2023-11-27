@@ -1,43 +1,19 @@
 """DQN Agent for the RoomEnv2 environment."""
-import datetime
 import os
-import random
-import shutil
-from copy import deepcopy
 
 import gymnasium as gym
-import matplotlib.pyplot as plt
-import numpy as np
 import torch
-import torch.nn.functional as F
 import torch.optim as optim
-from IPython.display import clear_output
-from tqdm.auto import tqdm, trange
 
-from explicit_memory.memory import (
-    EpisodicMemory,
-    MemorySystems,
-    SemanticMemory,
-    ShortMemory,
-)
 from explicit_memory.nn import LSTM
-from explicit_memory.policy import (
-    answer_question,
-    encode_observation,
-    explore,
-    manage_memory,
-)
 from explicit_memory.utils import (
     ReplayBuffer,
-    argmax,
-    dqn_target_hard_update,
     is_running_notebook,
-    plot_dqn,
-    save_dqn_results,
+    plot_results,
+    save_dqn_final_results,
     save_dqn_validation,
-    select_dqn_action,
-    update_dqn_model,
     write_yaml,
+    save_states_q_values_actions,
 )
 
 from ..handcrafted import HandcraftedAgent
@@ -213,14 +189,7 @@ class DQNAgent(HandcraftedAgent):
     def validate(self) -> None:
         self.train_val_test = "val"
         self.dqn.eval()
-        scores_temp, last_memory_state = self.validate_test_middle()
-        write_yaml(
-            last_memory_state,
-            os.path.join(
-                self.default_root_dir,
-                f"last_memory_state_validation_{str(self.num_validation).zfill(2)}.yaml",
-            ),
-        )
+        scores_temp, states, q_values, actions = self.validate_test_middle("val")
 
         save_dqn_validation(
             scores_temp=scores_temp,
@@ -229,6 +198,9 @@ class DQNAgent(HandcraftedAgent):
             num_validation=self.num_validation,
             val_filenames=self.val_filenames,
             dqn=self.dqn,
+        )
+        save_states_q_values_actions(
+            states, q_values, actions, self.default_root_dir, "val", self.num_validation
         )
         self.env.close()
         self.num_validation += 1
@@ -246,18 +218,36 @@ class DQNAgent(HandcraftedAgent):
         if checkpoint is not None:
             self.dqn.load_state_dict(torch.load(checkpoint))
 
-        scores, last_memory_state = self.validate_test_middle()
+        scores, states, q_values, actions = self.validate_test_middle("test")
         self.scores["test"] = scores
 
-        save_dqn_results(
-            self.scores,
-            self.training_loss,
-            self.default_root_dir,
-            self.q_values,
-            last_memory_state,
+        save_dqn_final_results(
+            self.scores, self.training_loss, self.default_root_dir, self.q_values, self
+        )
+        save_states_q_values_actions(
+            states, q_values, actions, self.default_root_dir, "test"
         )
 
-        plot_dqn(
+        self.plot_results("all", save_fig=True)
+        self.env.close()
+        self.dqn.train()
+
+    def plot_results(self, to_plot: str = "all", save_fig: bool = False) -> None:
+        """Plot things for DQN training.
+
+        Args:
+            to_plot: what to plot:
+                training_td_loss
+                epsilons
+                training_score
+                validation_score
+                test_score
+                q_values_train
+                q_values_val
+                q_values_test
+
+        """
+        plot_results(
             self.scores,
             self.training_loss,
             self.epsilons,
@@ -269,7 +259,6 @@ class DQNAgent(HandcraftedAgent):
             self.num_validation,
             self.num_samples_for_results,
             self.default_root_dir,
+            to_plot,
+            save_fig,
         )
-
-        self.env.close()
-        self.dqn.train()

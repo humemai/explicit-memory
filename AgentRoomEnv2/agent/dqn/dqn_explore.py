@@ -1,29 +1,23 @@
 """DQN Agent for the RoomEnv2 environment."""
-import datetime
 import os
-import random
-import shutil
 from copy import deepcopy
 
 import gymnasium as gym
-import matplotlib.pyplot as plt
-import numpy as np
 import torch
-import torch.nn.functional as F
-import torch.optim as optim
-from IPython.display import clear_output
-from tqdm.auto import tqdm, trange
+from tqdm.auto import trange
 
-from explicit_memory.memory import (EpisodicMemory, MemorySystems,
-                                    SemanticMemory, ShortMemory)
 from explicit_memory.nn import LSTM
-from explicit_memory.policy import (answer_question, encode_observation,
-                                    explore, manage_memory)
-from explicit_memory.utils import (ReplayBuffer, argmax,
-                                   dqn_target_hard_update, plot_dqn,
-                                   save_dqn_results, save_dqn_validation,
-                                   select_dqn_action, update_dqn_model,
-                                   write_yaml)
+from explicit_memory.policy import (
+    answer_question,
+    encode_observation,
+    manage_memory,
+)
+from explicit_memory.utils import (
+    dqn_target_hard_update,
+    select_dqn_action,
+    update_dqn_model,
+    write_yaml,
+)
 
 from .dqn import DQNAgent
 
@@ -164,15 +158,13 @@ class DQNExploreAgent(DQNAgent):
                     split_possessive=False,
                 )
                 state = self.memory_systems.return_as_a_dict_list()
-                action = select_dqn_action(
+                action, q_values_ = select_dqn_action(
                     state=state,
                     greedy=False,
                     dqn=self.dqn,
                     train_val_test=self.train_val_test,
-                    q_values=self.q_values,
                     epsilon=self.epsilon,
                     action_space=self.action_space,
-                    save_q_value=False,
                 )
                 action_pair = (action_qa, self.action2str[action])
                 (
@@ -183,9 +175,6 @@ class DQNExploreAgent(DQNAgent):
                     info,
                 ) = self.env.step(action_pair)
                 done = done or truncated
-
-                if done or len(self.replay_buffer) >= self.warm_start:
-                    break
 
                 observations["room"] = self.manage_agent_and_map_memory(
                     observations["room"]
@@ -202,6 +191,9 @@ class DQNExploreAgent(DQNAgent):
                 next_state = self.memory_systems.return_as_a_dict_list()
                 transition = [state, action, reward, next_state, done]
                 self.replay_buffer.store(*transition)
+
+                if done or len(self.replay_buffer) >= self.warm_start:
+                    break
 
     def train(self) -> None:
         """Train the explore agent."""
@@ -243,16 +235,16 @@ class DQNExploreAgent(DQNAgent):
                 split_possessive=False,
             )
             state = self.memory_systems.return_as_a_dict_list()
-            action = select_dqn_action(
+            action, q_values_ = select_dqn_action(
                 state=state,
                 greedy=False,
                 dqn=self.dqn,
                 train_val_test=self.train_val_test,
-                q_values=self.q_values,
                 epsilon=self.epsilon,
                 action_space=self.action_space,
-                save_q_value=True,
             )
+            self.q_values["train"].append(q_values_)
+
             action_pair = (action_qa, self.action2str[action])
             (
                 observations,
@@ -318,36 +310,38 @@ class DQNExploreAgent(DQNAgent):
                 self.iteration_idx == self.num_iterations
                 or self.iteration_idx % self.plotting_interval == 0
             ):
-                plot_dqn(
-                    self.scores,
-                    self.training_loss,
-                    self.epsilons,
-                    self.q_values,
-                    self.iteration_idx,
-                    self.action_space.n.item(),
-                    self.num_iterations,
-                    self.env.total_episode_rewards,
-                    self.num_validation,
-                    self.num_samples_for_results,
-                    self.default_root_dir,
-                )
+                self.plot_results("all", save_fig=True)
 
         with torch.no_grad():
             self.test()
 
         self.env.close()
 
-    def validate_test_middle(self) -> tuple[list[float], dict]:
+    def validate_test_middle(self, val_or_test: str) -> tuple[list[float], dict]:
         """A function shared by explore validation and test in the middle.
 
+        Args:
+            val_or_test: "val" or "test"
 
         Returns:
-            scores: a list of scores
-            last_memory_state: the last memory state
+            scores_temp = a list of total episde rewards
+            states = memory states
+            q_values = q values
+            actions = greey actions taken
 
         """
-        scores = []
-        for _ in range(self.num_samples_for_results):
+        scores_temp = []
+        states = []
+        q_values = []
+        actions = []
+
+        for idx in range(self.num_samples_for_results):
+            if idx == self.num_samples_for_results - 1:
+                save_results = True
+            else:
+                save_results = False
+            score = 0
+
             self.init_memory_systems()
             observations, info = self.env.reset()
 
@@ -363,7 +357,6 @@ class DQNExploreAgent(DQNAgent):
                     split_possessive=False,
                 )
 
-            score = 0
             while True:
                 action_qa = answer_question(
                     self.memory_systems,
@@ -372,16 +365,22 @@ class DQNExploreAgent(DQNAgent):
                     split_possessive=False,
                 )
                 state = self.memory_systems.return_as_a_dict_list()
-                action = select_dqn_action(
+                if save_results:
+                    states.append(deepcopy(state))
+
+                action, q_values_ = select_dqn_action(
                     state=state,
                     greedy=True,
                     dqn=self.dqn,
                     train_val_test=self.train_val_test,
-                    q_values=self.q_values,
                     epsilon=self.epsilon,
                     action_space=self.action_space,
-                    save_q_value=True,
                 )
+                if save_results:
+                    q_values.append(deepcopy(q_values_))
+                    actions.append(action)
+                    self.q_values[val_or_test].append(q_values_)
+
                 action_pair = (action_qa, self.action2str[action])
                 (
                     observations,
@@ -407,6 +406,6 @@ class DQNExploreAgent(DQNAgent):
                         self.mm_policy,
                         split_possessive=False,
                     )
-            scores.append(score)
+            scores_temp.append(score)
 
-        return scores, self.memory_systems.return_as_a_dict_list()
+        return scores_temp, states, q_values, actions

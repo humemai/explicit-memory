@@ -1,16 +1,11 @@
 """Handcrafted Agent for the RoomEnv2 environment."""
 import datetime
 import os
-import random
 import shutil
 from copy import deepcopy
 
 import gymnasium as gym
-import matplotlib.pyplot as plt
 import numpy as np
-import torch
-import torch.nn.functional as F
-import torch.optim as optim
 from IPython.display import clear_output
 from tqdm.auto import tqdm, trange
 

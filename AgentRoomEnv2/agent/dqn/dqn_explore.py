@@ -7,17 +7,10 @@ import torch
 from tqdm.auto import trange
 
 from explicit_memory.nn import LSTM
-from explicit_memory.policy import (
-    answer_question,
-    encode_observation,
-    manage_memory,
-)
-from explicit_memory.utils import (
-    dqn_target_hard_update,
-    select_dqn_action,
-    update_dqn_model,
-    write_yaml,
-)
+from explicit_memory.policy import (answer_question, encode_observation,
+                                    manage_memory)
+from explicit_memory.utils import (dqn_target_hard_update, select_dqn_action,
+                                   update_dqn_model, write_yaml)
 
 from .dqn import DQNAgent
 
@@ -35,7 +28,7 @@ class DQNExploreAgent(DQNAgent):
         replay_buffer_size: int = 102400,
         warm_start: int = 102400,
         batch_size: int = 1024,
-        target_update_rate: int = 10,
+        target_update_interval: int = 10,
         epsilon_decay_until: float = 2048,
         max_epsilon: float = 1.0,
         min_epsilon: float = 0.1,
@@ -83,7 +76,7 @@ class DQNExploreAgent(DQNAgent):
                 starting
             batch_size: The batch size for training This is the amount of samples sampled
                 from the replay buffer.
-            target_update_rate: The rate to update the target network.
+            target_update_interval: The rate to update the target network.
             epsilon_decay_until: The iteration index until which to decay epsilon.
             max_epsilon: The maximum epsilon.
             min_epsilon: The minimum epsilon.
@@ -302,7 +295,7 @@ class DQNExploreAgent(DQNAgent):
             self.epsilons.append(self.epsilon)
 
             # if hard update is needed
-            if self.iteration_idx % self.target_update_rate == 0:
+            if self.iteration_idx % self.target_update_interval == 0:
                 dqn_target_hard_update(dqn=self.dqn, dqn_target=self.dqn_target)
 
             # plotting & show training results

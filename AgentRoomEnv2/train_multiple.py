@@ -39,7 +39,7 @@ train_config = {
     "replay_buffer_size": 1024 * 100,
     "warm_start": 1024 * 100,
     "batch_size": 1024,
-    "target_update_rate": 10,
+    "target_update_interval": 10,
     "pretrain_semantic": False,
     "run_test": True,
     "num_samples_for_results": 10,

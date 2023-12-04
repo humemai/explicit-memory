@@ -56,7 +56,7 @@ class DQNExploreAgentTest(unittest.TestCase):
                                     "replay_buffer_size": 16,
                                     "warm_start": 16,
                                     "batch_size": 4,
-                                    "target_update_rate": 10,
+                                    "target_update_interval": 10,
                                     "pretrain_semantic": pretrain_semantic,
                                     "run_test": True,
                                     "num_samples_for_results": 3,

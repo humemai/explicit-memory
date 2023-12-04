@@ -473,6 +473,7 @@ def console_dqn(
     num_validation: int,
     num_samples_for_results: int,
     default_root_dir: str,
+    **kwargs,
 ) -> None:
     """Print the dqn training to the console."""
     if scores["train"]:

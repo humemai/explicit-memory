@@ -6,15 +6,10 @@ import torch
 import torch.optim as optim
 
 from explicit_memory.nn import LSTM
-from explicit_memory.utils import (
-    ReplayBuffer,
-    is_running_notebook,
-    plot_results,
-    save_dqn_final_results,
-    save_dqn_validation,
-    write_yaml,
-    save_states_q_values_actions,
-)
+from explicit_memory.utils import (ReplayBuffer, is_running_notebook,
+                                   plot_results, save_dqn_final_results,
+                                   save_dqn_validation,
+                                   save_states_q_values_actions, write_yaml)
 
 from ..handcrafted import HandcraftedAgent
 
@@ -32,7 +27,7 @@ class DQNAgent(HandcraftedAgent):
         replay_buffer_size: int = 102400,
         warm_start: int = 102400,
         batch_size: int = 1024,
-        target_update_rate: int = 10,
+        target_update_interval: int = 10,
         epsilon_decay_until: float = 2048,
         max_epsilon: float = 1.0,
         min_epsilon: float = 0.1,
@@ -64,7 +59,6 @@ class DQNAgent(HandcraftedAgent):
             "terminates_at": 99,
             "room_size": "xxs",
             "randomize_observations": True,
-            "deterministic_init": False,
         },
         ddqn: bool = False,
         dueling_dqn: bool = False,
@@ -80,7 +74,7 @@ class DQNAgent(HandcraftedAgent):
                 starting
             batch_size: The batch size for training This is the amount of samples sampled
                 from the replay buffer.
-            target_update_rate: The rate to update the target network.
+            target_update_interval: The rate to update the target network.
             epsilon_decay_until: The iteration index until which to decay epsilon.
             max_epsilon: The maximum epsilon.
             min_epsilon: The minimum epsilon.
@@ -154,7 +148,7 @@ class DQNAgent(HandcraftedAgent):
         self.max_epsilon = max_epsilon
         self.min_epsilon = min_epsilon
         self.epsilon_decay_until = epsilon_decay_until
-        self.target_update_rate = target_update_rate
+        self.target_update_interval = target_update_interval
         self.gamma = gamma
         self.warm_start = warm_start
         assert self.batch_size <= self.warm_start <= self.replay_buffer_size

@@ -131,22 +131,31 @@ def explore(memory_systems: MemorySystems, explore_policy: str) -> str:
                 for mem in memory_systems.semantic_map.entries
                 if mem[0] == agent_current_location
                 and mem[1] in ["north", "east", "south", "west"]
-                and mem[2] != "wall"
             ]
             if len(mems) > 0:
-                action = random.choice(mems)[1]
+                options = ["north", "east", "south", "west", "stay"]
+                for mem in mems:
+                    if mem[1] in options and mem[2] == "wall":
+                        options.remove(mem[1])
+
+                action = random.choice(options)
                 return action
 
-        # if there is an semantic memory, then use it
+        # if there is a semantic memory, then use it
         mems = [
             mem
             for mem in memory_systems.semantic.entries
             if mem[0] == agent_current_location
             and mem[1] in ["north", "east", "south", "west"]
-            and mem[2] != "wall"
         ]
         if len(mems) > 0:
-            action = random.choice(mems)[1]
+            options = ["north", "east", "south", "west", "stay"]
+            for mem in mems:
+                if mem[1] in options and mem[2] == "wall":
+                    options.remove(mem[1])
+
+            action = random.choice(options)
+
             return action
 
         # if there is an episodic memory, then use it
@@ -155,10 +164,15 @@ def explore(memory_systems: MemorySystems, explore_policy: str) -> str:
             for mem in memory_systems.episodic.entries
             if mem[0] == agent_current_location
             and mem[1] in ["north", "east", "south", "west"]
-            and mem[2] != "wall"
         ]
         if len(mems) > 0:
-            action = random.choice(mems)[1]
+            options = ["north", "east", "south", "west", "stay"]
+            for mem in mems:
+                if mem[1] in options and mem[2] == "wall":
+                    options.remove(mem[1])
+
+            action = random.choice(options)
+
             return action
 
         # we know the agent's current location but there is no memory about the map

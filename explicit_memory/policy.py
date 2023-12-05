@@ -122,83 +122,56 @@ def explore(memory_systems: MemorySystems, explore_policy: str) -> str:
         # no information about the agent's location
         if agent_current_location is None:
             action = random.choice(["north", "east", "south", "west", "stay"])
-            return action
 
-        # if there is a semantic map, then use it
+        # Get all the memories related to the current location
+        mems = []
+
+        # from the semantic map
         if hasattr(memory_systems, "semantic_map"):
-            mems = [
+            mems += [
                 mem
                 for mem in memory_systems.semantic_map.entries
                 if mem[0] == agent_current_location
                 and mem[1] in ["north", "east", "south", "west"]
             ]
-            if len(mems) > 0:
-                options = ["north", "east", "south", "west", "stay"]
-                for mem in mems:
-                    if mem[1] in options and mem[2] == "wall":
-                        options.remove(mem[1])
 
-                action = random.choice(options)
-                return action
-
-        # if there is a semantic memory, then use it
-        mems = [
+        # from the semantic memory
+        mems += [
             mem
             for mem in memory_systems.semantic.entries
             if mem[0] == agent_current_location
             and mem[1] in ["north", "east", "south", "west"]
         ]
-        if len(mems) > 0:
-            options = ["north", "east", "south", "west", "stay"]
-            for mem in mems:
-                if mem[1] in options and mem[2] == "wall":
-                    options.remove(mem[1])
 
-            action = random.choice(options)
-
-            return action
-
-        # if there is an episodic memory, then use it
-        mems = [
+        # from the episodic
+        mems += [
             mem
             for mem in memory_systems.episodic.entries
             if mem[0] == agent_current_location
             and mem[1] in ["north", "east", "south", "west"]
         ]
-        if len(mems) > 0:
-            options = ["north", "east", "south", "west", "stay"]
-            for mem in mems:
-                if mem[1] in options and mem[2] == "wall":
-                    options.remove(mem[1])
-
-            action = random.choice(options)
-
-            return action
 
         # we know the agent's current location but there is no memory about the map
-        action = random.choice(["north", "east", "south", "west", "stay"])
-        return action
+        if len(mems) == 0:
+            action = random.choice(["north", "east", "south", "west", "stay"])
+
+        # we know the agent's current location and there is at least one memory about
+        # the map and we want to avoid the walls
+        options = ["north", "east", "south", "west", "stay"]
+
+        for mem in mems:
+            if mem[1] in options and mem[2] == "wall":
+                options.remove(mem[1])
+
+        if len(options) == 0:
+            action = random.choice(["north", "east", "south", "west", "stay"])
+        else:
+            action = random.choice(options)
 
     elif explore_policy == "new_room":
         # I think avoid_walls is not working well, since it's stochastic.
         # so imma try this.
-        agent_current_location = find_agent_current_location(memory_systems)
-
-        visited_locations = find_visited_locations(memory_systems)
-        if len(visited_locations["episodic"]) > 0:
-            # use episodic memory
-            pass
-        else:
-            if len(visited_locations["semantic"]) > 0:
-                # use semantic memory
-                pass
-            else:
-                # use random
-                action = random.choice(["north", "east", "south", "west", "stay"])
-
         raise NotImplementedError
-
-        return action
 
     elif explore_policy == "neural":
         raise NotImplementedError

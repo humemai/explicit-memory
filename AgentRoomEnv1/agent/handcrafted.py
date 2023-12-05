@@ -13,11 +13,14 @@ import torch.optim as optim
 from IPython.display import clear_output
 from tqdm.auto import tqdm, trange
 
-from explicit_memory.memory import (EpisodicMemory, MemorySystems,
-                                    SemanticMemory, ShortMemory)
+from explicit_memory.memory import (
+    EpisodicMemory,
+    MemorySystems,
+    SemanticMemory,
+    ShortMemory,
+)
 from explicit_memory.nn import LSTM
-from explicit_memory.policy import (answer_question, encode_observation,
-                                    manage_memory)
+from explicit_memory.policy import answer_question, encode_observation, manage_memory
 from explicit_memory.utils import ReplayBuffer, is_running_notebook, write_yaml
 
 
@@ -31,9 +34,16 @@ class HandcraftedAgent:
     def __init__(
         self,
         env_str: str = "room_env:RoomEnv-v1",
+        env_config: dict = {
+            "des_size": "l",
+            "question_prob": 1.0,
+            "allow_random_human": False,
+            "allow_random_question": False,
+            "check_resources": True,
+            "seed": 42,
+        },
         policy: str = "random",
         num_samples_for_results: int = 10,
-        seed: int = 42,
         capacity: dict = {
             "episodic": 16,
             "semantic": 16,
@@ -41,16 +51,15 @@ class HandcraftedAgent:
         },
         pretrain_semantic: bool = False,
         default_root_dir: str = "./training_results/",
-        des_size: str = "l",
     ) -> None:
         """Initialization.
 
         Args:
             env_str: This has to be "room_env:RoomEnv-v1"
+            env_config: The configuration of the environment.
             policy: The memory management policy. Choose one of "random", "episodic_only",
                     or "semantic_only".
             num_samples_for_results: The number of samples to validate / test the agent.
-            seed: The random seed for test.
             capacity: The capacity of each human-like memory systems.
             pretrain_semantic: Whether or not to pretrain the semantic memory system.
             default_root_dir: default root directory to store the results.
@@ -63,10 +72,9 @@ class HandcraftedAgent:
         self.env_str = env_str
         self.policy = policy
         self.num_samples_for_results = num_samples_for_results
-        self.seed = seed
         self.capacity = capacity
         self.pretrain_semantic = pretrain_semantic
-        self.env = gym.make(self.env_str, seed=self.seed, des_size=des_size)
+        self.env = gym.make(self.env_str, **env_config)
         self.default_root_dir = os.path.join(
             default_root_dir, str(datetime.datetime.now())
         )

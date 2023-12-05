@@ -11,6 +11,7 @@ class PolicyTest(unittest.TestCase):
             episodic=EpisodicMemory(capacity=4),
             episodic_agent=EpisodicMemory(capacity=4),
             semantic=SemanticMemory(capacity=4),
+            semantic_map=SemanticMemory(capacity=4),
             short=ShortMemory(capacity=1),
         )
 
@@ -56,84 +57,111 @@ class PolicyTest(unittest.TestCase):
         with self.assertRaises(IndexError):
             explore(self.memory_systems, "avoid_walls")
 
-        for i in range(3):
-            obs = ["agent", "atlocation", "livingroom", i]
-            encode_observation(self.memory_systems, obs)
-            manage_memory(self.memory_systems, "episodic_agent", split_possessive=False)
-
-        self.assertEqual(self.memory_systems.episodic_agent.size, 3)
-
         obs = ["livingroom", "north", "wall", 1]
         encode_observation(self.memory_systems, obs)
-        manage_memory(self.memory_systems, "episodic", split_possessive=False)
+        manage_memory(self.memory_systems, "episodic")
         obs = ["livingroom", "south", "wall", 2]
         encode_observation(self.memory_systems, obs)
-        manage_memory(self.memory_systems, "episodic", split_possessive=False)
+        manage_memory(self.memory_systems, "episodic")
         self.assertEqual(self.memory_systems.episodic.size, 2)
+
+        obs = ["agent", "atlocation", "livingroom", 11]
+        encode_observation(self.memory_systems, obs)
+        manage_memory(self.memory_systems, "episodic_agent")
 
         agent_current_location = self.memory_systems.episodic_agent.get_latest_memory()[
             2
         ]
+        for _ in range(10):
+            action = explore(self.memory_systems, "avoid_walls")
+            self.assertIn(action, ["east", "west", "stay"])
 
-        memories_rooms = []
-        MARKER = "^^^"  # to allow hashing for the set operation
-
-        memories_rooms += [
-            MARKER.join(entry[:-1])
-            for entry in self.memory_systems.episodic.entries
-            if entry[1] in ["north", "east", "south", "west"] and entry[2] != "wall"
-        ]
-
-        memories_rooms += [
-            MARKER.join(entry[:-1])
-            for entry in self.memory_systems.semantic.entries
-            if entry[1] in ["north", "east", "south", "west"] and entry[2] != "wall"
-        ]
-
-        memories_rooms = [mem.split(MARKER) for mem in list(set(memories_rooms))]
-        memories_rooms = [
-            mem for mem in memories_rooms if mem[0] == agent_current_location
-        ]
-        self.assertEqual(len(memories_rooms), 0)
-
-        obs = ["livingroom", "west", "officeroom", 2]
+        obs = ["livingroom", "east", "wall", 3]
         encode_observation(self.memory_systems, obs)
-        manage_memory(self.memory_systems, "episodic", split_possessive=False)
-        obs = ["officeroom", "east", "livingroom", 5]
+        manage_memory(self.memory_systems, "semantic")
+
+        obs = ["livingroom", "west", "wall", 5]
         encode_observation(self.memory_systems, obs)
-        manage_memory(self.memory_systems, "episodic", split_possessive=False)
+        manage_memory(self.memory_systems, "semantic_map")
 
-        self.assertEqual(self.memory_systems.episodic.size, 4)
-        action = explore(self.memory_systems, "avoid_walls")
-        self.assertEqual(action, "west")
+        for _ in range(10):
+            action = explore(self.memory_systems, "avoid_walls")
+            self.assertEqual(action, "stay")
 
-        obs = ["livingroom", "north", "bedroom", 1]
+        # start over
+        self.setUp()
+
+        obs = ["livingroom", "north", "wall", 1]
         encode_observation(self.memory_systems, obs)
-        manage_memory(self.memory_systems, "semantic", split_possessive=False)
-        self.assertEqual(self.memory_systems.semantic.size, 1)
-        action = explore(self.memory_systems, "avoid_walls")
-        self.assertTrue(action in ["west", "north"])
+        manage_memory(self.memory_systems, "semantic_map")
 
-        obs = ["bedroom", "south", "wall", 1]
+        obs = ["livingroom", "east", "wall", 1]
         encode_observation(self.memory_systems, obs)
-        manage_memory(self.memory_systems, "semantic", split_possessive=False)
-        self.assertEqual(self.memory_systems.semantic.size, 2)
-        action = explore(self.memory_systems, "avoid_walls")
-        self.assertTrue(action in ["west", "north"])
+        manage_memory(self.memory_systems, "semantic")
 
-        self.memory_systems.semantic.add(["bedroom", "south", "wall", 2])
-        self.assertEqual(self.memory_systems.semantic.size, 2)
-        self.assertEqual(
-            self.memory_systems.semantic.get_strongest_memory(),
-            ["bedroom", "south", "wall", 3],
-        )
-        action = explore(self.memory_systems, "avoid_walls")
-        self.assertTrue(action in ["west", "north"])
+        obs = ["livingroom", "west", "wall", 1]
+        encode_observation(self.memory_systems, obs)
+        manage_memory(self.memory_systems, "semantic")
 
-        self.memory_systems.episodic_agent.forget_all()
-        self.memory_systems.episodic_agent.add(["agent", "atlocation", "officeroom", 1])
-        action = explore(self.memory_systems, "avoid_walls")
-        self.assertTrue(action in ["east"])
+        obs = ["livingroom", "south", "officeroom", 1]
+        encode_observation(self.memory_systems, obs)
+        manage_memory(self.memory_systems, "semantic_map")
+
+        obs = ["officeroom", "north", "livingroom", 1]
+        encode_observation(self.memory_systems, obs)
+        manage_memory(self.memory_systems, "semantic_map")
+
+        obs = ["officeroom", "west", "wall", 1]
+        encode_observation(self.memory_systems, obs)
+        manage_memory(self.memory_systems, "semantic_map")
+
+        obs = ["officeroom", "south", "wall", 1]
+        encode_observation(self.memory_systems, obs)
+        manage_memory(self.memory_systems, "semantic")
+
+        obs = ["officeroom", "east", "kitchen", 1]
+        encode_observation(self.memory_systems, obs)
+        manage_memory(self.memory_systems, "semantic")
+
+        obs = ["kitchen", "north", "wall", 1]
+        encode_observation(self.memory_systems, obs)
+        manage_memory(self.memory_systems, "episodic")
+
+        obs = ["kitchen", "east", "wall", 1]
+        encode_observation(self.memory_systems, obs)
+        manage_memory(self.memory_systems, "episodic")
+
+        obs = ["kitchen", "south", "wall", 1]
+        encode_observation(self.memory_systems, obs)
+        manage_memory(self.memory_systems, "episodic")
+
+        obs = ["kitchen", "west", "officeroom", 1]
+        encode_observation(self.memory_systems, obs)
+        manage_memory(self.memory_systems, "episodic")
+
+        obs = ["agent", "atlocation", "livingroom", 11]
+        encode_observation(self.memory_systems, obs)
+        manage_memory(self.memory_systems, "episodic_agent")
+
+        for _ in range(10):
+            action = explore(self.memory_systems, "avoid_walls")
+            self.assertIn(action, ["south", "stay"])
+
+        obs = ["agent", "atlocation", "officeroom", 12]
+        encode_observation(self.memory_systems, obs)
+        manage_memory(self.memory_systems, "episodic_agent")
+
+        for _ in range(10):
+            action = explore(self.memory_systems, "avoid_walls")
+            self.assertIn(action, ["north", "east", "stay"])
+
+        obs = ["agent", "atlocation", "kitchen", 13]
+        encode_observation(self.memory_systems, obs)
+        manage_memory(self.memory_systems, "episodic_agent")
+
+        for _ in range(10):
+            action = explore(self.memory_systems, "avoid_walls")
+            self.assertIn(action, ["west", "stay"])
 
     def test_explore_neural(self):
         obs = ["foo", "bar", "baz", 1]

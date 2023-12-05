@@ -13,17 +13,25 @@ import torch.optim as optim
 from IPython.display import clear_output
 from tqdm.auto import tqdm, trange
 
-from explicit_memory.memory import (EpisodicMemory, MemorySystems,
-                                    SemanticMemory, ShortMemory)
+from explicit_memory.memory import (
+    EpisodicMemory,
+    MemorySystems,
+    SemanticMemory,
+    ShortMemory,
+)
 from explicit_memory.nn import LSTM
-from explicit_memory.policy import (answer_question, encode_observation,
-                                    manage_memory)
-from explicit_memory.utils import (ReplayBuffer, dqn_target_hard_update,
-                                   plot_results, save_dqn_final_results,
-                                   save_dqn_validation,
-                                   save_states_q_values_actions,
-                                   select_dqn_action, update_dqn_model,
-                                   write_yaml)
+from explicit_memory.policy import answer_question, encode_observation, manage_memory
+from explicit_memory.utils import (
+    ReplayBuffer,
+    dqn_target_hard_update,
+    plot_results,
+    save_dqn_final_results,
+    save_dqn_validation,
+    save_states_q_values_actions,
+    select_dqn_action,
+    update_dqn_model,
+    write_yaml,
+)
 
 from .handcrafted import HandcraftedAgent
 
@@ -37,6 +45,13 @@ class DQNAgent(HandcraftedAgent):
     def __init__(
         self,
         env_str: str = "room_env:RoomEnv-v1",
+        env_config: dict = {
+            "des_size": "l",
+            "question_prob": 1.0,
+            "allow_random_human": False,
+            "allow_random_question": False,
+            "check_resources": True,
+        },
         num_iterations: int = 128 * 16,
         replay_buffer_size: int = 1024,
         warm_start: int = 1024,
@@ -71,12 +86,12 @@ class DQNAgent(HandcraftedAgent):
         ddqn: bool = False,
         dueling_dqn: bool = False,
         default_root_dir: str = "./training_results/",
-        des_size: str = "l",
     ):
         """Initialization.
 
         Args:
             env_str: This has to be "room_env:RoomEnv-v1"
+            env_config: The configuration of the environment.
             num_iterations: The number of iterations to train the agent.
             replay_buffer_size: The size of the replay buffer.
             warm_start: The number of samples to fill the replay buffer with, before
@@ -98,27 +113,25 @@ class DQNAgent(HandcraftedAgent):
             test_seed: The random seed for test.
             device: The device to run the agent on. This is either "cpu" or "cuda".
             default_root_dir: default root directory to store the results.
-            des_size: The size of the DES, e.g., xxs, xs, s, m, or, l
 
         """
         all_params = deepcopy(locals())
         del all_params["self"]
         del all_params["__class__"]
         self.all_params = deepcopy(all_params)
+        self.train_seed = train_seed
+        self.test_seed = test_seed
+        self.env_config = env_config
         super().__init__(
             env_str=env_str,
+            env_config={**self.env_config, "seed": self.train_seed},
             policy="rl",
             num_samples_for_results=num_samples_for_results,
-            seed=train_seed,
             capacity=capacity,
             pretrain_semantic=pretrain_semantic,
             default_root_dir=default_root_dir,
-            des_size=des_size,
         )
         write_yaml(self.all_params, os.path.join(self.default_root_dir, "train.yaml"))
-
-        self.train_seed = train_seed
-        self.test_seed = test_seed
 
         self.val_filenames = []
         self.num_iterations = num_iterations
@@ -422,8 +435,9 @@ class DQNAgent(HandcraftedAgent):
 
         """
         self.train_val_test = "test"
+
         self.env = gym.make(
-            self.env_str, seed=self.test_seed, des_size=self.all_params["des_size"]
+            self.env_str, **{**self.env_config, "seed": self.test_seed}
         )
         self.dqn.eval()
 

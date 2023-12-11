@@ -30,6 +30,11 @@ class HandcraftedAgentTest(unittest.TestCase):
                 "seed": 42,
                 "terminates_at": 99,
                 "room_size": rng.choice(["xxs", "xs", "s", "m", "l"]),
+                "randomize_observations": False,
+                "make_everything_static": False,
+                "rewards": {"correct": 1, "wrong": -1, "partial": 0},
+                "num_total_questions": 100,
+                "question_interval": 1,
             }
 
             results = {}

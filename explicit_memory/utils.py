@@ -284,7 +284,7 @@ def plot_results(
     iteration_idx: int,
     number_of_actions: int,
     num_iterations: int,
-    total_episode_rewards: int,
+    total_maximum_episode_rewards: int,
     num_validation: int,
     num_samples_for_results: int,
     default_root_dir: str,
@@ -318,7 +318,7 @@ def plot_results(
             plt.subplot(334)
             plt.title(
                 f"iteration {iteration_idx} out of {num_iterations}. "
-                f"training score: {scores['train'][-1]} out of {total_episode_rewards}"
+                f"training score: {scores['train'][-1]} out of {total_maximum_episode_rewards}"
             )
             plt.plot(scores["train"])
             plt.xlabel("episode")
@@ -329,7 +329,7 @@ def plot_results(
                 round(np.mean(scores).item()) for scores in scores["validation"]
             ]
             plt.title(
-                f"validation score: {val_means[-1]} out of {total_episode_rewards}"
+                f"validation score: {val_means[-1]} out of {total_maximum_episode_rewards}"
             )
             plt.plot(val_means)
             plt.xlabel("episode")
@@ -337,7 +337,7 @@ def plot_results(
         if scores["test"]:
             plt.subplot(336)
             plt.title(
-                f"test score: {np.mean(scores['test'])} out of {total_episode_rewards}"
+                f"test score: {np.mean(scores['test'])} out of {total_maximum_episode_rewards}"
             )
             plt.plot(round(np.mean(scores["test"]).item(), 2))
             plt.xlabel("episode")
@@ -407,7 +407,7 @@ def plot_results(
         plt.figure()
         plt.title(
             f"iteration {iteration_idx} out of {num_iterations}. "
-            f"training score: {scores['train'][-1]} out of {total_episode_rewards}"
+            f"training score: {scores['train'][-1]} out of {total_maximum_episode_rewards}"
         )
         plt.plot(scores["train"])
         plt.xlabel("episode")
@@ -415,14 +415,14 @@ def plot_results(
     elif to_plot == "validation_score":
         plt.figure()
         val_means = [round(np.mean(scores).item()) for scores in scores["validation"]]
-        plt.title(f"validation score: {val_means[-1]} out of {total_episode_rewards}")
+        plt.title(f"validation score: {val_means[-1]} out of {total_maximum_episode_rewards}")
         plt.plot(val_means)
         plt.xlabel("episode")
 
     elif to_plot == "test_score":
         plt.figure()
         plt.title(
-            f"test score: {np.mean(scores['test'])} out of {total_episode_rewards}"
+            f"test score: {np.mean(scores['test'])} out of {total_maximum_episode_rewards}"
         )
         plt.plot(round(np.mean(scores["test"]).item(), 2))
         plt.xlabel("episode")
@@ -469,7 +469,7 @@ def console_dqn(
     iteration_idx: int,
     number_of_actions: int,
     num_iterations: int,
-    total_episode_rewards: int,
+    total_maximum_episode_rewards: int,
     num_validation: int,
     num_samples_for_results: int,
     default_root_dir: str,
@@ -480,19 +480,19 @@ def console_dqn(
         tqdm.write(
             f"iteration {iteration_idx} out of {num_iterations}.\n"
             f"episode {num_validation} training score: "
-            f"{scores['train'][-1]} out of {total_episode_rewards}"
+            f"{scores['train'][-1]} out of {total_maximum_episode_rewards}"
         )
 
     if scores["validation"]:
         val_means = [round(np.mean(scores).item()) for scores in scores["validation"]]
         tqdm.write(
             f"episode {num_validation} validation score: {val_means[-1]} "
-            "out of {total_episode_rewards}"
+            "out of {total_maximum_episode_rewards}"
         )
 
     if scores["test"]:
         tqdm.write(
-            f"test score: {np.mean(scores['test'])} out of {total_episode_rewards}"
+            f"test score: {np.mean(scores['test'])} out of {total_maximum_episode_rewards}"
         )
 
     # tqdm.write(
@@ -907,7 +907,6 @@ def select_dqn_action(
     state: dict,
     greedy: bool,
     dqn: torch.nn.Module,
-    train_val_test: str,
     epsilon: float,
     action_space: gym.spaces.Discrete,
 ) -> tuple[int, list]:

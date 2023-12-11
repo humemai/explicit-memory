@@ -49,7 +49,7 @@ class HandcraftedAgent:
             "semantic": 16,
             "short": 1,
         },
-        pretrain_semantic: bool = False,
+        pretrain_semantic: str | bool = False,
         default_root_dir: str = "./training_results/",
     ) -> None:
         """Initialization.

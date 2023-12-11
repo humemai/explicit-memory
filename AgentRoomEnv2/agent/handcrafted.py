@@ -9,10 +9,18 @@ import numpy as np
 from IPython.display import clear_output
 from tqdm.auto import tqdm, trange
 
-from explicit_memory.memory import (EpisodicMemory, MemorySystems,
-                                    SemanticMemory, ShortMemory)
-from explicit_memory.policy import (answer_question, encode_observation,
-                                    explore, manage_memory)
+from explicit_memory.memory import (
+    EpisodicMemory,
+    MemorySystems,
+    SemanticMemory,
+    ShortMemory,
+)
+from explicit_memory.policy import (
+    answer_question,
+    encode_observation,
+    explore,
+    manage_memory,
+)
 from explicit_memory.utils import write_yaml
 
 
@@ -32,6 +40,10 @@ class HandcraftedAgent:
             "seed": 42,
             "terminates_at": 99,
             "randomize_observations": True,
+            "make_everything_static": False,
+            "rewards": {"correct": 1, "wrong": -1, "partial": 0},
+            "num_total_questions": 100,
+            "question_interval": 1,
             "room_size": "xxs",
         },
         mm_policy: str = "generalize",
@@ -43,7 +55,7 @@ class HandcraftedAgent:
             "semantic": 16,
             "short": 1,
         },
-        pretrain_semantic: bool = False,
+        pretrain_semantic: str | bool = False,
         default_root_dir: str = "./training_results/",
     ) -> None:
         """Initialize the agent.
@@ -97,7 +109,6 @@ class HandcraftedAgent:
         self.capacity = capacity
         self.pretrain_semantic = pretrain_semantic
         self.env = gym.make(self.env_str, **self.env_config)
-        self.max_total_rewards = self.env_config["terminates_at"] + 1
         self.default_root_dir = os.path.join(
             default_root_dir, str(datetime.datetime.now())
         )
@@ -168,7 +179,7 @@ class HandcraftedAgent:
         for _ in range(self.num_samples_for_results):
             score = 0
             env_started = False
-            action_pair = (None, None)
+            action_pair = ([], None)
             done = False
             self.init_memory_systems()
 
@@ -200,16 +211,20 @@ class HandcraftedAgent:
                         split_possessive=False,
                     )
 
-                action_qa = str(
-                    answer_question(
-                        self.memory_systems,
-                        self.qa_policy,
-                        observations["question"],
-                        split_possessive=False,
+                actions_qa = [
+                    str(
+                        answer_question(
+                            self.memory_systems,
+                            self.qa_policy,
+                            question,
+                            split_possessive=False,
+                        )
                     )
-                )
+                    for question in observations["questions"]
+                ]
+
                 action_explore = explore(self.memory_systems, self.explore_policy)
-                action_pair = (action_qa, action_explore)
+                action_pair = (actions_qa, action_explore)
             self.scores.append(score)
 
         results = {
@@ -239,8 +254,13 @@ class HandcraftedAgent:
             short=ShortMemory(capacity=self.capacity["short"]),
         )
 
-        if self.pretrain_semantic:
-            room_layout = self.env.return_room_layout()
+        assert self.pretrain_semantic in [False, "exclude_walls", "include_walls"]
+        if self.pretrain_semantic in ["exclude_walls", "include_walls"]:
+            if self.pretrain_semantic == "exclude_walls":
+                exclude_walls = True
+            else:
+                exclude_walls = False
+            room_layout = self.env.return_room_layout(exclude_walls)
 
             if hasattr(self.memory_systems, "semantic_map"):
                 assert self.capacity["semantic_map"] > 0

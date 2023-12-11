@@ -4,7 +4,7 @@ This is common.
 
 ```python
 des_size: str = "l",
-total_episode_rewards: int = 128,
+total_maximum_episode_rewards: int = 128,
 check_resources: bool = True,
 capacity: dict = {"episodic": 16, "semantic": 16, "short": 1}
 ```

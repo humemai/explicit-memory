@@ -37,7 +37,7 @@ class DQNAgent(HandcraftedAgent):
             "semantic": 16,
             "short": 1,
         },
-        pretrain_semantic: bool = False,
+        pretrain_semantic: str | bool = False,
         nn_params: dict = {
             "hidden_size": 64,
             "num_layers": 2,
@@ -166,7 +166,6 @@ class DQNAgent(HandcraftedAgent):
         # optimizer
         self.optimizer = optim.Adam(self.dqn.parameters())
 
-        self.train_val_test = None
         self.q_values = {"train": [], "val": [], "test": []}
 
     def fill_replay_buffer(self) -> None:
@@ -178,10 +177,8 @@ class DQNAgent(HandcraftedAgent):
 
     def train(self) -> None:
         """Code for training"""
-        self.train_val_test = "train"
 
     def validate(self) -> None:
-        self.train_val_test = "val"
         self.dqn.eval()
         scores_temp, states, q_values, actions = self.validate_test_middle("val")
 
@@ -199,10 +196,8 @@ class DQNAgent(HandcraftedAgent):
         self.env.close()
         self.num_validation += 1
         self.dqn.train()
-        self.train_val_test = "train"
 
     def test(self, checkpoint: str = None) -> None:
-        self.train_val_test = "test"
         self.dqn.eval()
         self.env_config["seed"] = self.test_seed
         self.env = gym.make(self.env_str, **self.env_config)
@@ -249,7 +244,7 @@ class DQNAgent(HandcraftedAgent):
             self.iteration_idx,
             self.action_space.n.item(),
             self.num_iterations,
-            self.env.total_episode_rewards,
+            self.env.total_maximum_episode_rewards,
             self.num_validation,
             self.num_samples_for_results,
             self.default_root_dir,

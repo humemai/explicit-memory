@@ -6,6 +6,9 @@
 
 ### Done
 
+1. avoid_walls
+1. split_reward_training
+
 ## Neural Networks
 
 ### GNN (StarE)

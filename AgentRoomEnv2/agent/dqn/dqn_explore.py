@@ -7,10 +7,13 @@ import torch
 from tqdm.auto import trange
 
 from explicit_memory.nn import LSTM
-from explicit_memory.policy import (answer_question, encode_observation,
-                                    manage_memory)
-from explicit_memory.utils import (dqn_target_hard_update, select_dqn_action,
-                                   update_dqn_model, write_yaml)
+from explicit_memory.policy import answer_question, encode_observation, manage_memory
+from explicit_memory.utils import (
+    dqn_target_hard_update,
+    select_dqn_action,
+    update_dqn_model,
+    write_yaml,
+)
 
 from .dqn import DQNAgent
 
@@ -144,12 +147,17 @@ class DQNExploreAgent(DQNAgent):
                 )
 
             while True:
-                action_qa = answer_question(
-                    self.memory_systems,
-                    self.qa_policy,
-                    observations["question"],
-                    split_possessive=False,
-                )
+                actions_qa = [
+                    str(
+                        answer_question(
+                            self.memory_systems,
+                            self.qa_policy,
+                            question,
+                            split_possessive=False,
+                        )
+                    )
+                    for question in observations["questions"]
+                ]
                 state = self.memory_systems.return_as_a_dict_list()
                 action, q_values_ = select_dqn_action(
                     state=state,
@@ -159,7 +167,7 @@ class DQNExploreAgent(DQNAgent):
                     epsilon=self.epsilon,
                     action_space=self.action_space,
                 )
-                action_pair = (action_qa, self.action2str[action])
+                action_pair = (actions_qa, self.action2str[action])
                 (
                     observations,
                     reward,
@@ -220,13 +228,18 @@ class DQNExploreAgent(DQNAgent):
                         self.mm_policy,
                         split_possessive=False,
                     )
+            actions_qa = [
+                str(
+                    answer_question(
+                        self.memory_systems,
+                        self.qa_policy,
+                        question,
+                        split_possessive=False,
+                    )
+                )
+                for question in observations["questions"]
+            ]
 
-            action_qa = answer_question(
-                self.memory_systems,
-                self.qa_policy,
-                observations["question"],
-                split_possessive=False,
-            )
             state = self.memory_systems.return_as_a_dict_list()
             action, q_values_ = select_dqn_action(
                 state=state,
@@ -238,7 +251,7 @@ class DQNExploreAgent(DQNAgent):
             )
             self.q_values["train"].append(q_values_)
 
-            action_pair = (action_qa, self.action2str[action])
+            action_pair = (actions_qa, self.action2str[action])
             (
                 observations,
                 reward,
@@ -351,12 +364,17 @@ class DQNExploreAgent(DQNAgent):
                 )
 
             while True:
-                action_qa = answer_question(
-                    self.memory_systems,
-                    self.qa_policy,
-                    observations["question"],
-                    split_possessive=False,
-                )
+                actions_qa = [
+                    str(
+                        answer_question(
+                            self.memory_systems,
+                            self.qa_policy,
+                            question,
+                            split_possessive=False,
+                        )
+                    )
+                    for question in observations["questions"]
+                ]
                 state = self.memory_systems.return_as_a_dict_list()
                 if save_results:
                     states.append(deepcopy(state))
@@ -374,7 +392,7 @@ class DQNExploreAgent(DQNAgent):
                     actions.append(action)
                     self.q_values[val_or_test].append(q_values_)
 
-                action_pair = (action_qa, self.action2str[action])
+                action_pair = (actions_qa, self.action2str[action])
                 (
                     observations,
                     reward,

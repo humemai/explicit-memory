@@ -6,10 +6,18 @@ import gymnasium as gym
 import torch
 from tqdm.auto import trange
 
-from explicit_memory.policy import (answer_question, encode_observation,
-                                    explore, manage_memory)
-from explicit_memory.utils import (dqn_target_hard_update, select_dqn_action,
-                                   update_dqn_model, write_yaml)
+from explicit_memory.policy import (
+    answer_question,
+    encode_observation,
+    explore,
+    manage_memory,
+)
+from explicit_memory.utils import (
+    dqn_target_hard_update,
+    select_dqn_action,
+    update_dqn_model,
+    write_yaml,
+)
 
 from .dqn import DQNAgent
 
@@ -39,7 +47,7 @@ class DQNMMAgent(DQNAgent):
             "semantic_map": 0,
             "short": 1,
         },
-        pretrain_semantic: bool = False,
+        pretrain_semantic: str | bool = False,
         nn_params: dict = {
             "hidden_size": 64,
             "num_layers": 2,
@@ -144,10 +152,9 @@ class DQNMMAgent(DQNAgent):
             for obs in observations["room"][1:]:
                 state = self.memory_systems.return_as_a_dict_list()
                 action, q_values_ = select_dqn_action(
-                    state=state,
+                    state=deepcopy(state),
                     greedy=False,
                     dqn=self.dqn,
-                    train_val_test=self.train_val_test,
                     epsilon=self.epsilon,
                     action_space=self.action_space,
                 )
@@ -161,23 +168,21 @@ class DQNMMAgent(DQNAgent):
             while True:
                 state = self.memory_systems.return_as_a_dict_list()
                 action, q_values_ = select_dqn_action(
-                    state=state,
+                    state=deepcopy(state),
                     greedy=False,
                     dqn=self.dqn,
-                    train_val_test=self.train_val_test,
                     epsilon=self.epsilon,
                     action_space=self.action_space,
                 )
                 manage_memory(
                     self.memory_systems, self.action2str[action], split_possessive=False
                 )
-                action_qa = str(
-                    answer_question(
-                        self.memory_systems, self.qa_policy, observations["question"]
-                    )
-                )
+                actions_qa = [
+                    str(answer_question(self.memory_systems, self.qa_policy, question))
+                    for question in observations["questions"]
+                ]
                 action_explore = explore(self.memory_systems, self.explore_policy)
-                action_pair = (action_qa, action_explore)
+                action_pair = (actions_qa, action_explore)
                 (
                     observations,
                     reward,
@@ -217,10 +222,9 @@ class DQNMMAgent(DQNAgent):
                 for obs in observations["room"][1:]:
                     state = self.memory_systems.return_as_a_dict_list()
                     action, q_values_ = select_dqn_action(
-                        state=state,
+                        state=deepcopy(state),
                         greedy=False,
                         dqn=self.dqn,
-                        train_val_test=self.train_val_test,
                         epsilon=self.epsilon,
                         action_space=self.action_space,
                     )
@@ -236,6 +240,7 @@ class DQNMMAgent(DQNAgent):
     def train(self) -> None:
         """Train the memory management agent."""
         self.fill_replay_buffer()  # fill up the buffer till warm start size
+        # import pdb; pdb.set_trace()
         super().train()
         self.num_validation = 0
 
@@ -264,10 +269,9 @@ class DQNMMAgent(DQNAgent):
                 for obs in observations["room"][1:]:
                     state = self.memory_systems.return_as_a_dict_list()
                     action, q_values_ = select_dqn_action(
-                        state=state,
+                        state=deepcopy(state),
                         greedy=False,
                         dqn=self.dqn,
-                        train_val_test=self.train_val_test,
                         epsilon=self.epsilon,
                         action_space=self.action_space,
                     )
@@ -285,10 +289,9 @@ class DQNMMAgent(DQNAgent):
             state = self.memory_systems.return_as_a_dict_list()
 
             action, q_values_ = select_dqn_action(
-                state=state,
+                state=deepcopy(state),
                 greedy=False,
                 dqn=self.dqn,
-                train_val_test=self.train_val_test,
                 epsilon=self.epsilon,
                 action_space=self.action_space,
             )
@@ -297,13 +300,14 @@ class DQNMMAgent(DQNAgent):
             manage_memory(
                 self.memory_systems, self.action2str[action], split_possessive=False
             )
-            action_qa = str(
-                answer_question(
-                    self.memory_systems, self.qa_policy, observations["question"]
-                )
-            )
+
+            actions_qa = [
+                str(answer_question(self.memory_systems, self.qa_policy, question))
+                for question in observations["questions"]
+            ]
+
             action_explore = explore(self.memory_systems, self.explore_policy)
-            action_pair = (action_qa, action_explore)
+            action_pair = (actions_qa, action_explore)
             (
                 observations,
                 reward,
@@ -314,39 +318,45 @@ class DQNMMAgent(DQNAgent):
             score += reward
             done = done or truncated
 
-            if not done:
-                observations["room"] = self.manage_agent_and_map_memory(
-                    observations["room"]
-                )
+            observations["room"] = self.manage_agent_and_map_memory(
+                observations["room"]
+            )
 
-                obs = observations["room"][0]
-                encode_observation(self.memory_systems, obs)
-                next_state = self.memory_systems.return_as_a_dict_list()
-                transitions.append([state, action, None, next_state, done])
+            obs = observations["room"][0]
+            encode_observation(self.memory_systems, obs)
+            next_state = self.memory_systems.return_as_a_dict_list()
+            transitions.append([state, action, None, next_state, done])
 
-                for trans in transitions[:-1]:
-                    if self.split_reward_training:
-                        trans[2] = reward / len(transitions)
-                    else:
-                        trans[2] = 0
-                    self.replay_buffer.store(*trans)
-
-                trans = transitions[-1]
+            for trans in transitions[:-1]:
                 if self.split_reward_training:
                     trans[2] = reward / len(transitions)
-
                 else:
-                    trans[2] = reward
+                    trans[2] = 0
                 self.replay_buffer.store(*trans)
 
+            trans = transitions[-1]
+            if self.split_reward_training:
+                trans[2] = reward / len(transitions)
+            else:
+                trans[2] = reward
+            self.replay_buffer.store(*trans)
+
+            if done:
+                self.scores["train"].append(score)
+                score = 0
+                with torch.no_grad():
+                    self.validate()
+
+                training_episode_begins = True
+
+            else:
                 transitions = []
                 for obs in observations["room"][1:]:
                     state = self.memory_systems.return_as_a_dict_list()
                     action, q_values_ = select_dqn_action(
-                        state=state,
+                        state=deepcopy(state),
                         greedy=False,
                         dqn=self.dqn,
-                        train_val_test=self.train_val_test,
                         epsilon=self.epsilon,
                         action_space=self.action_space,
                     )
@@ -362,14 +372,6 @@ class DQNMMAgent(DQNAgent):
                     transitions.append([state, action, None, next_state, False])
 
                 training_episode_begins = False
-
-            else:  # if episode ends
-                self.scores["train"].append(score)
-                score = 0
-                with torch.no_grad():
-                    self.validate()
-
-                training_episode_begins = True
 
             loss = update_dqn_model(
                 replay_buffer=self.replay_buffer,
@@ -448,10 +450,9 @@ class DQNMMAgent(DQNAgent):
                     states.append(deepcopy(state))
 
                 action, q_values_ = select_dqn_action(
-                    state=state,
+                    state=deepcopy(state),
                     greedy=True,
                     dqn=self.dqn,
-                    train_val_test=self.train_val_test,
                     epsilon=self.epsilon,
                     action_space=self.action_space,
                 )
@@ -471,10 +472,9 @@ class DQNMMAgent(DQNAgent):
                     states.append(deepcopy(state))
 
                 action, q_values_ = select_dqn_action(
-                    state=state,
+                    state=deepcopy(state),
                     greedy=True,
                     dqn=self.dqn,
-                    train_val_test=self.train_val_test,
                     epsilon=self.epsilon,
                     action_space=self.action_space,
                 )
@@ -486,13 +486,12 @@ class DQNMMAgent(DQNAgent):
                 manage_memory(
                     self.memory_systems, self.action2str[action], split_possessive=False
                 )
-                action_qa = str(
-                    answer_question(
-                        self.memory_systems, self.qa_policy, observations["question"]
-                    )
-                )
+                actions_qa = [
+                    str(answer_question(self.memory_systems, self.qa_policy, question))
+                    for question in observations["questions"]
+                ]
                 action_explore = explore(self.memory_systems, self.explore_policy)
-                action_pair = (action_qa, action_explore)
+                action_pair = (actions_qa, action_explore)
                 (
                     observations,
                     reward,
@@ -503,24 +502,24 @@ class DQNMMAgent(DQNAgent):
                 score += reward
                 done = done or truncated
 
-                if done:
-                    break
-
                 observations["room"] = self.manage_agent_and_map_memory(
                     observations["room"]
                 )
 
                 obs = observations["room"][0]
                 encode_observation(self.memory_systems, obs)
+
+                if done:
+                    break
+
                 for obs in observations["room"][1:]:
                     state = self.memory_systems.return_as_a_dict_list()
                     if save_results:
                         states.append(deepcopy(state))
                     action, q_values_ = select_dqn_action(
-                        state=state,
+                        state=deepcopy(state),
                         greedy=True,
                         dqn=self.dqn,
-                        train_val_test=self.train_val_test,
                         epsilon=self.epsilon,
                         action_space=self.action_space,
                     )
@@ -535,6 +534,7 @@ class DQNMMAgent(DQNAgent):
                         split_possessive=False,
                     )
                     encode_observation(self.memory_systems, obs)
+
             scores_temp.append(score)
 
         return scores_temp, states, q_values, actions

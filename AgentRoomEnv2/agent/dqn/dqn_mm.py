@@ -6,18 +6,10 @@ import gymnasium as gym
 import torch
 from tqdm.auto import trange
 
-from explicit_memory.policy import (
-    answer_question,
-    encode_observation,
-    explore,
-    manage_memory,
-)
-from explicit_memory.utils import (
-    dqn_target_hard_update,
-    select_dqn_action,
-    update_dqn_model,
-    write_yaml,
-)
+from explicit_memory.policy import (answer_question, encode_observation,
+                                    explore, manage_memory)
+from explicit_memory.utils import (dqn_target_hard_update, select_dqn_action,
+                                   update_dqn_model, write_yaml)
 
 from .dqn import DQNAgent
 
@@ -74,6 +66,7 @@ class DQNMMAgent(DQNAgent):
         dueling_dqn: bool = False,
         split_reward_training: bool = False,
         default_root_dir: str = "./training_results/",
+        run_handcrafted_baselines: dict | None = None,
     ):
         """Initialization.
 
@@ -115,6 +108,7 @@ class DQNMMAgent(DQNAgent):
             dueling_dqn: whether to use dueling dqn
             split_reward_training: whether to split the reward in memory management
             default_root_dir: default root directory to store the results.
+            run_handcrafted_baselines: Whether or not to run handcrafted baselines.
 
         """
         all_params = deepcopy(locals())
@@ -240,7 +234,6 @@ class DQNMMAgent(DQNAgent):
     def train(self) -> None:
         """Train the memory management agent."""
         self.fill_replay_buffer()  # fill up the buffer till warm start size
-        # import pdb; pdb.set_trace()
         super().train()
         self.num_validation = 0
 

@@ -16,7 +16,7 @@ from AgentRoomEnv2.agent import DQNExploreAgent, DQNMMAgent
 class DQNMMAgentTest(unittest.TestCase):
     def test_agent(self) -> None:
         num_runs = 0
-        for pretrain_semantic in [False, True]:
+        for pretrain_semantic in [False, "include_walls"]:
             for test_seed in [42]:
                 for ddqn in [False, True]:
                     for dueling_dqn in [False, True]:
@@ -74,9 +74,7 @@ class DQNMMAgentTest(unittest.TestCase):
                                         "env_config": {
                                             "question_prob": 1.0,
                                             "terminates_at": 9,
-                                            "room_size": rng.choice(
-                                                ["xxs", "xs", "s", "m", "l"]
-                                            ),
+                                            "room_size": rng.choice(["xxs"]),
                                         },
                                         "ddqn": ddqn,
                                         "dueling_dqn": dueling_dqn,

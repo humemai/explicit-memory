@@ -37,6 +37,8 @@ allow_random_question: bool = False,
 | Training for 32 Episodes, Dueling              | 97.5 ± 5.4              | 83.0 ± 6.3                  | -                                                              |
 | Training for 32 Episodes, Fix Last State Issue | 106.2 ± 7.3             | 92.2 ± 9.51                 | -                                                              |
 | refactored with "question_interval-1"          | 94.96 ± 2.69            | 79.96 ± 7.24                | idk why but everytime I refactor, I don't get the same results |
+| fuse-information=sum_positional-encoding=False | 95.32 ± 3.87            | 87.96 ± 5.19                |
+| fuse-information=sum_positional-encoding=True | 102.04 ± 2.22           | 84.2 ± 6.08                 |                                                                |
 
 ## Config 1
 

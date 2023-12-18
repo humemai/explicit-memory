@@ -41,7 +41,7 @@ class HandcraftedAgentTest(unittest.TestCase):
             for mm_policy in ["random", "generalize"]:
                 for qa_policy in ["random", "episodic_semantic"]:
                     for explore_policy in ["random", "avoid_walls"]:
-                        for pretrain_semantic in [False, True]:
+                        for pretrain_semantic in [False, "include_walls"]:
                             key = (mm_policy, qa_policy, explore_policy)
                             if key not in results:
                                 results[key] = []
@@ -61,9 +61,5 @@ class HandcraftedAgentTest(unittest.TestCase):
                                 )
                                 agent.test()
                                 agent.remove_results_from_disk()
-                                to_append = (
-                                    np.mean(agent.scores),
-                                    np.std(agent.scores),
-                                )
-                                print(to_append)
-                                results[key].append(to_append)
+                                print(agent.scores)
+                                results[key].append(agent.scores)

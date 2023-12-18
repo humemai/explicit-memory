@@ -13,25 +13,17 @@ import torch.optim as optim
 from IPython.display import clear_output
 from tqdm.auto import tqdm, trange
 
-from explicit_memory.memory import (
-    EpisodicMemory,
-    MemorySystems,
-    SemanticMemory,
-    ShortMemory,
-)
+from explicit_memory.memory import (EpisodicMemory, MemorySystems,
+                                    SemanticMemory, ShortMemory)
 from explicit_memory.nn import LSTM
-from explicit_memory.policy import answer_question, encode_observation, manage_memory
-from explicit_memory.utils import (
-    ReplayBuffer,
-    dqn_target_hard_update,
-    plot_results,
-    save_dqn_final_results,
-    save_dqn_validation,
-    save_states_q_values_actions,
-    select_dqn_action,
-    update_dqn_model,
-    write_yaml,
-)
+from explicit_memory.policy import (answer_question, encode_observation,
+                                    manage_memory)
+from explicit_memory.utils import (ReplayBuffer, dqn_target_hard_update,
+                                   plot_results, save_dqn_final_results,
+                                   save_dqn_validation,
+                                   save_states_q_values_actions,
+                                   select_dqn_action, update_dqn_model,
+                                   write_yaml)
 
 from .handcrafted import HandcraftedAgent
 
@@ -187,7 +179,6 @@ class DQNAgent(HandcraftedAgent):
         # optimizer
         self.optimizer = optim.Adam(self.dqn.parameters())
 
-        self.train_val_test = None
         self.q_values = {"train": [], "val": [], "test": []}
 
     def fill_replay_buffer(self) -> None:
@@ -206,7 +197,6 @@ class DQNAgent(HandcraftedAgent):
                     state=state,
                     greedy=False,
                     dqn=self.dqn,
-                    train_val_test=self.train_val_test,
                     epsilon=self.epsilon,
                     action_space=self.action_space,
                 )
@@ -241,7 +231,6 @@ class DQNAgent(HandcraftedAgent):
     def train(self):
         """Train the agent."""
         self.fill_replay_buffer()  # fill up the buffer till warm start size
-        self.train_val_test = "train"
         self.num_validation = 0
 
         self.epsilons = []
@@ -260,7 +249,6 @@ class DQNAgent(HandcraftedAgent):
                 state=state,
                 greedy=False,
                 dqn=self.dqn,
-                train_val_test=self.train_val_test,
                 epsilon=self.epsilon,
                 action_space=self.action_space,
             )
@@ -351,7 +339,6 @@ class DQNAgent(HandcraftedAgent):
 
     def validate(self) -> None:
         """Validate the agent."""
-        self.train_val_test = "val"
         self.dqn.eval()
 
         scores_temp = []
@@ -380,7 +367,6 @@ class DQNAgent(HandcraftedAgent):
                     state=state,
                     greedy=True,
                     dqn=self.dqn,
-                    train_val_test=self.train_val_test,
                     epsilon=self.epsilon,
                     action_space=self.action_space,
                 )
@@ -424,7 +410,6 @@ class DQNAgent(HandcraftedAgent):
         self.env.close()
         self.num_validation += 1
         self.dqn.train()
-        self.train_val_test = "train"
 
     def test(self, checkpoint: str = None) -> None:
         """Test the agent.
@@ -434,11 +419,8 @@ class DQNAgent(HandcraftedAgent):
                 best validation is used.
 
         """
-        self.train_val_test = "test"
 
-        self.env = gym.make(
-            self.env_str, **{**self.env_config, "seed": self.test_seed}
-        )
+        self.env = gym.make(self.env_str, **{**self.env_config, "seed": self.test_seed})
         self.dqn.eval()
 
         states = []
@@ -472,7 +454,6 @@ class DQNAgent(HandcraftedAgent):
                     state=state,
                     greedy=True,
                     dqn=self.dqn,
-                    train_val_test=self.train_val_test,
                     epsilon=self.epsilon,
                     action_space=self.action_space,
                 )

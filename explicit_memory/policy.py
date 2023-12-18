@@ -41,23 +41,25 @@ def find_agent_current_location(memory_systems: MemorySystems) -> str:
         agent_current_location = memory_systems.episodic_agent.get_latest_memory()[2]
         return agent_current_location
 
-    mems = [
-        mem
-        for mem in memory_systems.episodic.entries
-        if mem[0] == "agent" and mem[1] == "atlocation"
-    ]
-    if len(mems) > 0:
-        agent_current_location = mems[-1][2]
-        return agent_current_location
+    if hasattr(memory_systems, "episodic"):
+        mems = [
+            mem
+            for mem in memory_systems.episodic.entries
+            if mem[0] == "agent" and mem[1] == "atlocation"
+        ]
+        if len(mems) > 0:
+            agent_current_location = mems[-1][2]
+            return agent_current_location
 
-    mems = [
-        mem
-        for mem in memory_systems.semantic.entries
-        if mem[0] == "agent" and mem[1] == "atlocation"
-    ]
-    if len(mems) > 0:
-        agent_current_location = mems[-1][2]
-        return agent_current_location
+    if hasattr(memory_systems, "semantic"):
+        mems = [
+            mem
+            for mem in memory_systems.semantic.entries
+            if mem[0] == "agent" and mem[1] == "atlocation"
+        ]
+        if len(mems) > 0:
+            agent_current_location = mems[-1][2]
+            return agent_current_location
 
     return None
 
@@ -136,20 +138,22 @@ def explore(memory_systems: MemorySystems, explore_policy: str) -> str:
             ]
 
         # from the semantic memory
-        mems += [
-            mem
-            for mem in memory_systems.semantic.entries
-            if mem[0] == agent_current_location
-            and mem[1] in ["north", "east", "south", "west"]
-        ]
+        if hasattr(memory_systems, "semantic"):
+            mems += [
+                mem
+                for mem in memory_systems.semantic.entries
+                if mem[0] == agent_current_location
+                and mem[1] in ["north", "east", "south", "west"]
+            ]
 
         # from the episodic
-        mems += [
-            mem
-            for mem in memory_systems.episodic.entries
-            if mem[0] == agent_current_location
-            and mem[1] in ["north", "east", "south", "west"]
-        ]
+        if hasattr(memory_systems, "episodic"):
+            mems += [
+                mem
+                for mem in memory_systems.episodic.entries
+                if mem[0] == agent_current_location
+                and mem[1] in ["north", "east", "south", "west"]
+            ]
 
         # we know the agent's current location but there is no memory about the map
         if len(mems) == 0:
@@ -209,40 +213,48 @@ def manage_memory(
         "semantic_map",
     ]
     if policy.lower() == "episodic_agent":
-        mem_short = memory_systems.short.get_oldest_memory()
-        if "agent" != mem_short[0]:
-            raise ValueError("This is not an agent location related memory!")
-        assert memory_systems.episodic_agent.capacity > 0
-        if memory_systems.episodic_agent.is_full:
-            memory_systems.episodic_agent.forget_oldest()
-        mem_epi = ShortMemory.short2epi(mem_short)
-        memory_systems.episodic_agent.add(mem_epi)
+        if hasattr(memory_systems, "episodic_agent"):
+            mem_short = memory_systems.short.get_oldest_memory()
+            if "agent" != mem_short[0]:
+                raise ValueError("This is not an agent location related memory!")
+            assert memory_systems.episodic_agent.capacity > 0
+            if memory_systems.episodic_agent.is_full:
+                memory_systems.episodic_agent.forget_oldest()
+            mem_epi = ShortMemory.short2epi(mem_short)
+            memory_systems.episodic_agent.add(mem_epi)
 
     elif policy.lower() == "semantic_map":
-        mem_short = memory_systems.short.get_oldest_memory()
-        if mem_short[1] not in ["north", "east", "south", "west"]:
-            raise ValueError("This is not a room-map-related memory.")
-        assert memory_systems.semantic_map.capacity > 0
-        if memory_systems.semantic_map.is_full:
-            memory_systems.semantic_map.forget_weakest()
-        mem_sem = ShortMemory.short2sem(mem_short, split_possessive=split_possessive)
-        memory_systems.semantic_map.add(mem_sem)
+        if hasattr(memory_systems, "semantic_map"):
+            mem_short = memory_systems.short.get_oldest_memory()
+            if mem_short[1] not in ["north", "east", "south", "west"]:
+                raise ValueError("This is not a room-map-related memory.")
+            assert memory_systems.semantic_map.capacity > 0
+            if memory_systems.semantic_map.is_full:
+                memory_systems.semantic_map.forget_weakest()
+            mem_sem = ShortMemory.short2sem(
+                mem_short, split_possessive=split_possessive
+            )
+            memory_systems.semantic_map.add(mem_sem)
 
     elif policy.lower() == "episodic":
-        assert memory_systems.episodic.capacity != 0
-        if memory_systems.episodic.is_full:
-            memory_systems.episodic.forget_oldest()
-        mem_short = memory_systems.short.get_oldest_memory()
-        mem_epi = ShortMemory.short2epi(mem_short)
-        memory_systems.episodic.add(mem_epi)
+        if hasattr(memory_systems, "episodic"):
+            assert memory_systems.episodic.capacity != 0
+            if memory_systems.episodic.is_full:
+                memory_systems.episodic.forget_oldest()
+            mem_short = memory_systems.short.get_oldest_memory()
+            mem_epi = ShortMemory.short2epi(mem_short)
+            memory_systems.episodic.add(mem_epi)
 
     elif policy.lower() == "semantic":
-        assert memory_systems.semantic.capacity != 0
-        if memory_systems.semantic.is_full:
-            memory_systems.semantic.forget_weakest()
-        mem_short = memory_systems.short.get_oldest_memory()
-        mem_sem = ShortMemory.short2sem(mem_short, split_possessive=split_possessive)
-        memory_systems.semantic.add(mem_sem)
+        if hasattr(memory_systems, "semantic"):
+            assert memory_systems.semantic.capacity != 0
+            if memory_systems.semantic.is_full:
+                memory_systems.semantic.forget_weakest()
+            mem_short = memory_systems.short.get_oldest_memory()
+            mem_sem = ShortMemory.short2sem(
+                mem_short, split_possessive=split_possessive
+            )
+            memory_systems.semantic.add(mem_sem)
 
     elif policy.lower() == "forget":
         pass
@@ -281,20 +293,22 @@ def manage_memory(
         action_number = random.choice([0, 1, 2])
 
         if action_number == 0:
-            assert memory_systems.episodic.capacity != 0
-            if memory_systems.episodic.is_full:
-                memory_systems.episodic.forget_oldest()
-            mem_short = memory_systems.short.get_oldest_memory()
-            mem_epi = ShortMemory.short2epi(mem_short)
-            memory_systems.episodic.add(mem_epi)
+            if hasattr(memory_systems, "episodic"):
+                assert memory_systems.episodic.capacity != 0
+                if memory_systems.episodic.is_full:
+                    memory_systems.episodic.forget_oldest()
+                mem_short = memory_systems.short.get_oldest_memory()
+                mem_epi = ShortMemory.short2epi(mem_short)
+                memory_systems.episodic.add(mem_epi)
 
         elif action_number == 1:
-            assert memory_systems.semantic.capacity != 0
-            if memory_systems.semantic.is_full:
-                memory_systems.semantic.forget_weakest()
-            mem_short = memory_systems.short.get_oldest_memory()
-            mem_sem = ShortMemory.short2sem(mem_short)
-            memory_systems.semantic.add(mem_sem)
+            if hasattr(memory_systems, "semantic"):
+                assert memory_systems.semantic.capacity != 0
+                if memory_systems.semantic.is_full:
+                    memory_systems.semantic.forget_weakest()
+                mem_short = memory_systems.short.get_oldest_memory()
+                mem_sem = ShortMemory.short2sem(mem_short)
+                memory_systems.semantic.add(mem_sem)
 
         else:
             pass

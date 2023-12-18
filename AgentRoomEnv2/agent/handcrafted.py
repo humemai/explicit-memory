@@ -9,18 +9,10 @@ import numpy as np
 from IPython.display import clear_output
 from tqdm.auto import tqdm, trange
 
-from explicit_memory.memory import (
-    EpisodicMemory,
-    MemorySystems,
-    SemanticMemory,
-    ShortMemory,
-)
-from explicit_memory.policy import (
-    answer_question,
-    encode_observation,
-    explore,
-    manage_memory,
-)
+from explicit_memory.memory import (EpisodicMemory, MemorySystems,
+                                    SemanticMemory, ShortMemory)
+from explicit_memory.policy import (answer_question, encode_observation,
+                                    explore, manage_memory)
 from explicit_memory.utils import write_yaml
 
 
@@ -227,13 +219,13 @@ class HandcraftedAgent:
                 action_pair = (actions_qa, action_explore)
             self.scores.append(score)
 
-        results = {
+        self.scores = {
             "test_score": {
                 "mean": round(np.mean(self.scores).item(), 2),
                 "std": round(np.std(self.scores).item(), 2),
             }
         }
-        write_yaml(results, os.path.join(self.default_root_dir, "results.yaml"))
+        write_yaml(self.scores, os.path.join(self.default_root_dir, "results.yaml"))
         write_yaml(
             self.memory_systems.return_as_a_dict_list(),
             os.path.join(self.default_root_dir, "last_memory_state.yaml"),

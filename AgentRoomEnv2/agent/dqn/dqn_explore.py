@@ -7,13 +7,10 @@ import torch
 from tqdm.auto import trange
 
 from explicit_memory.nn import LSTM
-from explicit_memory.policy import answer_question, encode_observation, manage_memory
-from explicit_memory.utils import (
-    dqn_target_hard_update,
-    select_dqn_action,
-    update_dqn_model,
-    write_yaml,
-)
+from explicit_memory.policy import (answer_question, encode_observation,
+                                    manage_memory)
+from explicit_memory.utils import (dqn_target_hard_update, select_dqn_action,
+                                   update_dqn_model, write_yaml)
 
 from .dqn import DQNAgent
 
@@ -163,7 +160,6 @@ class DQNExploreAgent(DQNAgent):
                     state=state,
                     greedy=False,
                     dqn=self.dqn,
-                    train_val_test=self.train_val_test,
                     epsilon=self.epsilon,
                     action_space=self.action_space,
                 )
@@ -245,7 +241,6 @@ class DQNExploreAgent(DQNAgent):
                 state=state,
                 greedy=False,
                 dqn=self.dqn,
-                train_val_test=self.train_val_test,
                 epsilon=self.epsilon,
                 action_space=self.action_space,
             )
@@ -383,7 +378,6 @@ class DQNExploreAgent(DQNAgent):
                     state=state,
                     greedy=True,
                     dqn=self.dqn,
-                    train_val_test=self.train_val_test,
                     epsilon=self.epsilon,
                     action_space=self.action_space,
                 )

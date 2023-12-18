@@ -2,8 +2,10 @@
 import os
 
 import gymnasium as gym
+import numpy as np
 import torch
 import torch.optim as optim
+from room_env.envs.room2 import RoomEnv2
 
 from explicit_memory.nn import LSTM
 from explicit_memory.utils import (ReplayBuffer, is_running_notebook,
@@ -63,6 +65,7 @@ class DQNAgent(HandcraftedAgent):
         ddqn: bool = False,
         dueling_dqn: bool = False,
         default_root_dir: str = "./training_results/",
+        run_handcrafted_baselines: dict | None = None,
     ):
         """Initialization.
 
@@ -105,6 +108,7 @@ class DQNAgent(HandcraftedAgent):
             ddqn: wehther to use double dqn
             dueling_dqn: whether to use dueling dqn
             default_root_dir: default root directory to store the results.
+            run_handcrafted_baselines: Whether or not to run the handcrafted baselines.
 
         """
         self.train_seed = train_seed
@@ -141,6 +145,7 @@ class DQNAgent(HandcraftedAgent):
         self.num_iterations = num_iterations
         self.plotting_interval = plotting_interval
         self.run_test = run_test
+        self.run_handcrafted_baselines = run_handcrafted_baselines
 
         self.replay_buffer_size = replay_buffer_size
         self.batch_size = batch_size
@@ -167,6 +172,44 @@ class DQNAgent(HandcraftedAgent):
         self.optimizer = optim.Adam(self.dqn.parameters())
 
         self.q_values = {"train": [], "val": [], "test": []}
+
+        if self.run_handcrafted_baselines is not None:
+            self.run_and_save_handcrafted_baselines()
+
+    def run_and_save_handcrafted_baselines(self) -> None:
+        """Run and save the handcrafted baselines."""
+
+        env = RoomEnv2(**self.env_config)
+        observations, info = env.reset()
+        env.render("image", save_fig_dir=self.default_root_dir)
+
+        del env
+
+        results = {}
+        for policy in self.run_handcrafted_baselines:
+            results[str(policy)] = []
+            for test_seed in [0, 1, 2, 3, 4]:
+                agent_handcrafted = HandcraftedAgent(
+                    env_str="room_env:RoomEnv-v2",
+                    env_config={**self.env_config, "seed": test_seed},
+                    mm_policy=policy["mm"],
+                    qa_policy=policy["qa"],
+                    explore_policy=policy["explore"],
+                    num_samples_for_results=10,
+                    capacity=self.capacity,
+                    pretrain_semantic=policy["pretrain_semantic"],
+                    default_root_dir=self.default_root_dir,
+                )
+                agent_handcrafted.test()
+                results[str(policy)].append(
+                    agent_handcrafted.scores["test_score"]["mean"]
+                )
+                agent_handcrafted.remove_results_from_disk()
+            results[str(policy)] = {
+                "mean": np.mean(results[str(policy)]).item(),
+                "std": np.std(results[str(policy)]).item(),
+            }
+        write_yaml(results, os.path.join(self.default_root_dir, "handcrafted.yaml"))
 
     def fill_replay_buffer(self) -> None:
         """Make the replay buffer full in the beginning with the uniformly-sampled

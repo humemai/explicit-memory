@@ -1,9 +1,13 @@
 """Deep Q-network architecture. Currently only LSTM is implemented."""
+from typing import Literal
+
 import numpy as np
 import torch
 from torch import nn
 
 from explicit_memory.utils import split_by_possessive
+
+from ..utils import positional_encoding
 
 
 class LSTM(nn.Module):
@@ -18,15 +22,20 @@ class LSTM(nn.Module):
         memory_of_interest: list,
         hidden_size: int = 64,
         num_layers: int = 2,
-        embedding_dim: int = 32,
+        embedding_dim: int = 64,
         batch_first: bool = True,
         device: str = "cpu",
-        v1_params: dict = {
+        v1_params: dict
+        | None = {
             "include_human": "sum",
             "human_embedding_on_object_location": False,
         },
-        v2_params: dict = None,
+        v2_params: dict | None = None,
         dueling_dqn: bool = False,
+        fuse_information: Literal["concat", "sum"] = "concat",
+        include_positional_encoding: bool = False,
+        max_timesteps: int | None = None,
+        max_strength: int | None = None,
     ) -> None:
         """Initialize the LSTM.
 
@@ -53,6 +62,13 @@ class LSTM(nn.Module):
             human_embedding_on_object_location: whether to superposition the human embedding
                 on the tail (object location entity).
         dueling_dqn: whether to use dueling DQN or not.
+        fuse_information: "concat" or "sum"
+        include_positional_encoding: whether to include the number 4, i.e., strength or
+            timestamp in the entity list.
+        max_timesteps: maximum number of timesteps. This is only used when
+            `include_positional_encoding` is True.
+        max_strength: maximum strength. This is only used when `include_positional_encoding`
+            is True.
 
         """
         super().__init__()
@@ -66,6 +82,30 @@ class LSTM(nn.Module):
         self.v1_params = v1_params
         self.v2_params = v2_params
         self.dueling_dqn = dueling_dqn
+        self.fuse_information = fuse_information
+        self.include_positional_encoding = include_positional_encoding
+        self.max_timesteps = max_timesteps
+        self.max_strength = max_strength
+
+        if self.fuse_information == "concat":
+            self.linear_layer_hidden_size = hidden_size * len(self.memory_of_interest)
+        elif self.fuse_information == "sum":
+            self.linear_layer_hidden_size = hidden_size
+        else:
+            raise ValueError(
+                f"fuse_information should be one of 'concat' or 'sum', but "
+                f"{self.fuse_information} was given!"
+            )
+
+        if self.include_positional_encoding:
+            assert self.max_timesteps is not None
+            assert self.max_strength is not None
+            self.positional_encoding = positional_encoding(
+                positions=max(self.max_timesteps, self.max_strength) + 1,
+                dimensions=self.linear_layer_hidden_size,
+                scaling_factor=10000,
+                return_tensor=True,
+            )
 
         if self.v1_params is None:
             assert self.v2_params is not None
@@ -86,8 +126,9 @@ class LSTM(nn.Module):
                 batch_first=batch_first,
                 device=self.device,
             )
-            self.fc_e0 = nn.Linear(hidden_size, hidden_size, device=self.device)
-            self.fc_e1 = nn.Linear(hidden_size, hidden_size, device=self.device)
+            if self.fuse_information == "concat":
+                self.fc_e0 = nn.Linear(hidden_size, hidden_size, device=self.device)
+                self.fc_e1 = nn.Linear(hidden_size, hidden_size, device=self.device)
 
         if "episodic_agent" in self.memory_of_interest:
             self.lstm_e_agent = nn.LSTM(
@@ -97,8 +138,13 @@ class LSTM(nn.Module):
                 batch_first=batch_first,
                 device=self.device,
             )
-            self.fc_e0_agent = nn.Linear(hidden_size, hidden_size, device=self.device)
-            self.fc_e1_agent = nn.Linear(hidden_size, hidden_size, device=self.device)
+            if self.fuse_information == "concat":
+                self.fc_e0_agent = nn.Linear(
+                    hidden_size, hidden_size, device=self.device
+                )
+                self.fc_e1_agent = nn.Linear(
+                    hidden_size, hidden_size, device=self.device
+                )
 
         if "semantic" in self.memory_of_interest:
             self.lstm_s = nn.LSTM(
@@ -108,8 +154,9 @@ class LSTM(nn.Module):
                 batch_first=batch_first,
                 device=self.device,
             )
-            self.fc_s0 = nn.Linear(hidden_size, hidden_size, device=self.device)
-            self.fc_s1 = nn.Linear(hidden_size, hidden_size, device=self.device)
+            if self.fuse_information == "concat":
+                self.fc_s0 = nn.Linear(hidden_size, hidden_size, device=self.device)
+                self.fc_s1 = nn.Linear(hidden_size, hidden_size, device=self.device)
 
         if "semantic_map" in self.memory_of_interest:
             self.lstm_s_map = nn.LSTM(
@@ -119,8 +166,9 @@ class LSTM(nn.Module):
                 batch_first=batch_first,
                 device=self.device,
             )
-            self.fc_s0_map = nn.Linear(hidden_size, hidden_size, device=self.device)
-            self.fc_s1_map = nn.Linear(hidden_size, hidden_size, device=self.device)
+            if self.fuse_information == "concat":
+                self.fc_s0_map = nn.Linear(hidden_size, hidden_size, device=self.device)
+                self.fc_s1_map = nn.Linear(hidden_size, hidden_size, device=self.device)
 
         if "short" in self.memory_of_interest:
             self.lstm_o = nn.LSTM(
@@ -130,27 +178,28 @@ class LSTM(nn.Module):
                 batch_first=batch_first,
                 device=self.device,
             )
-            self.fc_o0 = nn.Linear(hidden_size, hidden_size, device=self.device)
-            self.fc_o1 = nn.Linear(hidden_size, hidden_size, device=self.device)
+            if self.fuse_information == "concat":
+                self.fc_o0 = nn.Linear(hidden_size, hidden_size, device=self.device)
+                self.fc_o1 = nn.Linear(hidden_size, hidden_size, device=self.device)
 
         self.fc_final0 = nn.Linear(
-            hidden_size * len(self.memory_of_interest),
-            hidden_size * len(self.memory_of_interest),
+            self.linear_layer_hidden_size,
+            self.linear_layer_hidden_size,
             device=self.device,
         )
         self.fc_final1 = nn.Linear(
-            hidden_size * len(self.memory_of_interest), n_actions, device=self.device
+            self.linear_layer_hidden_size, n_actions, device=self.device
         )
 
         self.advantage_layer = nn.Sequential(
             nn.Linear(
-                hidden_size * len(self.memory_of_interest),
-                hidden_size * len(self.memory_of_interest),
+                self.linear_layer_hidden_size,
+                self.linear_layer_hidden_size,
                 device=self.device,
             ),
             nn.ReLU(),
             nn.Linear(
-                hidden_size * len(self.memory_of_interest),
+                self.linear_layer_hidden_size,
                 n_actions,
                 device=self.device,
             ),
@@ -159,13 +208,13 @@ class LSTM(nn.Module):
         if self.dueling_dqn:
             self.value_layer = nn.Sequential(
                 nn.Linear(
-                    hidden_size * len(self.memory_of_interest),
-                    hidden_size * len(self.memory_of_interest),
+                    self.linear_layer_hidden_size,
+                    self.linear_layer_hidden_size,
                     device=self.device,
                 ),
                 nn.ReLU(),
                 nn.Linear(
-                    hidden_size * len(self.memory_of_interest),
+                    self.linear_layer_hidden_size,
                     1,
                     device=self.device,
                 ),
@@ -180,29 +229,41 @@ class LSTM(nn.Module):
         self.embeddings = nn.Embedding(
             len(self.word2idx), self.embedding_dim, device=self.device, padding_idx=0
         )
-        if self.version == "v1":
-            self.input_size_s = self.embedding_dim * 2
-            if (self.v1_params["include_human"] is None) or (
-                self.v1_params["include_human"] == "sum"
-            ):
-                self.input_size_e = self.embedding_dim * 2
-                self.input_size_o = self.embedding_dim * 2
 
-            elif self.v1_params["include_human"] == "concat":
+        if self.fuse_information == "concat":
+            if self.version == "v1":
+                self.input_size_s = self.embedding_dim * 2
+                if (self.v1_params["include_human"] is None) or (
+                    self.v1_params["include_human"] == "sum"
+                ):
+                    self.input_size_e = self.embedding_dim * 2
+                    self.input_size_o = self.embedding_dim * 2
+
+                elif self.v1_params["include_human"] == "concat":
+                    raise ValueError("This is deprecated!")
+                    # self.input_size_e = self.embedding_dim * 3
+                    # self.input_size_o = self.embedding_dim * 3
+                else:
+                    raise ValueError(
+                        "include_human should be one of None or 'sum'"
+                        f"but {self.v1_params['include_human']} was given!"
+                    )
+            elif self.version == "v2":  # [head, relation, tail]
+                self.input_size_s = self.embedding_dim * 3
                 self.input_size_e = self.embedding_dim * 3
                 self.input_size_o = self.embedding_dim * 3
-            else:
-                raise ValueError(
-                    "include_human should be one of None, 'sum', or 'concat', "
-                    f"but {self.v1_params['include_human']} was given!"
-                )
-        elif self.version == "v2":  # [head, relation, tail]
-            self.input_size_s = self.embedding_dim * 3
-            self.input_size_e = self.embedding_dim * 3
-            self.input_size_o = self.embedding_dim * 3
 
+            else:
+                raise ValueError(f"{self.version} is a wrong version!")
+        elif self.fuse_information == "sum":
+            self.input_size_s = self.embedding_dim
+            self.input_size_e = self.embedding_dim
+            self.input_size_o = self.embedding_dim
         else:
-            raise ValueError(f"{self.version} is a wrong version!")
+            raise ValueError(
+                f"fuse_information should be one of 'concat' or 'sum', but "
+                f"{self.fuse_information} was given!"
+            )
 
     def make_embedding_v1(self, mem: list[str], memory_type: str) -> torch.Tensor:
         """Create one embedding vector with summation and concatenation.
@@ -220,7 +281,22 @@ class LSTM(nn.Module):
 
         """
         if mem == ["<PAD>", "<PAD>", "<PAD>", "<PAD>"]:
-            human, obj, obj_loc = "<PAD>", "<PAD>", "<PAD>"
+            if self.fuse_information == "sum":
+                return self.embeddings(
+                    torch.tensor(self.word2idx["<PAD>"], device=self.device)
+                )
+            else:
+                final_embedding = torch.concat(
+                    [
+                        self.embeddings(
+                            torch.tensor(self.word2idx["<PAD>"], device=self.device)
+                        ),
+                        self.embeddings(
+                            torch.tensor(self.word2idx["<PAD>"], device=self.device)
+                        ),
+                    ]
+                )
+                return final_embedding
         else:
             if memory_type == "semantic":
                 obj = mem[0]
@@ -228,6 +304,7 @@ class LSTM(nn.Module):
                 human, obj = split_by_possessive(mem[0])
 
             obj_loc = mem[2]
+
         object_embedding = self.embeddings(
             torch.tensor(self.word2idx[obj], device=self.device)
         )
@@ -236,9 +313,17 @@ class LSTM(nn.Module):
         )
 
         if memory_type == "semantic":
-            final_embedding = torch.concat(
-                [object_embedding, object_location_embedding]
-            )
+            if self.fuse_information == "concat":
+                final_embedding = torch.concat(
+                    [object_embedding, object_location_embedding]
+                )
+            elif self.fuse_information == "sum":
+                final_embedding = object_embedding + object_location_embedding
+            else:
+                raise ValueError(
+                    f"fuse_information should be one of 'concat' or 'sum', but "
+                    f"{self.fuse_information} was given!"
+                )
 
         elif memory_type in ["episodic", "short"]:
             human_embedding = self.embeddings(
@@ -246,25 +331,43 @@ class LSTM(nn.Module):
             )
 
             if self.v1_params["include_human"] is None:
-                final_embedding = torch.concat(
-                    [object_embedding, object_location_embedding]
-                )
-            elif self.v1_params["include_human"] == "sum":
-                final_embedding = [object_embedding + human_embedding]
-
-                if self.v1_params["human_embedding_on_object_location"]:
-                    final_embedding.append(object_location_embedding + human_embedding)
+                if self.fuse_information == "concat":
+                    final_embedding = torch.concat(
+                        [object_embedding, object_location_embedding]
+                    )
+                elif self.fuse_information == "sum":
+                    final_embedding = object_embedding + object_location_embedding
                 else:
-                    final_embedding.append(object_location_embedding)
+                    raise ValueError(
+                        f"fuse_information should be one of 'concat' or 'sum', but "
+                        f"{self.fuse_information} was given!"
+                    )
+            elif self.v1_params["include_human"] == "sum":
+                if self.fuse_information == "concat":
+                    final_embedding = [object_embedding + human_embedding]
 
-                final_embedding = torch.concat(final_embedding)
+                    if self.v1_params["human_embedding_on_object_location"]:
+                        raise ValueError("This is deprecated!")
+                        # final_embedding.append(object_location_embedding + human_embedding)
+                    else:
+                        final_embedding.append(object_location_embedding)
+
+                    final_embedding = torch.concat(final_embedding)
+                elif self.fuse_information == "sum":
+                    final_embedding = (
+                        object_embedding + object_location_embedding + human_embedding
+                    )
 
             elif self.v1_params["include_human"] == "concat":
-                final_embedding = torch.concat(
-                    [human_embedding, object_embedding, object_location_embedding]
-                )
+                raise ValueError("This is deprecated!")
+                # final_embedding = torch.concat(
+                #     [human_embedding, object_embedding, object_location_embedding]
+                # )
         else:
             raise ValueError
+
+        if self.include_positional_encoding:
+            final_embedding += self.positional_encoding[mem[3]]
 
         return final_embedding
 
@@ -282,6 +385,27 @@ class LSTM(nn.Module):
         one embedding vector made from one memory element.
 
         """
+        if mem == ["<PAD>", "<PAD>", "<PAD>", "<PAD>"]:
+            if self.fuse_information == "sum":
+                return self.embeddings(
+                    torch.tensor(self.word2idx["<PAD>"], device=self.device)
+                )
+            else:
+                final_embedding = torch.concat(
+                    [
+                        self.embeddings(
+                            torch.tensor(self.word2idx["<PAD>"], device=self.device)
+                        ),
+                        self.embeddings(
+                            torch.tensor(self.word2idx["<PAD>"], device=self.device)
+                        ),
+                        self.embeddings(
+                            torch.tensor(self.word2idx["<PAD>"], device=self.device)
+                        ),
+                    ]
+                )
+                return final_embedding
+
         head_embedding = self.embeddings(
             torch.tensor(self.word2idx[mem[0]], device=self.device)
         )
@@ -291,9 +415,20 @@ class LSTM(nn.Module):
         tail_embedding = self.embeddings(
             torch.tensor(self.word2idx[mem[2]], device=self.device)
         )
-        final_embedding = torch.concat(
-            [head_embedding, relation_embedding, tail_embedding]
-        )
+        if self.fuse_information == "concat":
+            final_embedding = torch.concat(
+                [head_embedding, relation_embedding, tail_embedding]
+            )
+        elif self.fuse_information == "sum":
+            final_embedding = head_embedding + relation_embedding + tail_embedding
+        else:
+            raise ValueError(
+                f"fuse_information should be one of 'concat' or 'sum', but "
+                f"{self.fuse_information} was given!"
+            )
+
+        if self.include_positional_encoding:
+            final_embedding += self.positional_encoding[mem[3]]
 
         return final_embedding
 
@@ -316,7 +451,6 @@ class LSTM(nn.Module):
             for _ in range(self.capacity[memory_type] - len(mems)):
                 # this is a dummy entry for padding.
                 mems.append(mem_pad)
-
         batch_embeddings = []
         for mems in x:
             embeddings = []
@@ -345,10 +479,14 @@ class LSTM(nn.Module):
             batch_e = [sample["episodic"] for sample in x]
             batch_e = self.create_batch(batch_e, memory_type="episodic")
             lstm_out_e, _ = self.lstm_e(batch_e)
-            fc_out_e = self.relu(
-                self.fc_e1(self.relu(self.fc_e0(lstm_out_e[:, -1, :])))
-            )
-            to_concat.append(fc_out_e)
+
+            if self.fuse_information == "concat":
+                fc_out_e = self.relu(
+                    self.fc_e1(self.relu(self.fc_e0(lstm_out_e[:, -1, :])))
+                )
+                to_concat.append(fc_out_e)
+            else:
+                to_concat.append(lstm_out_e[:, -1, :])
 
         if "episodic_agent" in self.memory_of_interest:
             batch_e_agent = [sample["episodic_agent"] for sample in x]
@@ -356,42 +494,65 @@ class LSTM(nn.Module):
                 batch_e_agent, memory_type="episodic_agent"
             )
             lstm_out_e_agent, _ = self.lstm_e_agent(batch_e_agent)
-            fc_out_e_agent = self.relu(
-                self.fc_e1_agent(
-                    self.relu(self.fc_e0_agent(lstm_out_e_agent[:, -1, :]))
+
+            if self.fuse_information == "concat":
+                fc_out_e_agent = self.relu(
+                    self.fc_e1_agent(
+                        self.relu(self.fc_e0_agent(lstm_out_e_agent[:, -1, :]))
+                    )
                 )
-            )
-            to_concat.append(fc_out_e_agent)
+                to_concat.append(fc_out_e_agent)
+            else:
+                to_concat.append(lstm_out_e_agent[:, -1, :])
 
         if "semantic" in self.memory_of_interest:
             batch_s = [sample["semantic"] for sample in x]
             batch_s = self.create_batch(batch_s, memory_type="semantic")
             lstm_out_s, _ = self.lstm_s(batch_s)
-            fc_out_s = self.relu(
-                self.fc_s1(self.relu(self.fc_s0(lstm_out_s[:, -1, :])))
-            )
-            to_concat.append(fc_out_s)
+
+            if self.fuse_information == "concat":
+                fc_out_s = self.relu(
+                    self.fc_s1(self.relu(self.fc_s0(lstm_out_s[:, -1, :])))
+                )
+                to_concat.append(fc_out_s)
+            else:
+                to_concat.append(lstm_out_s[:, -1, :])
 
         if "semantic_map" in self.memory_of_interest:
             batch_s_map = [sample["semantic_map"] for sample in x]
             batch_s_map = self.create_batch(batch_s_map, memory_type="semantic_map")
             lstm_out_s_map, _ = self.lstm_s_map(batch_s_map)
-            fc_out_s_map = self.relu(
-                self.fc_s1_map(self.relu(self.fc_s0_map(lstm_out_s_map[:, -1, :])))
-            )
-            to_concat.append(fc_out_s_map)
+
+            if self.fuse_information == "concat":
+                fc_out_s_map = self.relu(
+                    self.fc_s1_map(self.relu(self.fc_s0_map(lstm_out_s_map[:, -1, :])))
+                )
+                to_concat.append(fc_out_s_map)
+            else:
+                to_concat.append(lstm_out_s_map[:, -1, :])
 
         if "short" in self.memory_of_interest:
             batch_o = [sample["short"] for sample in x]
             batch_o = self.create_batch(batch_o, memory_type="short")
             lstm_out_o, _ = self.lstm_o(batch_o)
-            fc_out_o = self.relu(
-                self.fc_o1(self.relu(self.fc_o0(lstm_out_o[:, -1, :])))
+
+            if self.fuse_information == "concat":
+                fc_out_o = self.relu(
+                    self.fc_o1(self.relu(self.fc_o0(lstm_out_o[:, -1, :])))
+                )
+                to_concat.append(fc_out_o)
+            else:
+                to_concat.append(lstm_out_o[:, -1, :])
+
+        if self.fuse_information == "concat":
+            fc_out_all = torch.concat(to_concat, dim=-1)
+        elif self.fuse_information == "sum":
+            fc_out_all = torch.sum(torch.stack(to_concat), dim=0)
+        else:
+            raise ValueError(
+                f"fuse_information should be one of 'concat' or 'sum', but "
+                f"{self.fuse_information} was given!"
             )
-            to_concat.append(fc_out_o)
-
-        fc_out_all = torch.concat(to_concat, dim=-1)
-
         if self.dueling_dqn:
             value = self.value_layer(fc_out_all)
             advantage = self.advantage_layer(fc_out_all)

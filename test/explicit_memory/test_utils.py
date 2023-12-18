@@ -118,3 +118,12 @@ class ReplayBufferTest(unittest.TestCase):
         }
         lstm = LSTM(**config)
         q = lstm(batch["obs"])
+
+    def test_positional_encoding(self):
+        foo = positional_encoding(10, 32, return_tensor=False)
+        self.assertEqual(foo.shape, (10, 32))
+        self.assertEqual(type(foo), np.ndarray)
+
+        foo = positional_encoding(10, 32, return_tensor=True)
+        self.assertEqual(foo.shape, (10, 32))
+        self.assertEqual(type(foo), torch.Tensor)

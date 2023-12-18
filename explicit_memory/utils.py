@@ -9,7 +9,7 @@ import shutil
 from collections import deque
 from copy import deepcopy
 from glob import glob
-from typing import Deque, Optional
+from typing import Deque, Optional, Union
 
 import gymnasium as gym
 import matplotlib.pyplot as plt
@@ -415,7 +415,9 @@ def plot_results(
     elif to_plot == "validation_score":
         plt.figure()
         val_means = [round(np.mean(scores).item()) for scores in scores["validation"]]
-        plt.title(f"validation score: {val_means[-1]} out of {total_maximum_episode_rewards}")
+        plt.title(
+            f"validation score: {val_means[-1]} out of {total_maximum_episode_rewards}"
+        )
         plt.plot(val_means)
         plt.xlabel("episode")
 
@@ -962,6 +964,7 @@ def save_dqn_validation(
     num_validation: int,
     val_filenames: list,
     dqn: torch.nn.Module,
+    if_duplicate_take_first: bool = False,
 ) -> None:
     """Keep the best validation model.
 
@@ -972,7 +975,9 @@ def save_dqn_validation(
         num_validation: the current validation episode.
         val_filenames: a list of filenames for the validation models.
         dqn: the dqn model.
-
+        if_duplicate_take_first: if True, take the first duplicate model. This will take
+            the higher training loss model. If False, take the last duplicate model.
+            This will take the lower training loss model.
     """
     mean_score = round(np.mean(scores_temp).item())
     filename = os.path.join(
@@ -986,7 +991,11 @@ def save_dqn_validation(
     for filename in val_filenames:
         scores_to_compare.append(int(filename.split("val-score=")[-1].split(".pt")[0]))
 
-    file_to_keep = val_filenames[scores_to_compare.index(max(scores_to_compare))]
+    indexes = list_duplicates_of(scores_to_compare, max(scores_to_compare))
+    if if_duplicate_take_first:
+        file_to_keep = val_filenames[indexes[0]]
+    else:
+        file_to_keep = val_filenames[indexes[-1]]
 
     for filename in deepcopy(val_filenames):
         if filename != file_to_keep:
@@ -1029,3 +1038,42 @@ def save_states_q_values_actions(
 def dqn_target_hard_update(dqn: torch.nn.Module, dqn_target: torch.nn.Module) -> None:
     """Hard update: target <- local."""
     dqn_target.load_state_dict(dqn.state_dict())
+
+
+def positional_encoding(
+    positions: int,
+    dimensions: int,
+    scaling_factor: float = 10000.0,
+    return_tensor: bool = False,
+) -> Union[np.ndarray, torch.Tensor]:
+    """
+    Generate sinusoidal positional encoding.
+
+    Parameters:
+    positions (int): The number of positions in the sequence.
+    dimensions (int): The dimension of the embedding vectors.
+    scaling_factor (float): The scaling factor used in the sinusoidal functions.
+    return_tensor (bool): If True, return a PyTorch tensor; otherwise, return a NumPy array.
+
+    Returns:
+    Union[np.ndarray, torch.Tensor]: A positional encoding in the form of either a NumPy array or a PyTorch tensor.
+    """
+    # Ensure the number of dimensions is even
+    assert dimensions % 2 == 0, "The dimension must be even."
+
+    # Initialize a matrix of position encodings with zeros
+    pos_enc = np.zeros((positions, dimensions))
+
+    # Compute the positional encodings
+    for pos in range(positions):
+        for i in range(0, dimensions, 2):
+            pos_enc[pos, i] = np.sin(pos / (scaling_factor ** ((2 * i) / dimensions)))
+            pos_enc[pos, i + 1] = np.cos(
+                pos / (scaling_factor ** ((2 * (i + 1)) / dimensions))
+            )
+
+    # Return as PyTorch tensor if requested
+    if return_tensor:
+        return torch.from_numpy(pos_enc)
+
+    return pos_enc

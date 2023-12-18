@@ -345,6 +345,7 @@ def plot_results(
         plt.subplot(331)
         plt.title("training td loss")
         plt.plot(training_loss)
+        # plt.semilogy(training_loss)
         plt.xlabel("update counts")
 
         plt.subplot(332)

@@ -23,6 +23,7 @@ class LSTM(nn.Module):
         hidden_size: int = 64,
         num_layers: int = 2,
         embedding_dim: int = 64,
+        make_categorical_embeddings: bool = False,
         batch_first: bool = True,
         device: str = "cpu",
         v1_params: dict
@@ -51,6 +52,7 @@ class LSTM(nn.Module):
         hidden_size: hidden size of the LSTM
         num_layers: number of the LSTM layers
         embedding_dim: entity embedding dimension (e.g., 32)
+        make_categorical_embeddings: whether to use categorical embeddings or not.
         batch_first: Should the batch dimension be the first or not.
         device: "cpu" or "cuda"
         v1_params: parameters for the v1 model.
@@ -78,6 +80,7 @@ class LSTM(nn.Module):
         self.relations = relations
         self.n_actions = n_actions
         self.embedding_dim = embedding_dim
+        self.make_categorical_embeddings = make_categorical_embeddings
         self.device = device
         self.v1_params = v1_params
         self.v2_params = v2_params
@@ -224,12 +227,41 @@ class LSTM(nn.Module):
 
     def create_embeddings(self) -> None:
         """Create learnable embeddings."""
-        self.word2idx = ["<PAD>"] + self.entities + self.relations
+        self.word2idx = (
+            ["<PAD>"]
+            + [name for names in self.entities.values() for name in names]
+            + self.relations
+        )
         self.word2idx = {word: idx for idx, word in enumerate(self.word2idx)}
+
         self.embeddings = nn.Embedding(
-            len(self.word2idx), self.embedding_dim, device=self.device, padding_idx=0
+            len(self.word2idx),
+            self.embedding_dim,
+            device=self.device,
+            padding_idx=0,
         )
 
+        if self.make_categorical_embeddings:
+            # Assuming self.entities is a dictionary where keys are categories and
+            # values are lists of entity names
+
+            # Create a dictionary to keep track of starting index for each category
+            category_start_indices = {}
+            current_index = 1  # Start from 1 to skip the <PAD> token
+            for category, names in self.entities.items():
+                category_start_indices[category] = current_index
+                current_index += len(names)
+
+            # Re-initialize embeddings by category
+            for category, start_idx in category_start_indices.items():
+                end_idx = start_idx + len(self.entities[category])
+                init_vector = torch.randn(self.embedding_dim, device=self.device)
+                self.embeddings.weight.data[start_idx:end_idx] = init_vector.repeat(
+                    end_idx - start_idx, 1
+                )
+
+            # Note: Relations are not re-initialized by category, assuming they are
+            # separate from entities
         if self.fuse_information == "concat":
             if self.version == "v1":
                 self.input_size_s = self.embedding_dim * 2

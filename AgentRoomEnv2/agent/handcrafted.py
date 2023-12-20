@@ -31,7 +31,7 @@ class HandcraftedAgent:
             "question_prob": 1.0,
             "seed": 42,
             "terminates_at": 99,
-            "randomize_observations": True,
+            "randomize_observations": "all",
             "make_everything_static": False,
             "rewards": {"correct": 1, "wrong": -1, "partial": 0},
             "num_total_questions": 100,
@@ -252,7 +252,7 @@ class HandcraftedAgent:
                 exclude_walls = True
             else:
                 exclude_walls = False
-            room_layout = self.env.return_room_layout(exclude_walls)
+            room_layout = self.env.unwrapped.return_room_layout(exclude_walls)
 
             if hasattr(self.memory_systems, "semantic_map"):
                 assert self.capacity["semantic_map"] > 0

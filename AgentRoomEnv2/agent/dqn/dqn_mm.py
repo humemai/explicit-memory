@@ -60,7 +60,7 @@ class DQNMMAgent(DQNAgent):
             "question_prob": 1.0,
             "terminates_at": 99,
             "room_size": "xxs",
-            "randomize_observations": True,
+            "randomize_observations": "all",
         },
         ddqn: bool = False,
         dueling_dqn: bool = False,

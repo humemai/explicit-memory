@@ -159,18 +159,28 @@ def explore(memory_systems: MemorySystems, explore_policy: str) -> str:
         if len(mems) == 0:
             action = random.choice(["north", "east", "south", "west", "stay"])
 
-        # we know the agent's current location and there is at least one memory about
-        # the map and we want to avoid the walls
-        options = ["north", "east", "south", "west", "stay"]
-
-        for mem in mems:
-            if mem[1] in options and mem[2] == "wall":
-                options.remove(mem[1])
-
-        if len(options) == 0:
-            action = random.choice(["north", "east", "south", "west", "stay"])
         else:
-            action = random.choice(options)
+            # we know the agent's current location and there is at least one memory about
+            # the map and we want to avoid the walls
+
+            to_take = []
+            to_avoid = []
+
+            for mem in mems:
+                if mem[2].split("_")[0] == "room":
+                    to_take.append(mem[1])
+                elif mem[2] == "wall":
+                    if mem[1] not in to_avoid:
+                        to_avoid.append(mem[1])
+
+            if len(to_take) > 0:
+                action = random.choice(to_take)
+            else:
+                options = ["north", "east", "south", "west", "stay"]
+                for e in to_avoid:
+                    options.remove(e)
+
+                action = random.choice(options)
 
     elif explore_policy == "new_room":
         # I think avoid_walls is not working well, since it's stochastic.

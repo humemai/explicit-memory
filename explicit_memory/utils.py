@@ -391,6 +391,7 @@ def plot_results(
             plt.show()
         else:
             console_dqn(**all_params)
+            plt.close("all")
 
     elif to_plot == "training_td_loss":
         plt.figure()
@@ -490,7 +491,7 @@ def console_dqn(
         val_means = [round(np.mean(scores).item()) for scores in scores["validation"]]
         tqdm.write(
             f"episode {num_validation} validation score: {val_means[-1]} "
-            "out of {total_maximum_episode_rewards}"
+            f"out of {total_maximum_episode_rewards}"
         )
 
     if scores["test"]:

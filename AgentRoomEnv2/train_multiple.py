@@ -1,32 +1,46 @@
-"""This script is to tran multiple train.py in parallel.
-Things learned:
-1. gamma=0.99 is always worse than gamma=0.65
-"""
+"""This script is to tran multiple train.py in parallel."""
+import matplotlib
 import datetime
+
+matplotlib.use("Agg")
+
+import logging
+
+logger = logging.getLogger()
+logger.disabled = True
+
+import random
+
+from copy import deepcopy
+from tqdm.auto import tqdm
+from agent.dqn import DQNMMAgent
+from explicit_memory.utils import write_yaml
 import os
 import subprocess
-from copy import deepcopy
 
-from tqdm import tqdm
+config = {
+    "question_prob": 1.0,
+    "terminates_at": 99,
+    "randomize_observations": None,
+    "room_size": None,
+    "rewards": {"correct": 1, "wrong": -1, "partial": -1},
+    "make_everything_static": False,
+    "num_total_questions": 1000,
+    "question_interval": 1,
+    "include_walls_in_observations": True,
+}
 
-from explicit_memory.utils import write_yaml
-
-train_config = {
+params = {
     "env_str": "room_env:RoomEnv-v2",
     "max_epsilon": 1.0,
     "min_epsilon": 0.1,
-    "epsilon_decay_until": 100 * 16,
-    "gamma": 0.65,
-    "capacity": {
-        "episodic": 16,
-        "episodic_agent": 16,
-        "semantic": 16,
-        "short": 1,
-    },
+    "epsilon_decay_until": 100 * 100,
+    "gamma": None,
+    "capacity": None,
     "nn_params": {
         "hidden_size": 64,
         "num_layers": 2,
-        "embedding_dim": 32,
+        "embedding_dim": 64,
         "v1_params": None,
         "v2_params": {},
         "memory_of_interest": [
@@ -34,50 +48,92 @@ train_config = {
             "semantic",
             "short",
         ],
+        "fuse_information": "sum",
+        "include_positional_encoding": True,
+        "max_timesteps": config["terminates_at"] + 1,
+        "max_strength": config["terminates_at"] + 1,
     },
-    "num_iterations": 100 * 16,
-    "replay_buffer_size": 1024 * 100,
-    "warm_start": 1024 * 100,
-    "batch_size": 1024,
+    "num_iterations": 100 * 100,
+    "replay_buffer_size": 100 * 100,
+    "warm_start": 100 * 100 / 10,
+    "batch_size": 32,
     "target_update_interval": 10,
-    "pretrain_semantic": False,
+    "pretrain_semantic": None,
     "run_test": True,
     "num_samples_for_results": 10,
-    "train_seed": 0 + 5,
+    "train_seed": None,
     "plotting_interval": 10,
     "device": "cpu",
-    "test_seed": 0,
-    # "mm_policy": "generalize",
+    "test_seed": None,
     "qa_policy": "episodic_semantic",
     "explore_policy": "avoid_walls",
-    "env_config": {
-        "question_prob": 1.0,
-        "terminates_at": 99,
-        "room_size": "xxs",
-    },
-    "ddqn": False,
-    "dueling_dqn": False,
-    "split_reward_training": False,
+    "env_config": config,
+    "ddqn": True,
+    "dueling_dqn": True,
+    "split_reward_training": None,
+    "default_root_dir": None,
+    "run_handcrafted_baselines": [
+        {
+            "mm": mm,
+            "qa": qa,
+            "explore": explore,
+            "pretrain_semantic": pretrain_semantic,
+        }
+        for mm in ["random", "episodic", "semantic"]
+        for qa in ["episodic_semantic"]
+        for explore in ["random", "avoid_walls"]
+        for pretrain_semantic in [False, "exclude_walls"]
+    ],
 }
 
 commands = []
 num_parallel = 2
 reverse = False
+
 os.makedirs("./junks", exist_ok=True)
 
-for pretrain_semantic in [False, True]:
-    for test_seed in [0, 1, 2, 3, 4]:
-        train_config["pretrain_semantic"] = pretrain_semantic
-        train_config["test_seed"] = test_seed
-        train_config["train_seed"] = test_seed + 5
+for test_seed in [0, 1, 2, 3, 4]:
+    for gamma in [0.9, 0.99]:
+        for room_size in ["m", "l"]:
+            for split_reward_training in [False]:
+                for pretrain_semantic in [False]:
+                    for randomize in ["none", "objects"]:
+                        if room_size == "m":
+                            capacity = {
+                                "episodic": 8,
+                                "episodic_agent": 0,
+                                "semantic": 8,
+                                "semantic_map": 0,
+                                "short": 1,
+                            }
+                        else:
+                            capacity = {
+                                "episodic": 16,
+                                "episodic_agent": 0,
+                                "semantic": 16,
+                                "semantic_map": 0,
+                                "short": 1,
+                            }
 
-        config_file_name = (
-            f"./junks/{str(datetime.datetime.now()).replace(' ', '-')}.yaml"
-        )
+                        config["room_size"] = room_size
+                        config["randomize_observations"] = randomize
 
-        write_yaml(train_config, config_file_name)
+                        params["capacity"] = capacity
+                        params["split_reward_training"] = split_reward_training
+                        params["pretrain_semantic"] = pretrain_semantic
+                        params["gamma"] = gamma
+                        params["test_seed"] = test_seed
+                        params["train_seed"] = test_seed + 5
 
-        commands.append(f"python train.py --config {config_file_name}")
+                        params[
+                            "default_root_dir"
+                        ] = f"./training_results/room_size={room_size}/split_reward_training={split_reward_training}/pretrain_semantic={pretrain_semantic}/randomize={randomize}/gamma={gamma}/"
+
+                        config_file_name = f"./junks/{str(datetime.datetime.now()).replace(' ', '-')}.yaml"
+
+                        write_yaml(params, config_file_name)
+
+                        commands.append(f"python train.py --config {config_file_name}")
 
 
 print(f"Running {len(commands)} training scripts ...")

@@ -504,7 +504,7 @@ class DQNAgent(HandcraftedAgent):
             self.iteration_idx,
             self.action_space.n.item(),
             self.num_iterations,
-            self.env.total_maximum_episode_rewards,
+            self.env.unwrapped.total_maximum_episode_rewards,
             self.num_validation,
             self.num_samples_for_results,
             self.default_root_dir,

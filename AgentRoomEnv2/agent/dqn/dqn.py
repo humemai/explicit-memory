@@ -60,7 +60,7 @@ class DQNAgent(HandcraftedAgent):
             "question_prob": 1.0,
             "terminates_at": 99,
             "room_size": "xxs",
-            "randomize_observations": True,
+            "randomize_observations": "all",
         },
         ddqn: bool = False,
         dueling_dqn: bool = False,
@@ -136,8 +136,8 @@ class DQNAgent(HandcraftedAgent):
         self.nn_params = nn_params
         self.nn_params["capacity"] = self.capacity
         self.nn_params["device"] = self.device
-        self.nn_params["entities"] = self.env.entities
-        self.nn_params["relations"] = self.env.relations
+        self.nn_params["entities"] = self.env.unwrapped.entities
+        self.nn_params["relations"] = self.env.unwrapped.relations
         self.nn_params["dueling_dqn"] = self.dueling_dqn
 
         self.val_filenames = []
@@ -195,7 +195,7 @@ class DQNAgent(HandcraftedAgent):
                     mm_policy=policy["mm"],
                     qa_policy=policy["qa"],
                     explore_policy=policy["explore"],
-                    num_samples_for_results=10,
+                    num_samples_for_results=self.num_samples_for_results,
                     capacity=self.capacity,
                     pretrain_semantic=policy["pretrain_semantic"],
                     default_root_dir=self.default_root_dir,
@@ -287,7 +287,7 @@ class DQNAgent(HandcraftedAgent):
             self.iteration_idx,
             self.action_space.n.item(),
             self.num_iterations,
-            self.env.total_maximum_episode_rewards,
+            self.env.unwrapped.total_maximum_episode_rewards,
             self.num_validation,
             self.num_samples_for_results,
             self.default_root_dir,

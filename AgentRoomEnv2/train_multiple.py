@@ -13,20 +13,19 @@ import random
 
 from copy import deepcopy
 from tqdm.auto import tqdm
-from agent.dqn import DQNMMAgent, DQNExploreAgent
 from explicit_memory.utils import write_yaml
 import os
 import subprocess
 
 config = {
     "question_prob": 1.0,
-    "terminates_at": 199,
+    "terminates_at": 99,
     "randomize_observations": "objects",
     "room_size": "l",
     "rewards": {"correct": 1, "wrong": 0, "partial": 0},
     "make_everything_static": False,
     "num_total_questions": 1000,
-    "question_interval": 1,
+    "question_interval": 20,
     "include_walls_in_observations": True,
 }
 
@@ -34,7 +33,7 @@ params = {
     "env_str": "room_env:RoomEnv-v2",
     "max_epsilon": 1.0,
     "min_epsilon": 0.1,
-    "epsilon_decay_until": 100 * 100,
+    "epsilon_decay_until": 100 * 200,
     "gamma": 0.99,
     "capacity": {
         "episodic": 16,
@@ -72,7 +71,7 @@ params = {
     "plotting_interval": 10,
     "device": "cpu",
     "test_seed": 0,
-    "mm_policy": "RL",
+    # "mm_policy": "RL",
     # "mm_agent_path": "trained-agents/lstm-mm/2023-12-28 18:13:03.001952/agent.pkl",
     "qa_policy": "episodic_semantic",
     "explore_policy": "avoid_walls",
@@ -96,7 +95,7 @@ params = {
 
 
 commands = []
-num_parallel = 2
+num_parallel = 1
 reverse = False
 shuffle = True
 

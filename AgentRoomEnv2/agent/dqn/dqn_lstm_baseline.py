@@ -42,6 +42,28 @@ class LSTM(torch.nn.Module):
         return x
 
 
+class History:
+    def __init__(self, block_size: int = 6) -> None:
+        self.block_size = block_size
+        self.blocks = [[]] * self.block_size
+
+    def list(self) -> list:
+        return [element for block in self.blocks for element in block]
+
+    def add_block(self, block: list) -> None:
+        self.blocks = self.blocks[1:] + [block]
+
+    def add_action(self, action: int) -> None:
+        assert action in [0, 1, 2, 3, 4]
+        self.blocks[-1].append(action)
+
+    def add_reward(self, reward: int) -> None:
+        self.blocks[-1].append(reward)
+
+    def __repr__(self) -> str:
+        return str(self.blocks)
+
+
 class DQNLSTMBaselineAgent:
     """DQN LSTM Baseline Agent interacting with environment.
 
@@ -170,7 +192,66 @@ class DQNLSTMBaselineAgent:
         actions. The filling continues until it reaches the warm start size.
 
         """
-        pass
+        while len(self.replay_buffer) < self.warm_start:
+            observations, info = self.env.reset()
+            history = History(self.history_block_size)
+
+            for obs in observations["room"]:
+                encode_observation(self.memory_systems, obs)
+                manage_memory(
+                    self.memory_systems,
+                    self.mm_policy,
+                    self.mm_policy_model,
+                    split_possessive=False,
+                )
+
+            while True:
+                actions_qa = [
+                    answer_question(
+                        self.memory_systems,
+                        self.qa_policy,
+                        question,
+                        split_possessive=False,
+                    )
+                    for question in observations["questions"]
+                ]
+                state = self.memory_systems.return_as_a_dict_list()
+                action, q_values_ = select_dqn_action(
+                    state=deepcopy(state),
+                    greedy=False,
+                    dqn=self.dqn,
+                    epsilon=self.epsilon,
+                    action_space=self.action_space,
+                )
+                action_pair = (actions_qa, self.action2str[action])
+                (
+                    observations,
+                    reward,
+                    done,
+                    truncated,
+                    info,
+                ) = self.env.step(action_pair)
+                done = done or truncated
+
+                observations["room"] = self.manage_agent_and_map_memory(
+                    observations["room"]
+                )
+
+                for obs in observations["room"]:
+                    encode_observation(self.memory_systems, obs)
+                    manage_memory(
+                        self.memory_systems,
+                        self.mm_policy,
+                        self.mm_policy_model,
+                        split_possessive=False,
+                    )
+
+                next_state = self.memory_systems.return_as_a_dict_list()
+                transition = [state, action, reward, next_state, done]
+                self.replay_buffer.store(*transition)
+
+                if done or len(self.replay_buffer) >= self.warm_start:
+                    break
 
     def train(self) -> None:
         """Code for training"""

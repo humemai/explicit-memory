@@ -8,10 +8,15 @@ import torch.optim as optim
 from room_env.envs.room2 import RoomEnv2
 
 from explicit_memory.nn import LSTM
-from explicit_memory.utils import (ReplayBuffer, is_running_notebook,
-                                   plot_results, save_dqn_final_results,
-                                   save_dqn_validation,
-                                   save_states_q_values_actions, write_yaml)
+from explicit_memory.utils import (
+    ReplayBuffer,
+    is_running_notebook,
+    plot_results,
+    save_dqn_final_results,
+    save_dqn_validation,
+    save_states_q_values_actions,
+    write_yaml,
+)
 
 from ..handcrafted import HandcraftedAgent
 
@@ -25,15 +30,15 @@ class DQNAgent(HandcraftedAgent):
     def __init__(
         self,
         env_str: str = "room_env:RoomEnv-v2",
-        num_iterations: int = 1000,
-        replay_buffer_size: int = 102400,
-        warm_start: int = 102400,
-        batch_size: int = 1024,
+        num_iterations: int = 10000,
+        replay_buffer_size: int = 10000,
+        warm_start: int = 1000,
+        batch_size: int = 32,
         target_update_interval: int = 10,
-        epsilon_decay_until: float = 2048,
+        epsilon_decay_until: float = 10000,
         max_epsilon: float = 1.0,
         min_epsilon: float = 0.1,
-        gamma: float = 0.65,
+        gamma: float = 0.9,
         capacity: dict = {
             "episodic": 16,
             "semantic": 16,
@@ -41,11 +46,22 @@ class DQNAgent(HandcraftedAgent):
         },
         pretrain_semantic: str | bool = False,
         nn_params: dict = {
+            "architecture": "lstm",
             "hidden_size": 64,
             "num_layers": 2,
-            "embedding_dim": 32,
+            "embedding_dim": 64,
+            "make_categorical_embeddings": False,
             "v1_params": None,
             "v2_params": {},
+            "memory_of_interest": [
+                "episodic",
+                "semantic",
+                "short",
+            ],
+            "fuse_information": "sum",
+            "include_positional_encoding": True,
+            "max_timesteps": 100,
+            "max_strength": 100,
         },
         run_test: bool = True,
         num_samples_for_results: int = 10,
@@ -59,14 +75,31 @@ class DQNAgent(HandcraftedAgent):
         env_config: dict = {
             "question_prob": 1.0,
             "terminates_at": 99,
-            "room_size": "xxs",
-            "randomize_observations": "all",
+            "randomize_observations": "objects",
+            "room_size": "l",
+            "rewards": {"correct": 1, "wrong": 0, "partial": 0},
+            "make_everything_static": False,
+            "num_total_questions": 1000,
+            "question_interval": 1,
+            "include_walls_in_observations": True,
         },
-        ddqn: bool = False,
-        dueling_dqn: bool = False,
+        ddqn: bool = True,
+        dueling_dqn: bool = True,
         default_root_dir: str = "./training_results/",
-        run_handcrafted_baselines: dict | None = None,
-    ):
+        run_handcrafted_baselines: dict
+        | None = [
+            {
+                "mm": mm,
+                "qa": qa,
+                "explore": explore,
+                "pretrain_semantic": pretrain_semantic,
+            }
+            for mm in ["random", "episodic", "semantic"]
+            for qa in ["episodic_semantic"]
+            for explore in ["random", "avoid_walls"]
+            for pretrain_semantic in [False, "exclude_walls"]
+        ],
+    ) -> None:
         """Initialization.
 
         Args:
@@ -159,8 +192,13 @@ class DQNAgent(HandcraftedAgent):
         assert self.batch_size <= self.warm_start <= self.replay_buffer_size
 
         # networks: dqn, dqn_target
-        self.dqn = LSTM(**self.nn_params)
-        self.dqn_target = LSTM(**self.nn_params)
+        if self.nn_params["architecture"].lower() == "lstm":
+            function_approximator = LSTM
+            del self.nn_params["architecture"]
+        elif self.nn_params["architecture"].lower() == "stare":
+            raise NotImplementedError
+        self.dqn = function_approximator(**self.nn_params)
+        self.dqn_target = function_approximator(**self.nn_params)
         self.dqn_target.load_state_dict(self.dqn.state_dict())
         self.dqn_target.eval()
 

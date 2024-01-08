@@ -25,5 +25,5 @@ for k, v in hparams.items():
     print(f"  {k:>21} : {v}")
 
 
-agent = DQNMMAgent(**hparams)
+agent = DQNExploreAgent(**hparams)
 agent.train()

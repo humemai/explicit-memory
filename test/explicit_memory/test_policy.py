@@ -163,12 +163,12 @@ class PolicyTest(unittest.TestCase):
             action = explore(self.memory_systems, "avoid_walls")
             self.assertIn(action, ["west", "stay"])
 
-    def test_explore_neural(self):
-        obs = ["foo", "bar", "baz", 1]
-        encode_observation(self.memory_systems, obs)
-        manage_memory(self.memory_systems, "episodic", split_possessive=False)
-        with self.assertRaises(NotImplementedError):
-            explore(self.memory_systems, "neural")
+    # def test_explore_neural(self):
+    #     obs = ["foo", "bar", "baz", 1]
+    #     encode_observation(self.memory_systems, obs)
+    #     manage_memory(self.memory_systems, "episodic", split_possessive=False)
+    #     with self.assertRaises(NotImplementedError):
+    #         explore(self.memory_systems, "neural")
 
     def test_manage_memory(self):
         obs = ["foo", "bar", "baz", 1]
@@ -532,11 +532,11 @@ class PolicyTest(unittest.TestCase):
             )
             manage_memory(self.memory_systems, "random", split_possessive=False)
 
-        with self.assertRaises(NotImplementedError):
-            encode_observation(
-                self.memory_systems, ["headset", "atlocation", "officeroom", 1]
-            )
-            manage_memory(self.memory_systems, "neural", split_possessive=False)
+        # with self.assertRaises(NotImplementedError):
+        #     encode_observation(
+        #         self.memory_systems, ["headset", "atlocation", "officeroom", 1]
+        #     )
+        #     manage_memory(self.memory_systems, "neural", split_possessive=False)
 
     def test_answer_question(self):
         self.memory_systems.short.add(["i", "am", "short", 42])
@@ -549,13 +549,13 @@ class PolicyTest(unittest.TestCase):
             )
         self.memory_systems.short.forget_all()
 
-        with self.assertRaises(NotImplementedError):
-            answer_question(
-                self.memory_systems,
-                policy="neural",
-                question=["foo", "bar", "?", 42],
-                split_possessive=False,
-            )
+        # with self.assertRaises(NotImplementedError):
+        #     answer_question(
+        #         self.memory_systems,
+        #         policy="neural",
+        #         question=["foo", "bar", "?", 42],
+        #         split_possessive=False,
+        #     )
         answer = answer_question(
             self.memory_systems,
             policy="episodic_semantic",

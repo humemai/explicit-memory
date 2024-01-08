@@ -1,0 +1,11 @@
+episodic: []
+semantic:
+- - room_000
+  - north
+  - wall
+  - 1
+short:
+- - room_000
+  - east
+  - room_001
+  - 0

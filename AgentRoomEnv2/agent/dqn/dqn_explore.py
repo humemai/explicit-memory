@@ -2,15 +2,25 @@
 import os
 from copy import deepcopy
 
+import numpy as np
 import gymnasium as gym
 import torch
 from tqdm.auto import trange
 
-from explicit_memory.nn import LSTM
-from explicit_memory.policy import (answer_question, encode_observation,
-                                    manage_memory)
-from explicit_memory.utils import (dqn_target_hard_update, select_dqn_action,
-                                   update_dqn_model, write_yaml)
+from explicit_memory.policy import (
+    answer_question,
+    encode_observation,
+    manage_memory,
+    explore,
+)
+from explicit_memory.utils import (
+    dqn_target_hard_update,
+    select_dqn_action,
+    update_dqn_model,
+    read_yaml,
+    write_yaml,
+    read_pickle,
+)
 
 from .dqn import DQNAgent
 
@@ -24,15 +34,15 @@ class DQNExploreAgent(DQNAgent):
     def __init__(
         self,
         env_str: str = "room_env:RoomEnv-v2",
-        num_iterations: int = 1000,
-        replay_buffer_size: int = 102400,
-        warm_start: int = 102400,
-        batch_size: int = 1024,
+        num_iterations: int = 10000,
+        replay_buffer_size: int = 10000,
+        warm_start: int = 1000,
+        batch_size: int = 32,
         target_update_interval: int = 10,
-        epsilon_decay_until: float = 2048,
+        epsilon_decay_until: float = 10000,
         max_epsilon: float = 1.0,
         min_epsilon: float = 0.1,
-        gamma: float = 0.65,
+        gamma: float = 0.9,
         capacity: dict = {
             "episodic": 16,
             "episodic_agent": 0,
@@ -42,12 +52,21 @@ class DQNExploreAgent(DQNAgent):
         },
         pretrain_semantic: bool = None,
         nn_params: dict = {
+            "architecture": "lstm",
             "hidden_size": 64,
             "num_layers": 2,
-            "embedding_dim": 32,
+            "embedding_dim": 64,
+            "make_categorical_embeddings": False,
             "v1_params": None,
             "v2_params": {},
-            "memory_of_interest": ["episodic", "episodic_agent", "semantic", "short"],
+            "memory_of_interest": [
+                "episodic",
+                "semantic",
+            ],
+            "fuse_information": "sum",
+            "include_positional_encoding": True,
+            "max_timesteps": 100,
+            "max_strength": 100,
         },
         run_test: bool = True,
         num_samples_for_results: int = 10,
@@ -55,17 +74,38 @@ class DQNExploreAgent(DQNAgent):
         train_seed: int = 5,
         test_seed: int = 0,
         device: str = "cpu",
-        mm_policy: str = "generalize",
+        mm_policy: str = "neural",
+        mm_agent_path: str
+        | None = "trained-agents/lstm-mm/2023-12-28 18:13:03.001952/agent.pkl",
         qa_policy: str = "episodic_semantic",
         env_config: dict = {
             "question_prob": 1.0,
             "terminates_at": 99,
-            "room_size": "xxs",
+            "randomize_observations": "objects",
+            "room_size": "l",
+            "rewards": {"correct": 1, "wrong": 0, "partial": 0},
+            "make_everything_static": False,
+            "num_total_questions": 1000,
+            "question_interval": 1,
+            "include_walls_in_observations": True,
         },
-        ddqn: bool = False,
-        dueling_dqn: bool = False,
+        ddqn: bool = True,
+        dueling_dqn: bool = True,
         default_root_dir: str = "./training_results/",
-    ):
+        run_handcrafted_baselines: dict
+        | None = [
+            {
+                "mm": mm,
+                "qa": qa,
+                "explore": explore,
+                "pretrain_semantic": pretrain_semantic,
+            }
+            for mm in ["random", "episodic", "semantic"]
+            for qa in ["episodic_semantic"]
+            for explore in ["random", "avoid_walls"]
+            for pretrain_semantic in [False, "exclude_walls"]
+        ],
+    ) -> None:
         """Initialization.
 
         Args:
@@ -92,6 +132,8 @@ class DQNExploreAgent(DQNAgent):
             device: The device to run the agent on. This is either "cpu" or "cuda".
             mm_policy: Memory management policy. Choose one of "generalize",
                 "random", "rl", or "neural"
+            mm_agent_path: The path to the memory management agent. This is only used
+                when mm_policy == "rl".
             qa_policy: question answering policy Choose one of "episodic_semantic",
                 "random", or "neural". qa_policy shouldn't be trained with RL. There is no
                 sequence of states / actions to learn from.
@@ -105,12 +147,14 @@ class DQNExploreAgent(DQNAgent):
             ddqn: wehther to use double dqn
             dueling_dqn: whether to use dueling dqn
             default_root_dir: default root directory to store the results.
+            run_handcrafted_baselines: Whether or not to run handcrafted baselines.
 
         """
         all_params = deepcopy(locals())
         del all_params["self"]
         del all_params["__class__"]
         self.all_params = deepcopy(all_params)
+        del all_params["mm_agent_path"]
 
         all_params["nn_params"]["n_actions"] = 5
         all_params["explore_policy"] = "rl"
@@ -119,6 +163,103 @@ class DQNExploreAgent(DQNAgent):
 
         self.action2str = {0: "north", 1: "east", 2: "south", 3: "west", 4: "stay"}
         self.action_space = gym.spaces.Discrete(len(self.action2str))
+
+        if self.mm_policy == "neural":
+            self.mm_agent = read_pickle(mm_agent_path)
+            self.mm_agent.dqn.eval()
+            self.mm_policy_model = self.mm_agent.dqn
+        else:
+            self.mm_policy_model = None
+
+        with torch.no_grad():
+            test_mean, test_std = self.run_neural_baseline()
+
+        handcrafted = read_yaml(os.path.join(self.default_root_dir, "handcrafted.yaml"))
+        handcrafted[
+            "{"
+            "mm"
+            ": "
+            "neural"
+            ", "
+            "qa"
+            ": "
+            "episodic_semantic"
+            ", "
+            "explore"
+            ": "
+            "avoid_walls"
+            "}"
+        ] = {"mean": test_mean, "std": test_std}
+        write_yaml(handcrafted, os.path.join(self.default_root_dir, "handcrafted.yaml"))
+        self.env_config["seed"] = self.train_seed
+        self.env = gym.make(self.env_str, **self.env_config)
+
+    def run_neural_baseline(self) -> None:
+        """Run the neural baseline."""
+        self.env_config["seed"] = self.test_seed
+        self.env = gym.make(self.env_str, **self.env_config)
+        scores = []
+
+        for _ in range(self.num_samples_for_results):
+            score = 0
+
+            self.init_memory_systems()
+            observations, info = self.env.reset()
+
+            observations["room"] = self.manage_agent_and_map_memory(
+                observations["room"]
+            )
+
+            for obs in observations["room"]:
+                encode_observation(self.memory_systems, obs)
+                manage_memory(
+                    self.memory_systems,
+                    self.mm_policy,
+                    self.mm_policy_model,
+                    split_possessive=False,
+                )
+
+            while True:
+                actions_qa = [
+                    answer_question(
+                        self.memory_systems,
+                        self.qa_policy,
+                        question,
+                        split_possessive=False,
+                    )
+                    for question in observations["questions"]
+                ]
+                action_explore = explore(self.memory_systems, "avoid_walls")
+
+                action_pair = (actions_qa, action_explore)
+                (
+                    observations,
+                    reward,
+                    done,
+                    truncated,
+                    info,
+                ) = self.env.step(action_pair)
+                score += reward
+                done = done or truncated
+
+                if done:
+                    break
+
+                observations["room"] = self.manage_agent_and_map_memory(
+                    observations["room"]
+                )
+
+                for obs in observations["room"]:
+                    encode_observation(self.memory_systems, obs)
+                    manage_memory(
+                        self.memory_systems,
+                        self.mm_policy,
+                        self.mm_policy_model,
+                        split_possessive=False,
+                    )
+            scores.append(score)
+
+        return np.mean(scores).item(), np.std(scores).item()
 
     def fill_replay_buffer(self) -> None:
         """Make the replay buffer full in the beginning with the uniformly-sampled
@@ -140,24 +281,23 @@ class DQNExploreAgent(DQNAgent):
                 manage_memory(
                     self.memory_systems,
                     self.mm_policy,
+                    self.mm_policy_model,
                     split_possessive=False,
                 )
 
             while True:
                 actions_qa = [
-                    str(
-                        answer_question(
-                            self.memory_systems,
-                            self.qa_policy,
-                            question,
-                            split_possessive=False,
-                        )
+                    answer_question(
+                        self.memory_systems,
+                        self.qa_policy,
+                        question,
+                        split_possessive=False,
                     )
                     for question in observations["questions"]
                 ]
                 state = self.memory_systems.return_as_a_dict_list()
                 action, q_values_ = select_dqn_action(
-                    state=state,
+                    state=deepcopy(state),
                     greedy=False,
                     dqn=self.dqn,
                     epsilon=self.epsilon,
@@ -182,6 +322,7 @@ class DQNExploreAgent(DQNAgent):
                     manage_memory(
                         self.memory_systems,
                         self.mm_policy,
+                        self.mm_policy_model,
                         split_possessive=False,
                     )
 
@@ -222,23 +363,23 @@ class DQNExploreAgent(DQNAgent):
                     manage_memory(
                         self.memory_systems,
                         self.mm_policy,
+                        self.mm_policy_model,
                         split_possessive=False,
                     )
+
             actions_qa = [
-                str(
-                    answer_question(
-                        self.memory_systems,
-                        self.qa_policy,
-                        question,
-                        split_possessive=False,
-                    )
+                answer_question(
+                    self.memory_systems,
+                    self.qa_policy,
+                    question,
+                    split_possessive=False,
                 )
                 for question in observations["questions"]
             ]
 
             state = self.memory_systems.return_as_a_dict_list()
             action, q_values_ = select_dqn_action(
-                state=state,
+                state=deepcopy(state),
                 greedy=False,
                 dqn=self.dqn,
                 epsilon=self.epsilon,
@@ -267,6 +408,7 @@ class DQNExploreAgent(DQNAgent):
                     manage_memory(
                         self.memory_systems,
                         self.mm_policy,
+                        self.mm_policy_model,
                         split_possessive=False,
                     )
                 next_state = self.memory_systems.return_as_a_dict_list()
@@ -355,18 +497,17 @@ class DQNExploreAgent(DQNAgent):
                 manage_memory(
                     self.memory_systems,
                     self.mm_policy,
+                    self.mm_policy_model,
                     split_possessive=False,
                 )
 
             while True:
                 actions_qa = [
-                    str(
-                        answer_question(
-                            self.memory_systems,
-                            self.qa_policy,
-                            question,
-                            split_possessive=False,
-                        )
+                    answer_question(
+                        self.memory_systems,
+                        self.qa_policy,
+                        question,
+                        split_possessive=False,
                     )
                     for question in observations["questions"]
                 ]
@@ -375,7 +516,7 @@ class DQNExploreAgent(DQNAgent):
                     states.append(deepcopy(state))
 
                 action, q_values_ = select_dqn_action(
-                    state=state,
+                    state=deepcopy(state),
                     greedy=True,
                     dqn=self.dqn,
                     epsilon=self.epsilon,
@@ -409,6 +550,7 @@ class DQNExploreAgent(DQNAgent):
                     manage_memory(
                         self.memory_systems,
                         self.mm_policy,
+                        self.mm_policy_model,
                         split_possessive=False,
                     )
             scores_temp.append(score)

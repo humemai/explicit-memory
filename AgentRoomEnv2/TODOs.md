@@ -4,6 +4,8 @@
 
 ### Remaining
 
+1. memory managemt neural network loading
+
 ### Done
 
 1. LSTM with new params

@@ -1,5 +1,6 @@
 import unittest
 
+import torch
 import numpy as np
 
 from explicit_memory.nn import LSTM
@@ -153,3 +154,67 @@ class LSTMTest(unittest.TestCase):
                     ]
                 )
             )
+
+    def test_make_categorical_embeddings(self) -> None:
+        for make_categorical_embeddings in [True, False]:
+            config = {
+                "hidden_size": 4,
+                "num_layers": 2,
+                "n_actions": 3,
+                "embedding_dim": 4,
+                "make_categorical_embeddings": make_categorical_embeddings,
+                "capacity": {
+                    "episodic": 16,
+                    "semantic": 16,
+                    "short": 1,
+                },
+                "memory_of_interest": [
+                    "episodic",
+                    "semantic",
+                    "short",
+                ],
+                "entities": {"c0": ["a0", "a1"], "c1": ["b0", "b1", "b2"]},
+                "relations": ["r0", "r1"],
+                "v1_params": None,
+                "v2_params": {},
+                "batch_first": True,
+                "device": "cpu",
+                "dueling_dqn": True,
+                "fuse_information": "sum",
+            }
+            lstm = LSTM(**config)
+            self.assertTrue(
+                all(lstm.embeddings.weight.data[0] == torch.tensor([0, 0, 0, 0]))
+            )
+            if make_categorical_embeddings:
+                self.assertTrue(
+                    all(
+                        lstm.embeddings.weight.data[1] == lstm.embeddings.weight.data[2]
+                    )
+                )
+                self.assertTrue(
+                    all(
+                        lstm.embeddings.weight.data[3] == lstm.embeddings.weight.data[4]
+                    )
+                )
+                self.assertTrue(
+                    all(
+                        lstm.embeddings.weight.data[3] == lstm.embeddings.weight.data[5]
+                    )
+                )
+            else:
+                self.assertFalse(
+                    all(
+                        lstm.embeddings.weight.data[1] == lstm.embeddings.weight.data[2]
+                    )
+                )
+                self.assertFalse(
+                    all(
+                        lstm.embeddings.weight.data[3] == lstm.embeddings.weight.data[4]
+                    )
+                )
+                self.assertFalse(
+                    all(
+                        lstm.embeddings.weight.data[3] == lstm.embeddings.weight.data[5]
+                    )
+                )

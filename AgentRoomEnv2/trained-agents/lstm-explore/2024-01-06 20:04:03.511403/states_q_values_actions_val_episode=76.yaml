@@ -1,0 +1,12612 @@
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    semantic:
+    - - room_000
+      - south
+      - wall
+      - 1
+    - - room_000
+      - north
+      - wall
+      - 1
+    - - room_000
+      - east
+      - room_001
+      - 1
+    - - room_000
+      - west
+      - wall
+      - 1
+    short: []
+  q_values:
+  - 18.291719436645508
+  - 18.3981876373291
+  - 18.69297218322754
+  - 18.829910278320312
+  - 18.336545944213867
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    semantic:
+    - - room_000
+      - south
+      - wall
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 2
+    - - room_000
+      - east
+      - room_001
+      - 2
+    - - room_000
+      - west
+      - wall
+      - 2
+    short: []
+  q_values:
+  - 19.655973434448242
+  - 19.98137092590332
+  - 20.175418853759766
+  - 20.152320861816406
+  - 19.730056762695312
+  action: 2
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    semantic:
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    short: []
+  q_values:
+  - 20.97941017150879
+  - 21.768537521362305
+  - 21.550466537475586
+  - 21.339614868164062
+  - 21.061100006103516
+  action: 1
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    semantic:
+    - - room_001
+      - north
+      - wall
+      - 1
+    - - room_001
+      - east
+      - room_002
+      - 1
+    - - room_001
+      - south
+      - room_004
+      - 1
+    - - agent
+      - atlocation
+      - room_001
+      - 1
+    - - room_001
+      - west
+      - room_000
+      - 1
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    short: []
+  q_values:
+  - 23.142671585083008
+  - 23.607542037963867
+  - 23.736896514892578
+  - 23.561145782470703
+  - 23.220569610595703
+  action: 2
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    semantic:
+    - - room_001
+      - north
+      - wall
+      - 1
+    - - room_001
+      - east
+      - room_002
+      - 1
+    - - dep_000
+      - atlocation
+      - room_004
+      - 1
+    - - agent
+      - atlocation
+      - room_001
+      - 1
+    - - room_004
+      - east
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_004
+      - 1
+    - - room_004
+      - south
+      - room_008
+      - 1
+    - - room_001
+      - south
+      - room_004
+      - 1
+    - - room_004
+      - north
+      - room_001
+      - 1
+    - - room_001
+      - west
+      - room_000
+      - 1
+    - - room_004
+      - west
+      - wall
+      - 1
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    short: []
+  q_values:
+  - 33.07918167114258
+  - 33.014869689941406
+  - 32.95714569091797
+  - 32.67787170410156
+  - 32.805233001708984
+  action: 0
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    semantic:
+    - - dep_000
+      - atlocation
+      - room_004
+      - 1
+    - - room_004
+      - north
+      - room_001
+      - 1
+    - - room_004
+      - east
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_004
+      - 1
+    - - room_004
+      - south
+      - room_008
+      - 1
+    - - room_004
+      - west
+      - wall
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    short: []
+  q_values:
+  - 34.6597785949707
+  - 34.93904495239258
+  - 34.751747131347656
+  - 34.27770233154297
+  - 34.52313995361328
+  action: 1
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    semantic:
+    - - room_004
+      - east
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_004
+      - 1
+    - - room_004
+      - south
+      - room_008
+      - 1
+    - - room_002
+      - west
+      - room_001
+      - 1
+    - - agent
+      - atlocation
+      - room_002
+      - 1
+    - - room_004
+      - north
+      - room_001
+      - 1
+    - - room_004
+      - west
+      - wall
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    short: []
+  q_values:
+  - 36.2818603515625
+  - 36.371002197265625
+  - 36.326171875
+  - 35.945743560791016
+  - 36.17323303222656
+  action: 1
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    semantic:
+    - - agent
+      - atlocation
+      - room_004
+      - 1
+    - - room_004
+      - south
+      - room_008
+      - 1
+    - - room_002
+      - west
+      - room_001
+      - 1
+    - - room_003
+      - east
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_002
+      - 1
+    - - room_004
+      - north
+      - room_001
+      - 1
+    - - room_004
+      - west
+      - wall
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    short: []
+  q_values:
+  - 41.6810188293457
+  - 41.56089782714844
+  - 42.45600128173828
+  - 42.09560775756836
+  - 41.95183563232422
+  action: 2
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    semantic:
+    - - room_005
+      - east
+      - room_006
+      - 1
+    - - room_003
+      - east
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_005
+      - 1
+    - - agent
+      - atlocation
+      - room_002
+      - 1
+    - - room_004
+      - north
+      - room_001
+      - 1
+    - - room_005
+      - south
+      - room_010
+      - 1
+    - - room_004
+      - west
+      - wall
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    short: []
+  q_values:
+  - 43.70978546142578
+  - 43.53883743286133
+  - 44.5498046875
+  - 44.195594787597656
+  - 44.060394287109375
+  action: 2
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    semantic:
+    - - room_010
+      - south
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_010
+      - 1
+    - - agent
+      - atlocation
+      - room_005
+      - 1
+    - - agent
+      - atlocation
+      - room_002
+      - 1
+    - - room_004
+      - north
+      - room_001
+      - 1
+    - - room_005
+      - south
+      - room_010
+      - 1
+    - - room_004
+      - west
+      - wall
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    short: []
+  q_values:
+  - 51.85708236694336
+  - 50.595947265625
+  - 52.07722091674805
+  - 52.51813507080078
+  - 52.064910888671875
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    semantic:
+    - - agent
+      - atlocation
+      - room_005
+      - 1
+    - - agent
+      - atlocation
+      - room_002
+      - 1
+    - - room_004
+      - north
+      - room_001
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - room_004
+      - west
+      - wall
+      - 1
+    - - room_009
+      - south
+      - wall
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    short: []
+  q_values:
+  - 52.957969665527344
+  - 51.09865951538086
+  - 52.692604064941406
+  - 53.64064407348633
+  - 52.85263442993164
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - agent
+      - atlocation
+      - room_008
+      - 1
+    - - room_004
+      - north
+      - room_001
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    short: []
+  q_values:
+  - 52.11972427368164
+  - 50.50896072387695
+  - 51.95481872558594
+  - 52.7464714050293
+  - 52.087791442871094
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - dep_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_007
+      - south
+      - wall
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    short: []
+  q_values:
+  - 51.287662506103516
+  - 49.71823501586914
+  - 51.09724044799805
+  - 51.869354248046875
+  - 51.24753189086914
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_007
+      - south
+      - wall
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    short: []
+  q_values:
+  - 48.87091827392578
+  - 47.19001007080078
+  - 48.65992736816406
+  - 49.50145721435547
+  - 48.78873825073242
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - dep_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 3
+    short: []
+  q_values:
+  - 45.90054702758789
+  - 44.42557144165039
+  - 45.792667388916016
+  - 46.54513168334961
+  - 45.85988235473633
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 4
+    short: []
+  q_values:
+  - 46.43488311767578
+  - 45.04548645019531
+  - 46.34745407104492
+  - 47.05022430419922
+  - 46.41253662109375
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - dep_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 5
+    short: []
+  q_values:
+  - 46.334415435791016
+  - 44.879905700683594
+  - 46.211036682128906
+  - 46.95094680786133
+  - 46.29595947265625
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - dep_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 6
+    short: []
+  q_values:
+  - 46.660499572753906
+  - 45.0934944152832
+  - 46.50830841064453
+  - 47.30759811401367
+  - 46.60117721557617
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - dep_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 7
+    short: []
+  q_values:
+  - 46.87278366088867
+  - 45.2069091796875
+  - 46.68829345703125
+  - 47.52407455444336
+  - 46.784305572509766
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 8
+    short: []
+  q_values:
+  - 47.21033477783203
+  - 45.50423812866211
+  - 47.01926803588867
+  - 47.873138427734375
+  - 47.11244201660156
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - dep_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 9
+    short: []
+  q_values:
+  - 46.23213195800781
+  - 44.56742477416992
+  - 46.04911422729492
+  - 46.88497543334961
+  - 46.140167236328125
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 10
+    short: []
+  q_values:
+  - 45.937191009521484
+  - 44.348793029785156
+  - 45.78849411010742
+  - 46.60490417480469
+  - 45.86940383911133
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 11
+    short: []
+  q_values:
+  - 45.313594818115234
+  - 43.7961540222168
+  - 45.1895637512207
+  - 45.97218322753906
+  - 45.260040283203125
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - dep_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 12
+    short: []
+  q_values:
+  - 44.58759307861328
+  - 43.09745407104492
+  - 44.46805953979492
+  - 45.23933029174805
+  - 44.535011291503906
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - dep_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 13
+    short: []
+  q_values:
+  - 44.33184814453125
+  - 42.840843200683594
+  - 44.21438980102539
+  - 44.98773193359375
+  - 44.27730178833008
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - dep_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 14
+    short: []
+  q_values:
+  - 44.246131896972656
+  - 42.75169372558594
+  - 44.12837219238281
+  - 44.90435791015625
+  - 44.19015121459961
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - dep_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 15
+    short: []
+  q_values:
+  - 44.367523193359375
+  - 42.86979675292969
+  - 44.24873352050781
+  - 45.02604675292969
+  - 44.3118782043457
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - dep_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 16
+    short: []
+  q_values:
+  - 44.8880729675293
+  - 43.38356399536133
+  - 44.76850509643555
+  - 45.5469856262207
+  - 44.83401870727539
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - dep_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 17
+    short: []
+  q_values:
+  - 45.53450393676758
+  - 44.01352310180664
+  - 45.41124725341797
+  - 46.19537353515625
+  - 45.47969436645508
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - dep_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 18
+    short: []
+  q_values:
+  - 45.611270904541016
+  - 44.054359436035156
+  - 45.47129440307617
+  - 46.27340316772461
+  - 45.54777908325195
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - dep_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 19
+    short: []
+  q_values:
+  - 45.488487243652344
+  - 43.891082763671875
+  - 45.331199645996094
+  - 46.15317153930664
+  - 45.41366958618164
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - dep_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 20
+    short: []
+  q_values:
+  - 45.73866653442383
+  - 44.10464859008789
+  - 45.56406784057617
+  - 46.393760681152344
+  - 45.6513786315918
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - dep_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 21
+    short: []
+  q_values:
+  - 46.08903884887695
+  - 44.4644775390625
+  - 45.916419982910156
+  - 46.742923736572266
+  - 46.00639343261719
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 22
+    short: []
+  q_values:
+  - 46.820247650146484
+  - 45.24693298339844
+  - 46.67562484741211
+  - 47.47850036621094
+  - 46.757511138916016
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - dep_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 23
+    short: []
+  q_values:
+  - 46.77588653564453
+  - 45.27096939086914
+  - 46.64298629760742
+  - 47.40787887573242
+  - 46.72583770751953
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - dep_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 24
+    short: []
+  q_values:
+  - 46.84507369995117
+  - 45.35884475708008
+  - 46.72132873535156
+  - 47.47562789916992
+  - 46.79945373535156
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - dep_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 25
+    short: []
+  q_values:
+  - 46.53276062011719
+  - 44.998409271240234
+  - 46.40528869628906
+  - 47.18654251098633
+  - 46.48005676269531
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 26
+    short: []
+  q_values:
+  - 46.58096694946289
+  - 45.025238037109375
+  - 46.458030700683594
+  - 47.25218200683594
+  - 46.52438735961914
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 27
+    short: []
+  q_values:
+  - 46.436058044433594
+  - 44.876853942871094
+  - 46.311195373535156
+  - 47.1082649230957
+  - 46.377620697021484
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - ind_000
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 28
+    short: []
+  q_values:
+  - 46.052398681640625
+  - 44.51636505126953
+  - 45.92528533935547
+  - 46.70929718017578
+  - 45.997337341308594
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - dep_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 29
+    short: []
+  q_values:
+  - 46.0257453918457
+  - 44.5130615234375
+  - 45.90104675292969
+  - 46.67485809326172
+  - 45.97456359863281
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 30
+    short: []
+  q_values:
+  - 46.29660415649414
+  - 44.78984832763672
+  - 46.18280029296875
+  - 46.95341491699219
+  - 46.2501220703125
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - ind_000
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 31
+    short: []
+  q_values:
+  - 45.766212463378906
+  - 44.22929000854492
+  - 45.634033203125
+  - 46.4210319519043
+  - 45.709983825683594
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - ind_000
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 32
+    short: []
+  q_values:
+  - 45.704288482666016
+  - 44.13861083984375
+  - 45.56401443481445
+  - 46.36710739135742
+  - 45.64116668701172
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - dep_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 33
+    short: []
+  q_values:
+  - 45.67359924316406
+  - 44.10695266723633
+  - 45.53300094604492
+  - 46.338462829589844
+  - 45.609397888183594
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 34
+    short: []
+  q_values:
+  - 46.03769302368164
+  - 44.51595687866211
+  - 45.921546936035156
+  - 46.70185470581055
+  - 45.987979888916016
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - ind_000
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 35
+    short: []
+  q_values:
+  - 45.688079833984375
+  - 44.28120803833008
+  - 45.58823776245117
+  - 46.3051872253418
+  - 45.659034729003906
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 36
+    short: []
+  q_values:
+  - 46.138893127441406
+  - 44.83351516723633
+  - 46.07749938964844
+  - 46.732154846191406
+  - 46.13568115234375
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 37
+    short: []
+  q_values:
+  - 46.26175308227539
+  - 44.975284576416016
+  - 46.20729446411133
+  - 46.849063873291016
+  - 46.26347732543945
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 38
+    short: []
+  q_values:
+  - 46.473262786865234
+  - 45.1290168762207
+  - 46.40243148803711
+  - 47.0778923034668
+  - 46.46226501464844
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 39
+    short: []
+  q_values:
+  - 46.752044677734375
+  - 45.326080322265625
+  - 46.65766525268555
+  - 47.38090896606445
+  - 46.72383499145508
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 40
+    short: []
+  q_values:
+  - 46.99098587036133
+  - 45.51439666748047
+  - 46.882991790771484
+  - 47.634666442871094
+  - 46.95398712158203
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 41
+    short: []
+  q_values:
+  - 47.24122619628906
+  - 45.7724494934082
+  - 47.141807556152344
+  - 47.8849983215332
+  - 47.21116638183594
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 42
+    short: []
+  q_values:
+  - 47.37197494506836
+  - 45.9458122253418
+  - 47.29277420043945
+  - 48.0072135925293
+  - 47.35574722290039
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 43
+    short: []
+  q_values:
+  - 47.18864059448242
+  - 45.8057975769043
+  - 47.124813079833984
+  - 47.814048767089844
+  - 47.18144989013672
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 44
+    short: []
+  q_values:
+  - 46.945953369140625
+  - 45.60788345336914
+  - 46.897457122802734
+  - 47.561859130859375
+  - 46.94704055786133
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 45
+    short: []
+  q_values:
+  - 46.873435974121094
+  - 45.58617401123047
+  - 46.84452438354492
+  - 47.478546142578125
+  - 46.88602828979492
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 46
+    short: []
+  q_values:
+  - 46.92479705810547
+  - 45.69406509399414
+  - 46.91618347167969
+  - 47.51463317871094
+  - 46.951316833496094
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 47
+    short: []
+  q_values:
+  - 47.10296630859375
+  - 45.92470932006836
+  - 47.11202621459961
+  - 47.675758361816406
+  - 47.1436767578125
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 48
+    short: []
+  q_values:
+  - 47.476173400878906
+  - 46.31452941894531
+  - 47.493648529052734
+  - 48.042274475097656
+  - 47.52437973022461
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 49
+    short: []
+  q_values:
+  - 47.92820739746094
+  - 46.72354507446289
+  - 47.93556594848633
+  - 48.50531005859375
+  - 47.96985626220703
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 50
+    short: []
+  q_values:
+  - 48.28834915161133
+  - 46.998870849609375
+  - 48.268699645996094
+  - 48.88764190673828
+  - 48.311424255371094
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 51
+    short: []
+  q_values:
+  - 48.49970626831055
+  - 47.12574005126953
+  - 48.449485778808594
+  - 49.119773864746094
+  - 48.502159118652344
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 52
+    short: []
+  q_values:
+  - 48.52762222290039
+  - 47.115875244140625
+  - 48.46003723144531
+  - 49.15408706665039
+  - 48.51962661743164
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 53
+    short: []
+  q_values:
+  - 48.39778137207031
+  - 47.0123176574707
+  - 48.333980560302734
+  - 49.01262664794922
+  - 48.39436721801758
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 54
+    short: []
+  q_values:
+  - 48.09608459472656
+  - 46.765655517578125
+  - 48.04656219482422
+  - 48.69355010986328
+  - 48.10344696044922
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 55
+    short: []
+  q_values:
+  - 47.58838653564453
+  - 46.29475784301758
+  - 47.54823303222656
+  - 48.177818298339844
+  - 47.60109329223633
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 56
+    short: []
+  q_values:
+  - 46.92000961303711
+  - 45.6204948425293
+  - 46.877220153808594
+  - 47.51820755004883
+  - 46.9276008605957
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 57
+    short: []
+  q_values:
+  - 46.494998931884766
+  - 45.13374710083008
+  - 46.43742752075195
+  - 47.120872497558594
+  - 46.48641586303711
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 58
+    short: []
+  q_values:
+  - 46.34053039550781
+  - 44.91899871826172
+  - 46.269981384277344
+  - 46.991634368896484
+  - 46.31767654418945
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 59
+    short: []
+  q_values:
+  - 46.26449966430664
+  - 44.83934020996094
+  - 46.1915283203125
+  - 46.9162712097168
+  - 46.2405891418457
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 60
+    short: []
+  q_values:
+  - 46.25444793701172
+  - 44.86660385131836
+  - 46.18650436401367
+  - 46.88922119140625
+  - 46.23859405517578
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 61
+    short: []
+  q_values:
+  - 46.34135437011719
+  - 44.977081298828125
+  - 46.27366638183594
+  - 46.96218490600586
+  - 46.32982635498047
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 62
+    short: []
+  q_values:
+  - 46.4304084777832
+  - 45.0193977355957
+  - 46.34158706665039
+  - 47.05857849121094
+  - 46.406131744384766
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 63
+    short: []
+  q_values:
+  - 46.623252868652344
+  - 45.11355972290039
+  - 46.506229400634766
+  - 47.27787780761719
+  - 46.57887649536133
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 64
+    short: []
+  q_values:
+  - 46.87922668457031
+  - 45.29481506347656
+  - 46.73560333251953
+  - 47.547176361083984
+  - 46.81718063354492
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 65
+    short: []
+  q_values:
+  - 47.04892349243164
+  - 45.43688201904297
+  - 46.89433288574219
+  - 47.72039794921875
+  - 46.98072052001953
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 66
+    short: []
+  q_values:
+  - 47.16462326049805
+  - 45.5746955871582
+  - 47.01874923706055
+  - 47.83181381225586
+  - 47.10354995727539
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 67
+    short: []
+  q_values:
+  - 47.11568069458008
+  - 45.57743453979492
+  - 46.987850189208984
+  - 47.772613525390625
+  - 47.06722640991211
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 68
+    short: []
+  q_values:
+  - 46.689674377441406
+  - 45.1949462890625
+  - 46.572086334228516
+  - 47.335365295410156
+  - 46.647891998291016
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 69
+    short: []
+  q_values:
+  - 46.16587829589844
+  - 44.66590881347656
+  - 46.05007553100586
+  - 46.81876754760742
+  - 46.122276306152344
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 70
+    short: []
+  q_values:
+  - 45.88325119018555
+  - 44.36753845214844
+  - 45.764041900634766
+  - 46.54305648803711
+  - 45.833160400390625
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 71
+    short: []
+  q_values:
+  - 45.725799560546875
+  - 44.202110290527344
+  - 45.604549407958984
+  - 46.388824462890625
+  - 45.67251968383789
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 72
+    short: []
+  q_values:
+  - 45.64523696899414
+  - 44.12422561645508
+  - 45.522823333740234
+  - 46.30584716796875
+  - 45.59297561645508
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 73
+    short: []
+  q_values:
+  - 45.758914947509766
+  - 44.23776626586914
+  - 45.6357307434082
+  - 46.41819763183594
+  - 45.7081298828125
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 74
+    short: []
+  q_values:
+  - 45.94911575317383
+  - 44.40620422363281
+  - 45.819541931152344
+  - 46.61288070678711
+  - 45.894649505615234
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 75
+    short: []
+  q_values:
+  - 45.94234848022461
+  - 44.360633850097656
+  - 45.79899597167969
+  - 46.61320495605469
+  - 45.8785285949707
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 76
+    short: []
+  q_values:
+  - 45.90663528442383
+  - 44.29558563232422
+  - 45.7529411315918
+  - 46.58284378051758
+  - 45.83454895019531
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 77
+    short: []
+  q_values:
+  - 46.07243728637695
+  - 44.45805740356445
+  - 45.91804122924805
+  - 46.74878692626953
+  - 45.99924850463867
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 78
+    short: []
+  q_values:
+  - 46.3864860534668
+  - 44.81232833862305
+  - 46.24537658691406
+  - 47.052032470703125
+  - 46.32440185546875
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 79
+    short: []
+  q_values:
+  - 46.72642517089844
+  - 45.23484420776367
+  - 46.604393005371094
+  - 47.36408233642578
+  - 46.683387756347656
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 80
+    short: []
+  q_values:
+  - 47.09828186035156
+  - 45.66431427001953
+  - 46.98815155029297
+  - 47.713096618652344
+  - 47.066864013671875
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 81
+    short: []
+  q_values:
+  - 47.393558502197266
+  - 45.937904357910156
+  - 47.280616760253906
+  - 48.01544952392578
+  - 47.359378814697266
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 82
+    short: []
+  q_values:
+  - 47.636173248291016
+  - 46.103050231933594
+  - 47.50602722167969
+  - 48.28450012207031
+  - 47.58683395385742
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 83
+    short: []
+  q_values:
+  - 47.76414489746094
+  - 46.163246154785156
+  - 47.618343353271484
+  - 48.43394088745117
+  - 47.70174789428711
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 84
+    short: []
+  q_values:
+  - 47.68655776977539
+  - 46.06564712524414
+  - 47.5305290222168
+  - 48.357608795166016
+  - 47.61894607543945
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 85
+    short: []
+  q_values:
+  - 47.444740295410156
+  - 45.84898376464844
+  - 47.2940788269043
+  - 48.108116149902344
+  - 47.38311767578125
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 86
+    short: []
+  q_values:
+  - 47.04294204711914
+  - 45.492469787597656
+  - 46.90683364868164
+  - 47.6978759765625
+  - 46.991355895996094
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 87
+    short: []
+  q_values:
+  - 46.502349853515625
+  - 44.9818000793457
+  - 46.377567291259766
+  - 47.15513610839844
+  - 46.4559440612793
+  action: 3
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_000
+      - 2
+    - - dep_003
+      - atlocation
+      - room_001
+      - 3
+    - - ind_002
+      - atlocation
+      - room_004
+      - 4
+    - - sta_003
+      - atlocation
+      - room_004
+      - 4
+    - - dep_003
+      - atlocation
+      - room_001
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+    - - room_010
+      - north
+      - room_005
+      - 9
+    - - dep_002
+      - atlocation
+      - room_009
+      - 10
+    - - ind_001
+      - atlocation
+      - room_008
+      - 11
+    semantic:
+    - - sta_001
+      - atlocation
+      - room_007
+      - 1
+    - - room_009
+      - north
+      - wall
+      - 1
+    - - agent
+      - atlocation
+      - room_009
+      - 1
+    - - room_008
+      - south
+      - room_011
+      - 1
+    - - room_008
+      - west
+      - room_007
+      - 1
+    - - room_008
+      - east
+      - room_009
+      - 1
+    - - room_001
+      - north
+      - wall
+      - 2
+    - - room_001
+      - east
+      - room_002
+      - 2
+    - - agent
+      - atlocation
+      - room_001
+      - 2
+    - - room_001
+      - south
+      - room_004
+      - 2
+    - - room_001
+      - west
+      - room_000
+      - 2
+    - - room_000
+      - north
+      - wall
+      - 3
+    - - room_000
+      - south
+      - wall
+      - 3
+    - - room_000
+      - east
+      - room_001
+      - 3
+    - - room_000
+      - west
+      - wall
+      - 3
+    - - room_007
+      - south
+      - wall
+      - 88
+    short: []
+  q_values:
+  - 46.07299041748047
+  - 44.551204681396484
+  - 45.9525146484375
+  - 46.733123779296875
+  - 46.02442169189453
+  action: 3

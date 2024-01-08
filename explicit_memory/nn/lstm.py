@@ -227,11 +227,19 @@ class LSTM(nn.Module):
 
     def create_embeddings(self) -> None:
         """Create learnable embeddings."""
-        self.word2idx = (
-            ["<PAD>"]
-            + [name for names in self.entities.values() for name in names]
-            + self.relations
-        )
+        if isinstance(self.entities, dict):
+            self.word2idx = (
+                ["<PAD>"]
+                + [name for names in self.entities.values() for name in names]
+                + self.relations
+            )
+        elif isinstance(self.entities, list):
+            self.word2idx = ["<PAD>"] + self.entities + self.relations
+        else:
+            raise ValueError(
+                "entities should be either a list or a dictionary, but "
+                f"{type(self.entities)} was given!"
+            )
         self.word2idx = {word: idx for idx, word in enumerate(self.word2idx)}
 
         self.embeddings = nn.Embedding(
@@ -259,9 +267,9 @@ class LSTM(nn.Module):
                 self.embeddings.weight.data[start_idx:end_idx] = init_vector.repeat(
                     end_idx - start_idx, 1
                 )
-
             # Note: Relations are not re-initialized by category, assuming they are
             # separate from entities
+
         if self.fuse_information == "concat":
             if self.version == "v1":
                 self.input_size_s = self.embedding_dim * 2
@@ -505,7 +513,6 @@ class LSTM(nn.Module):
         memories.
 
         """
-        assert isinstance(x, np.ndarray)
         to_concat = []
         if "episodic" in self.memory_of_interest:
             batch_e = [sample["episodic"] for sample in x]

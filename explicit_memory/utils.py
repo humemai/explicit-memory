@@ -9,7 +9,7 @@ import shutil
 from collections import deque
 from copy import deepcopy
 from glob import glob
-from typing import Deque, Optional, Union
+from typing import Deque, Optional, Union, Literal
 
 import gymnasium as gym
 import matplotlib.pyplot as plt
@@ -545,7 +545,7 @@ class ReplayBuffer:
 
     def __init__(
         self,
-        observation_type: str,
+        observation_type: Literal["dict", "tensor"],
         size: int,
         obs_dim: tuple = None,
         batch_size: int = 32,

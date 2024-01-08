@@ -4,7 +4,11 @@ The trained neural network policies are not implemented yet.
 """
 import random
 
+import numpy as np
+import torch
+
 from .memory import EpisodicMemory, MemorySystems, SemanticMemory, ShortMemory
+from .utils import argmax
 
 
 def encode_observation(memory_systems: MemorySystems, obs: list[list]) -> None:
@@ -104,12 +108,17 @@ def find_visited_locations(
     return visited_locations
 
 
-def explore(memory_systems: MemorySystems, explore_policy: str) -> str:
+def explore(
+    memory_systems: MemorySystems,
+    explore_policy: str,
+    explore_policy_model: torch.nn.Module | None = None,
+) -> str:
     """Explore the room (sub-graph).
 
     Args:
         memory_systems: MemorySystems
         explore_policy: "random", "avoid_walls", or "neural"
+        explore_policy_model: a neural network model for exploration policy.
 
     Returns:
         action: The exploration action to take.
@@ -160,8 +169,8 @@ def explore(memory_systems: MemorySystems, explore_policy: str) -> str:
             action = random.choice(["north", "east", "south", "west", "stay"])
 
         else:
-            # we know the agent's current location and there is at least one memory about
-            # the map and we want to avoid the walls
+            # we know the agent's current location and there is at least one memory
+            # about the map and we want to avoid the walls
 
             to_take = []
             to_avoid = []
@@ -188,7 +197,20 @@ def explore(memory_systems: MemorySystems, explore_policy: str) -> str:
         raise NotImplementedError
 
     elif explore_policy == "neural":
-        raise NotImplementedError
+        state = memory_systems.return_as_a_dict_list()
+        with torch.no_grad():
+            q_values = (
+                explore_policy_model(np.array([state]))
+                .detach()
+                .cpu()
+                .numpy()
+                .tolist()[0]
+            )
+        selected_action = argmax(q_values)
+        assert selected_action in [0, 1, 2, 3, 4]
+
+        action = ["north", "east", "south", "west", "stay"][selected_action]
+
     else:
         raise ValueError("Unknown exploration policy.")
 
@@ -200,6 +222,7 @@ def explore(memory_systems: MemorySystems, explore_policy: str) -> str:
 def manage_memory(
     memory_systems: MemorySystems,
     policy: str,
+    mm_policy_model: torch.nn.Module | None = None,
     split_possessive: bool = True,
 ) -> None:
     """Non RL memory management policy.
@@ -208,9 +231,31 @@ def manage_memory(
         MemorySystems
         policy: "episodic", "semantic", "generalize", "forget", "random", "neural",
             "episodic_agent", or "semantic_map",
+        mm_policy_model: a neural network model for memory management policy.
         split_possessive: whether to split the possessive, i.e., 's, or not.
 
     """
+
+    def action_number_0():
+        if hasattr(memory_systems, "episodic"):
+            assert memory_systems.episodic.capacity != 0
+            if memory_systems.episodic.is_full:
+                memory_systems.episodic.forget_oldest()
+            mem_short = memory_systems.short.get_oldest_memory()
+            mem_epi = ShortMemory.short2epi(mem_short)
+            memory_systems.episodic.add(mem_epi)
+
+    def action_number_1():
+        if hasattr(memory_systems, "semantic"):
+            assert memory_systems.semantic.capacity != 0
+            if memory_systems.semantic.is_full:
+                memory_systems.semantic.forget_weakest()
+            mem_short = memory_systems.short.get_oldest_memory()
+            mem_sem = ShortMemory.short2sem(
+                mem_short, split_possessive=split_possessive
+            )
+            memory_systems.semantic.add(mem_sem)
+
     assert not memory_systems.short.is_empty
     assert policy.lower() in [
         "episodic",
@@ -247,24 +292,10 @@ def manage_memory(
             memory_systems.semantic_map.add(mem_sem)
 
     elif policy.lower() == "episodic":
-        if hasattr(memory_systems, "episodic"):
-            assert memory_systems.episodic.capacity != 0
-            if memory_systems.episodic.is_full:
-                memory_systems.episodic.forget_oldest()
-            mem_short = memory_systems.short.get_oldest_memory()
-            mem_epi = ShortMemory.short2epi(mem_short)
-            memory_systems.episodic.add(mem_epi)
+        action_number_0()
 
     elif policy.lower() == "semantic":
-        if hasattr(memory_systems, "semantic"):
-            assert memory_systems.semantic.capacity != 0
-            if memory_systems.semantic.is_full:
-                memory_systems.semantic.forget_weakest()
-            mem_short = memory_systems.short.get_oldest_memory()
-            mem_sem = ShortMemory.short2sem(
-                mem_short, split_possessive=split_possessive
-            )
-            memory_systems.semantic.add(mem_sem)
+        action_number_1()
 
     elif policy.lower() == "forget":
         pass
@@ -303,28 +334,31 @@ def manage_memory(
         action_number = random.choice([0, 1, 2])
 
         if action_number == 0:
-            if hasattr(memory_systems, "episodic"):
-                assert memory_systems.episodic.capacity != 0
-                if memory_systems.episodic.is_full:
-                    memory_systems.episodic.forget_oldest()
-                mem_short = memory_systems.short.get_oldest_memory()
-                mem_epi = ShortMemory.short2epi(mem_short)
-                memory_systems.episodic.add(mem_epi)
+            action_number_0()
 
         elif action_number == 1:
-            if hasattr(memory_systems, "semantic"):
-                assert memory_systems.semantic.capacity != 0
-                if memory_systems.semantic.is_full:
-                    memory_systems.semantic.forget_weakest()
-                mem_short = memory_systems.short.get_oldest_memory()
-                mem_sem = ShortMemory.short2sem(mem_short)
-                memory_systems.semantic.add(mem_sem)
+            action_number_1()
 
         else:
             pass
 
     elif policy.lower() == "neural":
-        raise NotImplementedError
+        state = memory_systems.return_as_a_dict_list()
+        with torch.no_grad():
+            q_values = (
+                mm_policy_model(np.array([state])).detach().cpu().numpy().tolist()[0]
+            )
+        selected_action = argmax(q_values)
+        assert selected_action in [0, 1, 2]
+
+        if selected_action == 0:
+            action_number_0()
+
+        elif selected_action == 1:
+            action_number_1()
+
+        else:
+            pass
 
     else:
         raise ValueError

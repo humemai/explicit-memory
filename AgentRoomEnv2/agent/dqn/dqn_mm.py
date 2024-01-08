@@ -6,10 +6,18 @@ import gymnasium as gym
 import torch
 from tqdm.auto import trange
 
-from explicit_memory.policy import (answer_question, encode_observation,
-                                    explore, manage_memory)
-from explicit_memory.utils import (dqn_target_hard_update, select_dqn_action,
-                                   update_dqn_model, write_yaml)
+from explicit_memory.policy import (
+    answer_question,
+    encode_observation,
+    explore,
+    manage_memory,
+)
+from explicit_memory.utils import (
+    dqn_target_hard_update,
+    select_dqn_action,
+    update_dqn_model,
+    write_yaml,
+)
 
 from .dqn import DQNAgent
 
@@ -23,15 +31,15 @@ class DQNMMAgent(DQNAgent):
     def __init__(
         self,
         env_str: str = "room_env:RoomEnv-v2",
-        num_iterations: int = 1000,
-        replay_buffer_size: int = 102400,
-        warm_start: int = 102400,
-        batch_size: int = 1024,
+        num_iterations: int = 10000,
+        replay_buffer_size: int = 10000,
+        warm_start: int = 1000,
+        batch_size: int = 32,
         target_update_interval: int = 10,
-        epsilon_decay_until: float = 2048,
+        epsilon_decay_until: float = 10000,
         max_epsilon: float = 1.0,
         min_epsilon: float = 0.1,
-        gamma: float = 0.65,
+        gamma: float = 0.9,
         capacity: dict = {
             "episodic": 16,
             "episodic_agent": 0,
@@ -41,12 +49,22 @@ class DQNMMAgent(DQNAgent):
         },
         pretrain_semantic: str | bool = False,
         nn_params: dict = {
+            "architecture": "lstm",
             "hidden_size": 64,
             "num_layers": 2,
-            "embedding_dim": 32,
+            "embedding_dim": 64,
+            "make_categorical_embeddings": False,
             "v1_params": None,
             "v2_params": {},
-            "memory_of_interest": ["episodic", "semantic", "short"],
+            "memory_of_interest": [
+                "episodic",
+                "semantic",
+                "short",
+            ],
+            "fuse_information": "sum",
+            "include_positional_encoding": True,
+            "max_timesteps": 100,
+            "max_strength": 100,
         },
         run_test: bool = True,
         num_samples_for_results: int = 10,
@@ -59,15 +77,32 @@ class DQNMMAgent(DQNAgent):
         env_config: dict = {
             "question_prob": 1.0,
             "terminates_at": 99,
-            "room_size": "xxs",
-            "randomize_observations": "all",
+            "randomize_observations": "objects",
+            "room_size": "l",
+            "rewards": {"correct": 1, "wrong": 0, "partial": 0},
+            "make_everything_static": False,
+            "num_total_questions": 1000,
+            "question_interval": 1,
+            "include_walls_in_observations": True,
         },
-        ddqn: bool = False,
-        dueling_dqn: bool = False,
+        ddqn: bool = True,
+        dueling_dqn: bool = True,
         split_reward_training: bool = False,
         default_root_dir: str = "./training_results/",
-        run_handcrafted_baselines: dict | None = None,
-    ):
+        run_handcrafted_baselines: dict
+        | None = [
+            {
+                "mm": mm,
+                "qa": qa,
+                "explore": explore,
+                "pretrain_semantic": pretrain_semantic,
+            }
+            for mm in ["random", "episodic", "semantic"]
+            for qa in ["episodic_semantic"]
+            for explore in ["random", "avoid_walls"]
+            for pretrain_semantic in [False, "exclude_walls"]
+        ],
+    ) -> None:
         """Initialization.
 
         Args:
@@ -172,7 +207,7 @@ class DQNMMAgent(DQNAgent):
                     self.memory_systems, self.action2str[action], split_possessive=False
                 )
                 actions_qa = [
-                    str(answer_question(self.memory_systems, self.qa_policy, question))
+                    answer_question(self.memory_systems, self.qa_policy, question)
                     for question in observations["questions"]
                 ]
                 action_explore = explore(self.memory_systems, self.explore_policy)
@@ -295,7 +330,7 @@ class DQNMMAgent(DQNAgent):
             )
 
             actions_qa = [
-                str(answer_question(self.memory_systems, self.qa_policy, question))
+                answer_question(self.memory_systems, self.qa_policy, question)
                 for question in observations["questions"]
             ]
 
@@ -480,7 +515,7 @@ class DQNMMAgent(DQNAgent):
                     self.memory_systems, self.action2str[action], split_possessive=False
                 )
                 actions_qa = [
-                    str(answer_question(self.memory_systems, self.qa_policy, question))
+                    answer_question(self.memory_systems, self.qa_policy, question)
                     for question in observations["questions"]
                 ]
                 action_explore = explore(self.memory_systems, self.explore_policy)

@@ -1,28 +1,61 @@
 # Scores
 
-## m
+## l
 
-The number of room: 8\
-The number of static_objects: 2\
-The number of independent_objects: 2\
-The number of dependent_objects: 2
+```python
+capacity = {
+    "episodic": 16,
+    "episodic_agent": 0,
+    "semantic": 16,
+    "semantic_map": 0,
+    "short": 1,
+}
+```
+
+The number of room: 16\
+The number of static_objects: 4\
+The number of independent_objects: 4\
+The number of dependent_objects: 4
+
+| memory mgmt | qa                | explore     | test_mean | test_std |
+| ----------- | ----------------- | ----------- | --------- | -------- |
+| random      | episodic_semantic | random      | 211.26    | 9.17     |
+| random      | episodic_semantic | avoid_walls | 258.51    | 6.79     |
+| episodic    | episodic_semantic | random      | 105.78    | 3.20     |
+| episodic    | episodic_semantic | avoid_walls | 148.32    | 1.62     |
+| semantic    | episodic_semantic | random      | 117.68    | 2.57     |
+| semantic    | episodic_semantic | avoid_walls | 147.16    | 5.71     |
+| RL          | episodic_semantic | avoid_walls | 341.7     | 34.94    |
+| neural      | episodic_semantic | RL          | 442.7     | 50.45    |
+
+<!-- ## l2
+
+The number of room: 16\
+The number of static_objects: 8\
+The number of independent_objects: 8\
+The number of dependent_objects: 8
+
+```python
+{
+    "episodic": 16,
+    "episodic_agent": 0,
+    "semantic": 16,
+    "semantic_map": 0,
+    "short": 1,
+}
+```
 
 | memory mgmt | qa                | explore     | pretrain_semantic | test_mean | test_std |
 | ----------- | ----------------- | ----------- | ----------------- | --------- | -------- |
-| random      | episodic_semantic | random      | False             | -775.41   | 13.77    |
-| random      | episodic_semantic | random      | exclude_walls     | -742.39   | 18.73    |
-| random      | episodic_semantic | avoid_walls | False             | -639.81   | 19.45    |
-| random      | episodic_semantic | avoid_walls | exclude_walls     | -723.1    | 17.78    |
-| episodic    | episodic_semantic | random      | False             | -801.83   | 9.58     |
-| episodic    | episodic_semantic | random      | exclude_walls     | -801.83   | 9.58     |
-| episodic    | episodic_semantic | avoid_walls | False             | -676.76   | 12.66    |
-| episodic    | episodic_semantic | avoid_walls | exclude_walls     | -714.33   | 9.17     |
-| semantic    | episodic_semantic | random      | False             | -955.34   | 8.51     |
-| semantic    | episodic_semantic | random      | exclude_walls     | -912.96   | 11.02    |
-| semantic    | episodic_semantic | avoid_walls | False             | -992.14   | 3.59     |
-| semantic    | episodic_semantic | avoid_walls | exclude_walls     | -930.30   | 10.14    |
+| random      | episodic_semantic | random      | False             | 124.47    | 3.62     |
+| random      | episodic_semantic | avoid_walls | False             | 158.67    | 3.39     |
+| episodic    | episodic_semantic | random      | False             | 92.24     | 1.26     |
+| episodic    | episodic_semantic | avoid_walls | False             | 135.48    | 1.63     |
+| semantic    | episodic_semantic | random      | False             | 47.95     | 3.32     |
+| semantic    | episodic_semantic | avoid_walls | False             | 48.73     | 2.87     |
+| RL          | episodic_semantic | avoid_walls | False             | 214.05    | 31.87    | -->
 
-## l
+<!-- ## l, 8
 
 The number of room: 16\
 The number of static_objects: 4\
@@ -31,18 +64,98 @@ The number of dependent_objects: 4
 
 | memory mgmt | qa                | explore     | pretrain_semantic | test_mean | test_std |
 | ----------- | ----------------- | ----------- | ----------------- | --------- | -------- |
-| random      | episodic_semantic | random      | False             | -781.99   | 9.14     |
-| random      | episodic_semantic | random      | exclude_walls     | -794.05   | 11.19    |
-| random      | episodic_semantic | avoid_walls | False             | -744.21   | 11.15    |
-| random      | episodic_semantic | avoid_walls | exclude_walls     | -779.16   | 5.86     |
-| episodic    | episodic_semantic | random      | False             | -849.98   | 4.85     |
-| episodic    | episodic_semantic | random      | exclude_walls     | -849.98   | 4.85     |
-| episodic    | episodic_semantic | avoid_walls | False             | -827.95   | 2.75     |
-| episodic    | episodic_semantic | avoid_walls | exclude_walls     | -824.15   | 2.73     |
-| semantic    | episodic_semantic | random      | False             | -935.98   | 10.66    |
-| semantic    | episodic_semantic | random      | exclude_walls     | -925.38   | 7.27     |
-| semantic    | episodic_semantic | avoid_walls | False             | -901.82   | 7.84     |
-| semantic    | episodic_semantic | avoid_walls | exclude_walls     | -916.14   | 13.97    |
+| random      | episodic_semantic | random      | False             | 139.82    | 8.19     |
+| random      | episodic_semantic | avoid_walls | False             | 196.54    | 5.30     |
+| episodic    | episodic_semantic | random      | False             | 75.01     | 2.43     |
+| episodic    | episodic_semantic | avoid_walls | False             | 86.02     | 1.38     |
+| semantic    | episodic_semantic | random      | False             | 78.05     | 1.35     |
+| semantic    | episodic_semantic | avoid_walls | False             | 121.21    | 6.37     | -->
+
+<!-- ## l2, 8
+
+The number of room: 16\
+The number of static_objects: 8\
+The number of independent_objects: 8\
+The number of dependent_objects: 8
+
+| memory mgmt | qa                | explore     | pretrain_semantic | test_mean | test_std |
+| ----------- | ----------------- | ----------- | ----------------- | --------- | -------- |
+| random      | episodic_semantic | random      | False             | 72.32     | 1.82     |
+| random      | episodic_semantic | avoid_walls | False             | 94.47     | 1.75     |
+| episodic    | episodic_semantic | random      | False             | 61.51     | 0.46     |
+| episodic    | episodic_semantic | avoid_walls | False             | 74.14     | 0.76     |
+| semantic    | episodic_semantic | random      | False             | 14.79     | 1.48     |
+| semantic    | episodic_semantic | avoid_walls | False             | 9.81      | 0.87     | -->
+
+<!--
+
+## l2
+
+The number of room: 16\
+The number of static_objects: 8\
+The number of independent_objects: 8\
+The number of dependent_objects: 8
+
+```python
+capacity = {
+    "episodic": 16,
+    "episodic_agent": 0,
+    "semantic": 16,
+    "semantic_map": 0,
+    "short": 1,
+}
+```
+
+| memory mgmt | qa                | explore     | pretrain_semantic | test_mean | test_std |
+| ----------- | ----------------- | ----------- | ----------------- | --------- | -------- |
+| random      | episodic_semantic | random      | False             | 124.60    | 3.89     |
+| random      | episodic_semantic | avoid_walls | False             | 160.87    | 1.57     |
+| episodic    | episodic_semantic | random      | False             | 92.24     | 1.26     |
+| episodic    | episodic_semantic | avoid_walls | False             | 135.48    | 1.63     |
+| semantic    | episodic_semantic | random      | False             | 49.60     | 1.59     |
+| semantic    | episodic_semantic | avoid_walls | False             | 67.17     | 3.06     |
+
+## l2
+
+The number of room: 16\
+The number of static_objects: 8\
+The number of independent_objects: 8\
+The number of dependent_objects: 8
+
+```python
+capacity = {
+    "episodic": 32,
+    "episodic_agent": 0,
+    "semantic": 32,
+    "semantic_map": 0,
+    "short": 1,
+}
+```
+
+| memory mgmt | qa                | explore     | pretrain_semantic | test_mean | test_std |
+| ----------- | ----------------- | ----------- | ----------------- | --------- | -------- |
+| random      | episodic_semantic | random      | False             | 191.64    | 6.88     |
+| random      | episodic_semantic | avoid_walls | False             | 240.37    | 5.63     |
+| episodic    | episodic_semantic | random      | False             | 130.94    | 2.22     |
+| episodic    | episodic_semantic | avoid_walls | False             | 198.20    | 5.10     |
+| semantic    | episodic_semantic | random      | False             | 105.97    | 2.95     |
+| semantic    | episodic_semantic | avoid_walls | False             | 100.33    | 3.25     |
+
+## m
+
+The number of room: 8\
+The number of static_objects: 2\
+The number of independent_objects: 2\
+The number of dependent_objects: 2
+
+| memory mgmt | qa                | explore     | mean   | std  |
+| ----------- | ----------------- | ----------- | ------ | ---- |
+| random      | episodic_semantic | random      | 98.65  | 6.39 |
+| random      | episodic_semantic | avoid_walls | 174.34 | 6.00 |
+| episodic    | episodic_semantic | random      | 99.08  | 4.79 |
+| episodic    | episodic_semantic | avoid_walls | 161.62 | 6.33 |
+| semantic    | episodic_semantic | random      | 14.17  | 1.50 |
+| semantic    | episodic_semantic | avoid_walls | 3.72   | 0.79 |
 
 ## xl
 
@@ -51,17 +164,11 @@ The number of static_objects: 8\
 The number of independent_objects: 8\
 The number of dependent_objects: 8
 
-| memory mgmt | qa                | explore     | pretrain_semantic | test_mean | test_std |
-| ----------- | ----------------- | ----------- | ----------------- | --------- | -------- |
-| random      | episodic_semantic | random      | False             | -894.58   | 8.14     |
-| random      | episodic_semantic | random      | exclude_walls     | -920.02   | 1.94     |
-| random      | episodic_semantic | avoid_walls | False             | -868.81   | 4.90     |
-| random      | episodic_semantic | avoid_walls | exclude_walls     | -895.04   | 3.90     |
-| episodic    | episodic_semantic | random      | False             | -930.80   | 2.84     |
-| episodic    | episodic_semantic | random      | exclude_walls     | -930.80   | 2.84     |
-| episodic    | episodic_semantic | avoid_walls | False             | -920.28   | 1.26     |
-| episodic    | episodic_semantic | avoid_walls | exclude_walls     | -919.32   | 1.85     |
-| semantic    | episodic_semantic | random      | False             | -961.08   | 4.87     |
-| semantic    | episodic_semantic | random      | exclude_walls     | -983.30   | 0.86     |
-| semantic    | episodic_semantic | avoid_walls | False             | -859.19   | 4.08     |
-| semantic    | episodic_semantic | avoid_walls | exclude_walls     | -978.35   | 1.62     |
+| memory mgmt | qa                | explore     | test_mean | test_std |
+| ----------- | ----------------- | ----------- | --------- | -------- |
+| random      | episodic_semantic | random      | 66.85     | 2.89     |
+| random      | episodic_semantic | avoid_walls | 81.70     | 2.02     |
+| episodic    | episodic_semantic | random      | 34.60     | 1.42     |
+| episodic    | episodic_semantic | avoid_walls | 39.86     | 0.63     |
+| semantic    | episodic_semantic | random      | 22.28     | 2.54     |
+| semantic    | episodic_semantic | avoid_walls | 75.00     | 0.77     | -->

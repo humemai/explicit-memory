@@ -3,6 +3,10 @@ import logging
 logger = logging.getLogger()
 logger.disabled = True
 
+import matplotlib
+
+matplotlib.use("Agg")
+
 import random
 import unittest
 
@@ -10,7 +14,7 @@ import gymnasium as gym
 import numpy as np
 from tqdm.auto import tqdm
 
-from AgentRoomEnv2.agent import DQNExploreAgent, DQNMMAgent
+from AgentRoomEnv2.agent import DQNExploreAgent
 
 
 class DQNExploreAgentTest(unittest.TestCase):
@@ -45,6 +49,7 @@ class DQNExploreAgentTest(unittest.TestCase):
                                     "gamma": 0.65,
                                     "capacity": capacity,
                                     "nn_params": {
+                                        "architecture": "lstm",
                                         "hidden_size": 4,
                                         "num_layers": 2,
                                         "embedding_dim": 4,

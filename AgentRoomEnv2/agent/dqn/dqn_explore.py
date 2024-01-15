@@ -156,13 +156,13 @@ class DQNExploreAgent(DQNAgent):
         self.all_params = deepcopy(all_params)
         del all_params["mm_agent_path"]
 
-        all_params["nn_params"]["n_actions"] = 5
+        self.action2str = {0: "north", 1: "east", 2: "south", 3: "west", 4: "stay"}
+        self.action_space = gym.spaces.Discrete(len(self.action2str))
+
+        all_params["nn_params"]["n_actions"] = len(self.action2str)
         all_params["explore_policy"] = "rl"
         super().__init__(**all_params)
         write_yaml(self.all_params, os.path.join(self.default_root_dir, "train.yaml"))
-
-        self.action2str = {0: "north", 1: "east", 2: "south", 3: "west", 4: "stay"}
-        self.action_space = gym.spaces.Discrete(len(self.action2str))
 
         if self.mm_policy == "neural":
             self.mm_agent = read_pickle(mm_agent_path)
@@ -242,9 +242,6 @@ class DQNExploreAgent(DQNAgent):
                 score += reward
                 done = done or truncated
 
-                if done:
-                    break
-
                 observations["room"] = self.manage_agent_and_map_memory(
                     observations["room"]
                 )
@@ -257,6 +254,10 @@ class DQNExploreAgent(DQNAgent):
                         self.mm_policy_model,
                         split_possessive=False,
                     )
+
+                if done:
+                    break
+
             scores.append(score)
 
         return np.mean(scores).item(), np.std(scores).item()

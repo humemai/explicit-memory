@@ -1,0 +1,119 @@
+episodic:
+- - agent
+  - atlocation
+  - Bathroom
+  - 0
+- - agent
+  - atlocation
+  - Bathroom
+  - 1
+- - agent
+  - atlocation
+  - Bathroom
+  - 2
+- - Chair
+  - atlocation
+  - Kitchen
+  - 3
+- - Bed
+  - atlocation
+  - Guest Room
+  - 4
+- - Chair
+  - atlocation
+  - Kitchen
+  - 5
+- - Sunroom
+  - south
+  - Playroom
+  - 7
+- - Sunroom
+  - west
+  - Game Room
+  - 7
+- - agent
+  - atlocation
+  - Sunroom
+  - 7
+- - Bench
+  - atlocation
+  - Sunroom
+  - 7
+- - Mudroom
+  - north
+  - Playroom
+  - 9
+- - Box
+  - atlocation
+  - Pantry
+  - 10
+semantic:
+- - Desk
+  - atlocation
+  - Home Office
+  - 1
+- - Kim
+  - atlocation
+  - Playroom
+  - 1
+- - Game Room
+  - west
+  - Kitchen
+  - 1
+- - Sunroom
+  - north
+  - wall
+  - 1
+- - Guest Room
+  - south
+  - Craft Room
+  - 1
+- - agent
+  - atlocation
+  - Game Room
+  - 1
+- - Playroom
+  - east
+  - Conservatory
+  - 1
+- - agent
+  - atlocation
+  - Kitchen
+  - 2
+- - Kitchen
+  - north
+  - wall
+  - 2
+- - Kitchen
+  - west
+  - Bathroom
+  - 2
+- - Kitchen
+  - east
+  - Game Room
+  - 2
+- - Kitchen
+  - south
+  - Guest Room
+  - 2
+- - Bathroom
+  - west
+  - wall
+  - 3
+- - Bathroom
+  - south
+  - wall
+  - 3
+- - Bathroom
+  - north
+  - wall
+  - 3
+- - Bathroom
+  - east
+  - Kitchen
+  - 3
+short:
+- - Home Office
+  - north
+  - wall
+  - 13

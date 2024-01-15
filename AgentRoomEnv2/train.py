@@ -1,4 +1,5 @@
 import matplotlib
+
 matplotlib.use("Agg")
 import argparse
 import logging
@@ -6,7 +7,7 @@ import logging
 logger = logging.getLogger()
 logger.disabled = True
 
-from agent.dqn import DQNExploreAgent, DQNMMAgent
+from agent.dqn import DQNExploreAgent, DQNMMAgent, DQNLSTMBaselineAgent
 
 from explicit_memory.utils import read_yaml
 
@@ -25,5 +26,5 @@ for k, v in hparams.items():
     print(f"  {k:>21} : {v}")
 
 
-agent = DQNMMAgent(**hparams)
+agent = DQNLSTMBaselineAgent(**hparams)
 agent.train()

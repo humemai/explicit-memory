@@ -33,8 +33,8 @@ class LSTM(nn.Module):
         },
         v2_params: dict | None = None,
         dueling_dqn: bool = False,
-        fuse_information: Literal["concat", "sum"] = "concat",
-        include_positional_encoding: bool = False,
+        fuse_information: Literal["concat", "sum"] = "sum",
+        include_positional_encoding: bool = True,
         max_timesteps: int | None = None,
         max_strength: int | None = None,
     ) -> None:
@@ -184,15 +184,6 @@ class LSTM(nn.Module):
             if self.fuse_information == "concat":
                 self.fc_o0 = nn.Linear(hidden_size, hidden_size, device=self.device)
                 self.fc_o1 = nn.Linear(hidden_size, hidden_size, device=self.device)
-
-        self.fc_final0 = nn.Linear(
-            self.linear_layer_hidden_size,
-            self.linear_layer_hidden_size,
-            device=self.device,
-        )
-        self.fc_final1 = nn.Linear(
-            self.linear_layer_hidden_size, n_actions, device=self.device
-        )
 
         self.advantage_layer = nn.Sequential(
             nn.Linear(

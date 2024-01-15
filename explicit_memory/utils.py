@@ -933,7 +933,7 @@ def select_dqn_action(
     if epsilon < np.random.random() or greedy:
         selected_action = argmax(q_values)
     else:
-        selected_action = action_space.sample()
+        selected_action = action_space.sample().item()
 
     return selected_action, q_values
 

@@ -52,10 +52,10 @@ def split_by_possessive(name_entity: str) -> tuple[str, str]:
     """Separate name and entity from the given string.
 
     Args:
-        name_entity: e.g., "tae's laptop"
+        name_entity: e.g., "bob's laptop"
 
     Returns:
-        name: e.g., tae
+        name: e.g., bob
         entity: e.g., laptop
 
     """

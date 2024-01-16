@@ -21,8 +21,8 @@ nn_params:
 run_test: true
 num_samples_for_results: 10
 plotting_interval: 10
-train_seed: 6
-test_seed: 1
+train_seed: 5
+test_seed: 0
 device: cpu
 env_config:
   question_prob: 1.0

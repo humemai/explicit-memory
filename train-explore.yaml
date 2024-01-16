@@ -33,8 +33,8 @@ nn_params:
 run_test: true
 num_samples_for_results: 10
 plotting_interval: 10
-train_seed: 8
-test_seed: 3
+train_seed: 5
+test_seed: 0
 device: cpu
 mm_policy: neural
 mm_agent_path: trained-agents/lstm-mm/2023-12-28 18:13:03.001952/agent.pkl

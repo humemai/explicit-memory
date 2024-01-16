@@ -1,31 +1,12 @@
-# explicit-memory
+# https://anonymous.4open.science/r/agent/
 
-This repo hosts several (RL) agents that learn their policies by interacting with the
-[gymnasium](https://gymnasium.farama.org/) environments.
-
-These agents all take advantage of have human-like external memory systems that are modeled with knowledge graphs.
-
-## [Click here for the agent for RoomEnv-v0](./RoomEnv0/README.md)
-
-This agent was featured in the paper ["A Machine With Human-Like Memory Systems"](https://arxiv.org/abs/2204.01611).
-
-## [Click here for the agent for RoomEnv-v1](./RoomEnv1/README.md)
-
-This agent was featured in the paper ["A Machine with Short-Term, Episodic, and Semantic Memory Systems"](https://doi.org/10.1609/aaai.v37i1.25075).
-
-## [Click here for the agent for RoomEnv-v2](./RoomEnv2/README.md)
-
-## Contributing
-
-Contributions are what make the open source community such an amazing place to be learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-
-1. Fork the Project
-1. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-1. Run `make test && make style && make quality` in the root repo directory, to ensure code quality.
-1. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-1. Push to the Branch (`git push origin feature/AmazingFeature`)
-1. Open a Pull Request
-
-## License
-
-[MIT](https://choosealicense.com/licenses/mit/)
+1. python>=3.10
+2. First go to https://anonymous.4open.science/r/env/ and install the gymnasium environment
+3. `pip install -e .`
+4. Train
+   1. `python train-mm.py` for the $\pi_{mm}$
+   2. `python train-explore.py` for the $\pi_{explore}$
+   3. `python train-explore-baseline.py` for the $\pi_{explore}$ (baseline with the history room size of 24)
+5. See the trained results
+   1. [./training_results](./training_results) for your trained results
+   2. [./trained-agents](./trained-agents) for the already trained results

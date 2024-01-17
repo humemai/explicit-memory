@@ -26,10 +26,7 @@ from .dqn import DQNAgent
 
 
 class DQNExploreAgent(DQNAgent):
-    """DQN Agent interacting with environment.
-
-    Based on https://github.com/Curt-Park/rainbow-is-all-you-need/
-    """
+    """DQN Agent interacting with environment."""
 
     def __init__(
         self,

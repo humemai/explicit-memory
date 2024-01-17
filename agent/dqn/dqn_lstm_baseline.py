@@ -349,10 +349,7 @@ class History:
 
 
 class DQNLSTMBaselineAgent:
-    """DQN LSTM Baseline Agent interacting with environment.
-
-    Based on https://github.com/Curt-Park/rainbow-is-all-you-need/
-    """
+    """DQN LSTM Baseline Agent interacting with environment."""
 
     def __init__(
         self,

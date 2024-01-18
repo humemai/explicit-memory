@@ -57,6 +57,7 @@ class LSTMTest(unittest.TestCase):
                                                         "device": "cpu",
                                                         "dueling_dqn": dueling_dqn,
                                                         "fuse_information": fuse_information,
+                                                        "include_positional_encoding": False,
                                                     }
                                                 )
         for config in configs:
@@ -97,6 +98,7 @@ class LSTMTest(unittest.TestCase):
                 "device": "cpu",
                 "dueling_dqn": True,
                 "fuse_information": fuse_information,
+                "include_positional_encoding": False,
             }
             lstm = LSTM(**config)
             lstm.forward(
@@ -113,11 +115,19 @@ class LSTMTest(unittest.TestCase):
 
     def test_forward_v2(self) -> None:
         for fuse_information in ["concat", "sum"]:
+            if fuse_information == "concat":
+                include_positional_encoding = False
+                max_timesteps = None
+                max_strength = None
+            else:
+                include_positional_encoding = True
+                max_timesteps = 100
+                max_strength = 100
             config = {
                 "hidden_size": 64,
                 "num_layers": 2,
                 "n_actions": 3,
-                "embedding_dim": 32,
+                "embedding_dim": 64,
                 "capacity": {
                     "episodic": 16,
                     "semantic": 16,
@@ -141,6 +151,9 @@ class LSTMTest(unittest.TestCase):
                 "device": "cpu",
                 "dueling_dqn": True,
                 "fuse_information": fuse_information,
+                "include_positional_encoding": include_positional_encoding,
+                "max_timesteps": max_timesteps,
+                "max_strength": max_strength,
             }
             lstm = LSTM(**config)
             lstm.forward(
@@ -181,6 +194,10 @@ class LSTMTest(unittest.TestCase):
                 "device": "cpu",
                 "dueling_dqn": True,
                 "fuse_information": "sum",
+                "include_positional_encoding": False,
+                "max_timesteps": None,
+                "max_strength": None,
+                
             }
             lstm = LSTM(**config)
             self.assertTrue(

@@ -115,6 +115,7 @@ class ReplayBufferTest(unittest.TestCase):
             "v2_params": None,
             "batch_first": True,
             "device": "cpu",
+            "include_positional_encoding": False,
         }
         lstm = LSTM(**config)
         q = lstm(batch["obs"])

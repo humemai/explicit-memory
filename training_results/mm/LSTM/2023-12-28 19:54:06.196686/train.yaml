@@ -1,0 +1,82 @@
+env_str: room_env:RoomEnv-v2
+num_iterations: 10000
+replay_buffer_size: 10000
+warm_start: 1000.0
+batch_size: 32
+target_update_interval: 10
+epsilon_decay_until: 10000
+max_epsilon: 1.0
+min_epsilon: 0.1
+gamma: 0.99
+capacity:
+  episodic: 16
+  episodic_agent: 0
+  semantic: 16
+  semantic_map: 0
+  short: 1
+pretrain_semantic: false
+nn_params:
+  hidden_size: 64
+  num_layers: 2
+  embedding_dim: 64
+  make_categorical_embeddings: false
+  v1_params: null
+  v2_params: {}
+  memory_of_interest:
+  - episodic
+  - semantic
+  - short
+  fuse_information: sum
+  include_positional_encoding: true
+  max_timesteps: 100
+  max_strength: 100
+run_test: true
+num_samples_for_results: 10
+plotting_interval: 10
+train_seed: 9
+test_seed: 4
+device: cpu
+qa_policy: episodic_semantic
+explore_policy: avoid_walls
+env_config:
+  question_prob: 1.0
+  terminates_at: 99
+  randomize_observations: objects
+  room_size: l
+  rewards:
+    correct: 1
+    wrong: 0
+    partial: 0
+  make_everything_static: false
+  num_total_questions: 1000
+  question_interval: 1
+  include_walls_in_observations: true
+ddqn: true
+dueling_dqn: true
+split_reward_training: false
+default_root_dir: ./training_results/room_size=l/gamma=0.99/
+run_handcrafted_baselines:
+- mm: random
+  qa: episodic_semantic
+  explore: random
+  pretrain_semantic: false
+- mm: random
+  qa: episodic_semantic
+  explore: avoid_walls
+  pretrain_semantic: false
+- mm: episodic
+  qa: episodic_semantic
+  explore: random
+  pretrain_semantic: false
+- mm: episodic
+  qa: episodic_semantic
+  explore: avoid_walls
+  pretrain_semantic: false
+- mm: semantic
+  qa: episodic_semantic
+  explore: random
+  pretrain_semantic: false
+- mm: semantic
+  qa: episodic_semantic
+  explore: avoid_walls
+  pretrain_semantic: false

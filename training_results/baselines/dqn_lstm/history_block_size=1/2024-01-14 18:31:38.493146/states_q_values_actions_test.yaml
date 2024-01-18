@@ -1,0 +1,3452 @@
+- state:
+    data:
+    - - room_000
+      - north
+      - wall
+      - 0
+    - - room_000
+      - east
+      - room_001
+      - 0
+    - - room_000
+      - south
+      - wall
+      - 0
+    - - room_000
+      - west
+      - wall
+      - 0
+    - - agent
+      - atlocation
+      - room_000
+      - 0
+  q_values:
+  - 15.224869728088379
+  - 17.02788543701172
+  - 15.69871997833252
+  - 14.35973834991455
+  - 15.433756828308105
+  action: 1
+- state:
+    data:
+    - - room_001
+      - north
+      - wall
+      - 1
+    - - room_001
+      - east
+      - room_002
+      - 1
+    - - room_001
+      - south
+      - room_004
+      - 1
+    - - room_001
+      - west
+      - room_000
+      - 1
+    - - agent
+      - atlocation
+      - room_001
+      - 1
+    - - dep_003
+      - atlocation
+      - room_001
+      - 1
+  q_values:
+  - 21.36651611328125
+  - 22.358154296875
+  - 21.276628494262695
+  - 16.946134567260742
+  - 22.114370346069336
+  action: 1
+- state:
+    data:
+    - - room_002
+      - north
+      - wall
+      - 2
+    - - room_002
+      - east
+      - room_003
+      - 2
+    - - room_002
+      - south
+      - wall
+      - 2
+    - - room_002
+      - west
+      - room_001
+      - 2
+    - - agent
+      - atlocation
+      - room_002
+      - 2
+  q_values:
+  - 20.90155792236328
+  - 22.74955177307129
+  - 19.016504287719727
+  - 15.592874526977539
+  - 21.481046676635742
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 3
+    - - room_003
+      - east
+      - wall
+      - 3
+    - - room_003
+      - south
+      - room_005
+      - 3
+    - - room_003
+      - west
+      - room_002
+      - 3
+    - - agent
+      - atlocation
+      - room_003
+      - 3
+    - - sta_002
+      - atlocation
+      - room_003
+      - 3
+  q_values:
+  - 35.37862777709961
+  - 37.03852844238281
+  - 15.037856101989746
+  - 14.001197814941406
+  - 36.02267074584961
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 4
+    - - room_003
+      - east
+      - wall
+      - 4
+    - - room_003
+      - south
+      - room_005
+      - 4
+    - - room_003
+      - west
+      - room_002
+      - 4
+    - - agent
+      - atlocation
+      - room_003
+      - 4
+    - - sta_002
+      - atlocation
+      - room_003
+      - 4
+  q_values:
+  - 35.34589767456055
+  - 37.04347229003906
+  - 15.159258842468262
+  - 14.129205703735352
+  - 36.00687789916992
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 5
+    - - room_003
+      - east
+      - wall
+      - 5
+    - - room_003
+      - south
+      - room_005
+      - 5
+    - - room_003
+      - west
+      - room_002
+      - 5
+    - - agent
+      - atlocation
+      - room_003
+      - 5
+    - - sta_002
+      - atlocation
+      - room_003
+      - 5
+  q_values:
+  - 35.28658676147461
+  - 37.028587341308594
+  - 15.15235424041748
+  - 14.157154083251953
+  - 35.9804801940918
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 6
+    - - room_003
+      - east
+      - wall
+      - 6
+    - - room_003
+      - south
+      - room_005
+      - 6
+    - - room_003
+      - west
+      - room_002
+      - 6
+    - - agent
+      - atlocation
+      - room_003
+      - 6
+    - - sta_002
+      - atlocation
+      - room_003
+      - 6
+  q_values:
+  - 35.20338439941406
+  - 36.96202087402344
+  - 15.087100982666016
+  - 14.123432159423828
+  - 35.92750549316406
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 7
+    - - room_003
+      - east
+      - wall
+      - 7
+    - - room_003
+      - south
+      - room_005
+      - 7
+    - - room_003
+      - west
+      - room_002
+      - 7
+    - - agent
+      - atlocation
+      - room_003
+      - 7
+    - - sta_002
+      - atlocation
+      - room_003
+      - 7
+  q_values:
+  - 35.036251068115234
+  - 36.7763786315918
+  - 15.10766315460205
+  - 14.166614532470703
+  - 35.77289962768555
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 8
+    - - room_003
+      - east
+      - wall
+      - 8
+    - - room_003
+      - south
+      - room_005
+      - 8
+    - - room_003
+      - west
+      - room_002
+      - 8
+    - - agent
+      - atlocation
+      - room_003
+      - 8
+    - - sta_002
+      - atlocation
+      - room_003
+      - 8
+  q_values:
+  - 34.73939514160156
+  - 36.450706481933594
+  - 15.09333324432373
+  - 14.21572494506836
+  - 35.46812057495117
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 9
+    - - room_003
+      - east
+      - wall
+      - 9
+    - - room_003
+      - south
+      - room_005
+      - 9
+    - - room_003
+      - west
+      - room_002
+      - 9
+    - - agent
+      - atlocation
+      - room_003
+      - 9
+    - - sta_002
+      - atlocation
+      - room_003
+      - 9
+  q_values:
+  - 34.25459289550781
+  - 35.946205139160156
+  - 14.983062744140625
+  - 14.247472763061523
+  - 34.97481155395508
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 10
+    - - room_003
+      - east
+      - wall
+      - 10
+    - - room_003
+      - south
+      - room_005
+      - 10
+    - - room_003
+      - west
+      - room_002
+      - 10
+    - - agent
+      - atlocation
+      - room_003
+      - 10
+    - - sta_002
+      - atlocation
+      - room_003
+      - 10
+  q_values:
+  - 33.56377029418945
+  - 35.269474029541016
+  - 14.893431663513184
+  - 14.331827163696289
+  - 34.310665130615234
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 11
+    - - room_003
+      - east
+      - wall
+      - 11
+    - - room_003
+      - south
+      - room_005
+      - 11
+    - - room_003
+      - west
+      - room_002
+      - 11
+    - - agent
+      - atlocation
+      - room_003
+      - 11
+    - - sta_002
+      - atlocation
+      - room_003
+      - 11
+  q_values:
+  - 32.99787521362305
+  - 34.747501373291016
+  - 14.826956748962402
+  - 14.404672622680664
+  - 33.79849624633789
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 12
+    - - room_003
+      - east
+      - wall
+      - 12
+    - - room_003
+      - south
+      - room_005
+      - 12
+    - - room_003
+      - west
+      - room_002
+      - 12
+    - - agent
+      - atlocation
+      - room_003
+      - 12
+    - - sta_002
+      - atlocation
+      - room_003
+      - 12
+  q_values:
+  - 32.85158157348633
+  - 34.63688278198242
+  - 14.696325302124023
+  - 14.348172187805176
+  - 33.69594192504883
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 13
+    - - room_003
+      - east
+      - wall
+      - 13
+    - - room_003
+      - south
+      - room_005
+      - 13
+    - - room_003
+      - west
+      - room_002
+      - 13
+    - - agent
+      - atlocation
+      - room_003
+      - 13
+    - - sta_002
+      - atlocation
+      - room_003
+      - 13
+  q_values:
+  - 32.97563552856445
+  - 34.77762222290039
+  - 14.5645112991333
+  - 14.22258472442627
+  - 33.83980941772461
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 14
+    - - room_003
+      - east
+      - wall
+      - 14
+    - - room_003
+      - south
+      - room_005
+      - 14
+    - - room_003
+      - west
+      - room_002
+      - 14
+    - - agent
+      - atlocation
+      - room_003
+      - 14
+    - - sta_002
+      - atlocation
+      - room_003
+      - 14
+  q_values:
+  - 33.22527313232422
+  - 35.030555725097656
+  - 14.355822563171387
+  - 13.953380584716797
+  - 34.08407974243164
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 15
+    - - room_003
+      - east
+      - wall
+      - 15
+    - - room_003
+      - south
+      - room_005
+      - 15
+    - - room_003
+      - west
+      - room_002
+      - 15
+    - - agent
+      - atlocation
+      - room_003
+      - 15
+    - - sta_002
+      - atlocation
+      - room_003
+      - 15
+  q_values:
+  - 33.29882049560547
+  - 35.12760925292969
+  - 13.959073066711426
+  - 13.530130386352539
+  - 34.15815734863281
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 16
+    - - room_003
+      - east
+      - wall
+      - 16
+    - - room_003
+      - south
+      - room_005
+      - 16
+    - - room_003
+      - west
+      - room_002
+      - 16
+    - - agent
+      - atlocation
+      - room_003
+      - 16
+    - - sta_002
+      - atlocation
+      - room_003
+      - 16
+  q_values:
+  - 33.10531234741211
+  - 34.95975112915039
+  - 13.61349105834961
+  - 13.186347007751465
+  - 33.962371826171875
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 17
+    - - room_003
+      - east
+      - wall
+      - 17
+    - - room_003
+      - south
+      - room_005
+      - 17
+    - - room_003
+      - west
+      - room_002
+      - 17
+    - - agent
+      - atlocation
+      - room_003
+      - 17
+    - - sta_002
+      - atlocation
+      - room_003
+      - 17
+  q_values:
+  - 32.88726043701172
+  - 34.73464584350586
+  - 13.514849662780762
+  - 13.07002067565918
+  - 33.718257904052734
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 18
+    - - room_003
+      - east
+      - wall
+      - 18
+    - - room_003
+      - south
+      - room_005
+      - 18
+    - - room_003
+      - west
+      - room_002
+      - 18
+    - - agent
+      - atlocation
+      - room_003
+      - 18
+    - - sta_002
+      - atlocation
+      - room_003
+      - 18
+  q_values:
+  - 32.81898498535156
+  - 34.64360809326172
+  - 13.486478805541992
+  - 13.002789497375488
+  - 33.61705017089844
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 19
+    - - room_003
+      - east
+      - wall
+      - 19
+    - - room_003
+      - south
+      - room_005
+      - 19
+    - - room_003
+      - west
+      - room_002
+      - 19
+    - - agent
+      - atlocation
+      - room_003
+      - 19
+    - - sta_002
+      - atlocation
+      - room_003
+      - 19
+  q_values:
+  - 32.965484619140625
+  - 34.77607345581055
+  - 13.320843696594238
+  - 12.780160903930664
+  - 33.7419548034668
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 20
+    - - room_003
+      - east
+      - wall
+      - 20
+    - - room_003
+      - south
+      - room_005
+      - 20
+    - - room_003
+      - west
+      - room_002
+      - 20
+    - - agent
+      - atlocation
+      - room_003
+      - 20
+    - - sta_002
+      - atlocation
+      - room_003
+      - 20
+  q_values:
+  - 33.281375885009766
+  - 35.08249282836914
+  - 13.104101181030273
+  - 12.485345840454102
+  - 34.03974533081055
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 21
+    - - room_003
+      - east
+      - wall
+      - 21
+    - - room_003
+      - south
+      - room_005
+      - 21
+    - - room_003
+      - west
+      - room_002
+      - 21
+    - - agent
+      - atlocation
+      - room_003
+      - 21
+    - - sta_002
+      - atlocation
+      - room_003
+      - 21
+  q_values:
+  - 33.59614562988281
+  - 35.40096664428711
+  - 13.014594078063965
+  - 12.337467193603516
+  - 34.352752685546875
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 22
+    - - room_003
+      - east
+      - wall
+      - 22
+    - - room_003
+      - south
+      - room_005
+      - 22
+    - - room_003
+      - west
+      - room_002
+      - 22
+    - - agent
+      - atlocation
+      - room_003
+      - 22
+    - - sta_002
+      - atlocation
+      - room_003
+      - 22
+  q_values:
+  - 33.830867767333984
+  - 35.65648651123047
+  - 13.139500617980957
+  - 12.460536003112793
+  - 34.60613250732422
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 23
+    - - room_003
+      - east
+      - wall
+      - 23
+    - - room_003
+      - south
+      - room_005
+      - 23
+    - - room_003
+      - west
+      - room_002
+      - 23
+    - - agent
+      - atlocation
+      - room_003
+      - 23
+    - - sta_002
+      - atlocation
+      - room_003
+      - 23
+  q_values:
+  - 34.04117202758789
+  - 35.862548828125
+  - 13.446067810058594
+  - 12.764759063720703
+  - 34.81843566894531
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 24
+    - - room_003
+      - east
+      - wall
+      - 24
+    - - room_003
+      - south
+      - room_005
+      - 24
+    - - room_003
+      - west
+      - room_002
+      - 24
+    - - agent
+      - atlocation
+      - room_003
+      - 24
+    - - sta_002
+      - atlocation
+      - room_003
+      - 24
+  q_values:
+  - 34.35330581665039
+  - 36.131248474121094
+  - 13.803495407104492
+  - 13.060518264770508
+  - 35.10325622558594
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 25
+    - - room_003
+      - east
+      - wall
+      - 25
+    - - room_003
+      - south
+      - room_005
+      - 25
+    - - room_003
+      - west
+      - room_002
+      - 25
+    - - agent
+      - atlocation
+      - room_003
+      - 25
+    - - sta_002
+      - atlocation
+      - room_003
+      - 25
+  q_values:
+  - 34.742576599121094
+  - 36.465206146240234
+  - 14.083260536193848
+  - 13.228072166442871
+  - 35.45778274536133
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 26
+    - - room_003
+      - east
+      - wall
+      - 26
+    - - room_003
+      - south
+      - room_005
+      - 26
+    - - room_003
+      - west
+      - room_002
+      - 26
+    - - agent
+      - atlocation
+      - room_003
+      - 26
+    - - sta_002
+      - atlocation
+      - room_003
+      - 26
+  q_values:
+  - 34.985137939453125
+  - 36.67074966430664
+  - 14.241897583007812
+  - 13.312060356140137
+  - 35.67658996582031
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 27
+    - - room_003
+      - east
+      - wall
+      - 27
+    - - room_003
+      - south
+      - room_005
+      - 27
+    - - room_003
+      - west
+      - room_002
+      - 27
+    - - agent
+      - atlocation
+      - room_003
+      - 27
+    - - sta_002
+      - atlocation
+      - room_003
+      - 27
+  q_values:
+  - 35.09926986694336
+  - 36.780513763427734
+  - 14.293307304382324
+  - 13.351495742797852
+  - 35.792503356933594
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 28
+    - - room_003
+      - east
+      - wall
+      - 28
+    - - room_003
+      - south
+      - room_005
+      - 28
+    - - room_003
+      - west
+      - room_002
+      - 28
+    - - agent
+      - atlocation
+      - room_003
+      - 28
+    - - sta_002
+      - atlocation
+      - room_003
+      - 28
+  q_values:
+  - 35.13634490966797
+  - 36.84202575683594
+  - 14.250720024108887
+  - 13.345311164855957
+  - 35.853092193603516
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 29
+    - - room_003
+      - east
+      - wall
+      - 29
+    - - room_003
+      - south
+      - room_005
+      - 29
+    - - room_003
+      - west
+      - room_002
+      - 29
+    - - agent
+      - atlocation
+      - room_003
+      - 29
+    - - sta_002
+      - atlocation
+      - room_003
+      - 29
+  q_values:
+  - 35.08405685424805
+  - 36.81932830810547
+  - 14.263084411621094
+  - 13.420536994934082
+  - 35.82813262939453
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 30
+    - - room_003
+      - east
+      - wall
+      - 30
+    - - room_003
+      - south
+      - room_005
+      - 30
+    - - room_003
+      - west
+      - room_002
+      - 30
+    - - agent
+      - atlocation
+      - room_003
+      - 30
+    - - ind_000
+      - atlocation
+      - room_003
+      - 30
+    - - sta_002
+      - atlocation
+      - room_003
+      - 30
+    - - dep_000
+      - atlocation
+      - room_003
+      - 30
+    - - ind_002
+      - atlocation
+      - room_003
+      - 30
+  q_values:
+  - 40.16058349609375
+  - 40.89952087402344
+  - 21.509117126464844
+  - 19.689512252807617
+  - 40.38685989379883
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 31
+    - - room_003
+      - east
+      - wall
+      - 31
+    - - room_003
+      - south
+      - room_005
+      - 31
+    - - room_003
+      - west
+      - room_002
+      - 31
+    - - agent
+      - atlocation
+      - room_003
+      - 31
+    - - sta_002
+      - atlocation
+      - room_003
+      - 31
+    - - ind_000
+      - atlocation
+      - room_003
+      - 31
+  q_values:
+  - 40.996707916259766
+  - 42.25815963745117
+  - 20.433834075927734
+  - 19.264549255371094
+  - 41.64554214477539
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 32
+    - - room_003
+      - east
+      - wall
+      - 32
+    - - room_003
+      - south
+      - room_005
+      - 32
+    - - room_003
+      - west
+      - room_002
+      - 32
+    - - agent
+      - atlocation
+      - room_003
+      - 32
+    - - ind_000
+      - atlocation
+      - room_003
+      - 32
+    - - sta_002
+      - atlocation
+      - room_003
+      - 32
+  q_values:
+  - 40.212074279785156
+  - 41.39139938354492
+  - 20.052120208740234
+  - 18.818153381347656
+  - 40.70957946777344
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 33
+    - - room_003
+      - east
+      - wall
+      - 33
+    - - room_003
+      - south
+      - room_005
+      - 33
+    - - room_003
+      - west
+      - room_002
+      - 33
+    - - agent
+      - atlocation
+      - room_003
+      - 33
+    - - ind_000
+      - atlocation
+      - room_003
+      - 33
+    - - sta_002
+      - atlocation
+      - room_003
+      - 33
+  q_values:
+  - 40.18315887451172
+  - 41.35531234741211
+  - 20.015689849853516
+  - 18.75904655456543
+  - 40.66832733154297
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 34
+    - - room_003
+      - east
+      - wall
+      - 34
+    - - room_003
+      - south
+      - room_005
+      - 34
+    - - room_003
+      - west
+      - room_002
+      - 34
+    - - agent
+      - atlocation
+      - room_003
+      - 34
+    - - ind_000
+      - atlocation
+      - room_003
+      - 34
+    - - sta_002
+      - atlocation
+      - room_003
+      - 34
+  q_values:
+  - 40.29259490966797
+  - 41.473228454589844
+  - 19.999521255493164
+  - 18.74606704711914
+  - 40.787513732910156
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 35
+    - - room_003
+      - east
+      - wall
+      - 35
+    - - room_003
+      - south
+      - room_005
+      - 35
+    - - room_003
+      - west
+      - room_002
+      - 35
+    - - agent
+      - atlocation
+      - room_003
+      - 35
+    - - ind_000
+      - atlocation
+      - room_003
+      - 35
+    - - sta_002
+      - atlocation
+      - room_003
+      - 35
+  q_values:
+  - 40.5466423034668
+  - 41.73313522338867
+  - 19.977331161499023
+  - 18.751293182373047
+  - 41.06011962890625
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 36
+    - - room_003
+      - east
+      - wall
+      - 36
+    - - room_003
+      - south
+      - room_005
+      - 36
+    - - room_003
+      - west
+      - room_002
+      - 36
+    - - agent
+      - atlocation
+      - room_003
+      - 36
+    - - ind_000
+      - atlocation
+      - room_003
+      - 36
+    - - sta_002
+      - atlocation
+      - room_003
+      - 36
+  q_values:
+  - 40.811309814453125
+  - 41.980167388916016
+  - 19.992048263549805
+  - 18.75756072998047
+  - 41.32575607299805
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 37
+    - - room_003
+      - east
+      - wall
+      - 37
+    - - room_003
+      - south
+      - room_005
+      - 37
+    - - room_003
+      - west
+      - room_002
+      - 37
+    - - agent
+      - atlocation
+      - room_003
+      - 37
+    - - sta_002
+      - atlocation
+      - room_003
+      - 37
+    - - ind_000
+      - atlocation
+      - room_003
+      - 37
+  q_values:
+  - 41.60491180419922
+  - 42.80880355834961
+  - 20.504526138305664
+  - 19.208894729614258
+  - 42.21460723876953
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 38
+    - - room_003
+      - east
+      - wall
+      - 38
+    - - room_003
+      - south
+      - room_005
+      - 38
+    - - room_003
+      - west
+      - room_002
+      - 38
+    - - agent
+      - atlocation
+      - room_003
+      - 38
+    - - ind_000
+      - atlocation
+      - room_003
+      - 38
+    - - sta_002
+      - atlocation
+      - room_003
+      - 38
+  q_values:
+  - 40.84516906738281
+  - 41.95883560180664
+  - 20.344053268432617
+  - 18.953975677490234
+  - 41.313167572021484
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 39
+    - - room_003
+      - east
+      - wall
+      - 39
+    - - room_003
+      - south
+      - room_005
+      - 39
+    - - room_003
+      - west
+      - room_002
+      - 39
+    - - agent
+      - atlocation
+      - room_003
+      - 39
+    - - ind_000
+      - atlocation
+      - room_003
+      - 39
+    - - sta_002
+      - atlocation
+      - room_003
+      - 39
+  q_values:
+  - 40.732181549072266
+  - 41.8342170715332
+  - 20.524381637573242
+  - 19.088584899902344
+  - 41.1883430480957
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 40
+    - - room_003
+      - east
+      - wall
+      - 40
+    - - room_003
+      - south
+      - room_005
+      - 40
+    - - room_003
+      - west
+      - room_002
+      - 40
+    - - agent
+      - atlocation
+      - room_003
+      - 40
+    - - ind_000
+      - atlocation
+      - room_003
+      - 40
+    - - sta_002
+      - atlocation
+      - room_003
+      - 40
+  q_values:
+  - 40.76279067993164
+  - 41.87529373168945
+  - 20.526521682739258
+  - 19.128719329833984
+  - 41.23683547973633
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 41
+    - - room_003
+      - east
+      - wall
+      - 41
+    - - room_003
+      - south
+      - room_005
+      - 41
+    - - room_003
+      - west
+      - room_002
+      - 41
+    - - agent
+      - atlocation
+      - room_003
+      - 41
+    - - ind_000
+      - atlocation
+      - room_003
+      - 41
+    - - sta_002
+      - atlocation
+      - room_003
+      - 41
+  q_values:
+  - 40.99999237060547
+  - 42.153358459472656
+  - 20.303640365600586
+  - 19.040985107421875
+  - 41.52376937866211
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 42
+    - - room_003
+      - east
+      - wall
+      - 42
+    - - room_003
+      - south
+      - room_005
+      - 42
+    - - room_003
+      - west
+      - room_002
+      - 42
+    - - agent
+      - atlocation
+      - room_003
+      - 42
+    - - ind_000
+      - atlocation
+      - room_003
+      - 42
+    - - sta_002
+      - atlocation
+      - room_003
+      - 42
+  q_values:
+  - 41.37941360473633
+  - 42.57021713256836
+  - 19.972476959228516
+  - 18.859031677246094
+  - 41.95675277709961
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 43
+    - - room_003
+      - east
+      - wall
+      - 43
+    - - room_003
+      - south
+      - room_005
+      - 43
+    - - room_003
+      - west
+      - room_002
+      - 43
+    - - agent
+      - atlocation
+      - room_003
+      - 43
+    - - ind_000
+      - atlocation
+      - room_003
+      - 43
+    - - sta_002
+      - atlocation
+      - room_003
+      - 43
+  q_values:
+  - 41.72786331176758
+  - 42.94219970703125
+  - 19.659061431884766
+  - 18.611616134643555
+  - 42.34416198730469
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 44
+    - - room_003
+      - east
+      - wall
+      - 44
+    - - room_003
+      - south
+      - room_005
+      - 44
+    - - room_003
+      - west
+      - room_002
+      - 44
+    - - agent
+      - atlocation
+      - room_003
+      - 44
+    - - sta_002
+      - atlocation
+      - room_003
+      - 44
+    - - ind_000
+      - atlocation
+      - room_003
+      - 44
+  q_values:
+  - 42.159912109375
+  - 43.48588562011719
+  - 19.74103546142578
+  - 18.739883422851562
+  - 42.9163818359375
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 45
+    - - room_003
+      - east
+      - wall
+      - 45
+    - - room_003
+      - south
+      - room_005
+      - 45
+    - - room_003
+      - west
+      - room_002
+      - 45
+    - - agent
+      - atlocation
+      - room_003
+      - 45
+    - - ind_000
+      - atlocation
+      - room_003
+      - 45
+    - - sta_002
+      - atlocation
+      - room_003
+      - 45
+  q_values:
+  - 41.64020919799805
+  - 42.813289642333984
+  - 19.714061737060547
+  - 18.53806495666504
+  - 42.190284729003906
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 46
+    - - room_003
+      - east
+      - wall
+      - 46
+    - - room_003
+      - south
+      - room_005
+      - 46
+    - - room_003
+      - west
+      - room_002
+      - 46
+    - - agent
+      - atlocation
+      - room_003
+      - 46
+    - - ind_000
+      - atlocation
+      - room_003
+      - 46
+    - - sta_002
+      - atlocation
+      - room_003
+      - 46
+  q_values:
+  - 41.161834716796875
+  - 42.325748443603516
+  - 20.007898330688477
+  - 18.73610496520996
+  - 41.671844482421875
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 47
+    - - room_003
+      - east
+      - wall
+      - 47
+    - - room_003
+      - south
+      - room_005
+      - 47
+    - - room_003
+      - west
+      - room_002
+      - 47
+    - - agent
+      - atlocation
+      - room_003
+      - 47
+    - - sta_002
+      - atlocation
+      - room_003
+      - 47
+    - - ind_000
+      - atlocation
+      - room_003
+      - 47
+  q_values:
+  - 41.370670318603516
+  - 42.60274887084961
+  - 20.665515899658203
+  - 19.43386459350586
+  - 41.9908447265625
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 48
+    - - room_003
+      - east
+      - wall
+      - 48
+    - - room_003
+      - south
+      - room_005
+      - 48
+    - - room_003
+      - west
+      - room_002
+      - 48
+    - - agent
+      - atlocation
+      - room_003
+      - 48
+    - - ind_000
+      - atlocation
+      - room_003
+      - 48
+    - - sta_002
+      - atlocation
+      - room_003
+      - 48
+  q_values:
+  - 40.54686737060547
+  - 41.7005729675293
+  - 20.417186737060547
+  - 19.14035415649414
+  - 41.043087005615234
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 49
+    - - room_003
+      - east
+      - wall
+      - 49
+    - - room_003
+      - south
+      - room_005
+      - 49
+    - - room_003
+      - west
+      - room_002
+      - 49
+    - - agent
+      - atlocation
+      - room_003
+      - 49
+    - - ind_000
+      - atlocation
+      - room_003
+      - 49
+    - - sta_002
+      - atlocation
+      - room_003
+      - 49
+  q_values:
+  - 40.558170318603516
+  - 41.708030700683594
+  - 20.400964736938477
+  - 19.164392471313477
+  - 41.06621551513672
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 50
+    - - room_003
+      - east
+      - wall
+      - 50
+    - - room_003
+      - south
+      - room_005
+      - 50
+    - - room_003
+      - west
+      - room_002
+      - 50
+    - - agent
+      - atlocation
+      - room_003
+      - 50
+    - - sta_002
+      - atlocation
+      - room_003
+      - 50
+    - - ind_000
+      - atlocation
+      - room_003
+      - 50
+  q_values:
+  - 41.00755310058594
+  - 42.230953216552734
+  - 20.745346069335938
+  - 19.744606018066406
+  - 41.664546966552734
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 51
+    - - room_003
+      - east
+      - wall
+      - 51
+    - - room_003
+      - south
+      - room_005
+      - 51
+    - - room_003
+      - west
+      - room_002
+      - 51
+    - - agent
+      - atlocation
+      - room_003
+      - 51
+    - - ind_000
+      - atlocation
+      - room_003
+      - 51
+    - - sta_002
+      - atlocation
+      - room_003
+      - 51
+  q_values:
+  - 39.54677200317383
+  - 40.67386245727539
+  - 20.488584518432617
+  - 19.583887100219727
+  - 40.046321868896484
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 52
+    - - room_003
+      - east
+      - wall
+      - 52
+    - - room_003
+      - south
+      - room_005
+      - 52
+    - - room_003
+      - west
+      - room_002
+      - 52
+    - - agent
+      - atlocation
+      - room_003
+      - 52
+    - - sta_002
+      - atlocation
+      - room_003
+      - 52
+    - - ind_000
+      - atlocation
+      - room_003
+      - 52
+  q_values:
+  - 39.81818771362305
+  - 41.05024719238281
+  - 20.900651931762695
+  - 20.230987548828125
+  - 40.47929000854492
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 53
+    - - room_003
+      - east
+      - wall
+      - 53
+    - - room_003
+      - south
+      - room_005
+      - 53
+    - - room_003
+      - west
+      - room_002
+      - 53
+    - - agent
+      - atlocation
+      - room_003
+      - 53
+    - - sta_002
+      - atlocation
+      - room_003
+      - 53
+    - - ind_000
+      - atlocation
+      - room_003
+      - 53
+  q_values:
+  - 39.425079345703125
+  - 40.67748260498047
+  - 20.928361892700195
+  - 20.36747932434082
+  - 40.120079040527344
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 54
+    - - room_003
+      - east
+      - wall
+      - 54
+    - - room_003
+      - south
+      - room_005
+      - 54
+    - - room_003
+      - west
+      - room_002
+      - 54
+    - - agent
+      - atlocation
+      - room_003
+      - 54
+    - - sta_002
+      - atlocation
+      - room_003
+      - 54
+    - - ind_000
+      - atlocation
+      - room_003
+      - 54
+  q_values:
+  - 38.97086715698242
+  - 40.244102478027344
+  - 20.950725555419922
+  - 20.555505752563477
+  - 39.71736145019531
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 55
+    - - room_003
+      - east
+      - wall
+      - 55
+    - - room_003
+      - south
+      - room_005
+      - 55
+    - - room_003
+      - west
+      - room_002
+      - 55
+    - - agent
+      - atlocation
+      - room_003
+      - 55
+    - - sta_002
+      - atlocation
+      - room_003
+      - 55
+    - - ind_000
+      - atlocation
+      - room_003
+      - 55
+  q_values:
+  - 38.623863220214844
+  - 39.90285873413086
+  - 20.96938705444336
+  - 20.692089080810547
+  - 39.39283752441406
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 56
+    - - room_003
+      - east
+      - wall
+      - 56
+    - - room_003
+      - south
+      - room_005
+      - 56
+    - - room_003
+      - west
+      - room_002
+      - 56
+    - - agent
+      - atlocation
+      - room_003
+      - 56
+    - - ind_000
+      - atlocation
+      - room_003
+      - 56
+    - - sta_002
+      - atlocation
+      - room_003
+      - 56
+  q_values:
+  - 37.684356689453125
+  - 38.88417434692383
+  - 20.635005950927734
+  - 20.143644332885742
+  - 38.26771926879883
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 57
+    - - room_003
+      - east
+      - wall
+      - 57
+    - - room_003
+      - south
+      - room_005
+      - 57
+    - - room_003
+      - west
+      - room_002
+      - 57
+    - - agent
+      - atlocation
+      - room_003
+      - 57
+    - - sta_002
+      - atlocation
+      - room_003
+      - 57
+    - - ind_000
+      - atlocation
+      - room_003
+      - 57
+  q_values:
+  - 38.891876220703125
+  - 40.166015625
+  - 21.025774002075195
+  - 20.592069625854492
+  - 39.61642837524414
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 58
+    - - room_003
+      - east
+      - wall
+      - 58
+    - - room_003
+      - south
+      - room_005
+      - 58
+    - - room_003
+      - west
+      - room_002
+      - 58
+    - - agent
+      - atlocation
+      - room_003
+      - 58
+    - - ind_000
+      - atlocation
+      - room_003
+      - 58
+    - - sta_002
+      - atlocation
+      - room_003
+      - 58
+  q_values:
+  - 38.12638854980469
+  - 39.3314208984375
+  - 20.66460609436035
+  - 19.997655868530273
+  - 38.687557220458984
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 59
+    - - room_003
+      - east
+      - wall
+      - 59
+    - - room_003
+      - south
+      - room_005
+      - 59
+    - - room_003
+      - west
+      - room_002
+      - 59
+    - - agent
+      - atlocation
+      - room_003
+      - 59
+    - - sta_002
+      - atlocation
+      - room_003
+      - 59
+    - - ind_000
+      - atlocation
+      - room_003
+      - 59
+  q_values:
+  - 39.43227767944336
+  - 40.67255401611328
+  - 21.005807876586914
+  - 20.347196578979492
+  - 40.09010696411133
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 60
+    - - room_003
+      - east
+      - wall
+      - 60
+    - - room_003
+      - south
+      - room_005
+      - 60
+    - - room_003
+      - west
+      - room_002
+      - 60
+    - - agent
+      - atlocation
+      - room_003
+      - 60
+    - - sta_002
+      - atlocation
+      - room_003
+      - 60
+    - - ind_000
+      - atlocation
+      - room_003
+      - 60
+  q_values:
+  - 39.54073715209961
+  - 40.750892639160156
+  - 20.99076271057129
+  - 20.292512893676758
+  - 40.175968170166016
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 61
+    - - room_003
+      - east
+      - wall
+      - 61
+    - - room_003
+      - south
+      - room_005
+      - 61
+    - - room_003
+      - west
+      - room_002
+      - 61
+    - - agent
+      - atlocation
+      - room_003
+      - 61
+    - - ind_000
+      - atlocation
+      - room_003
+      - 61
+    - - sta_002
+      - atlocation
+      - room_003
+      - 61
+  q_values:
+  - 38.3349723815918
+  - 39.47806167602539
+  - 20.549278259277344
+  - 19.784780502319336
+  - 38.84288787841797
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 62
+    - - room_003
+      - east
+      - wall
+      - 62
+    - - room_003
+      - south
+      - room_005
+      - 62
+    - - room_003
+      - west
+      - room_002
+      - 62
+    - - agent
+      - atlocation
+      - room_003
+      - 62
+    - - ind_000
+      - atlocation
+      - room_003
+      - 62
+    - - sta_002
+      - atlocation
+      - room_003
+      - 62
+  q_values:
+  - 38.422569274902344
+  - 39.562400817871094
+  - 20.596242904663086
+  - 19.81614112854004
+  - 38.92716979980469
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 63
+    - - room_003
+      - east
+      - wall
+      - 63
+    - - room_003
+      - south
+      - room_005
+      - 63
+    - - room_003
+      - west
+      - room_002
+      - 63
+    - - agent
+      - atlocation
+      - room_003
+      - 63
+    - - ind_000
+      - atlocation
+      - room_003
+      - 63
+    - - sta_002
+      - atlocation
+      - room_003
+      - 63
+  q_values:
+  - 38.60749435424805
+  - 39.7459831237793
+  - 20.674848556518555
+  - 19.869935989379883
+  - 39.113250732421875
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 64
+    - - room_003
+      - east
+      - wall
+      - 64
+    - - room_003
+      - south
+      - room_005
+      - 64
+    - - room_003
+      - west
+      - room_002
+      - 64
+    - - agent
+      - atlocation
+      - room_003
+      - 64
+    - - ind_000
+      - atlocation
+      - room_003
+      - 64
+    - - sta_002
+      - atlocation
+      - room_003
+      - 64
+  q_values:
+  - 38.80525207519531
+  - 39.944149017333984
+  - 20.745906829833984
+  - 19.917797088623047
+  - 39.31441879272461
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 65
+    - - room_003
+      - east
+      - wall
+      - 65
+    - - room_003
+      - south
+      - room_005
+      - 65
+    - - room_003
+      - west
+      - room_002
+      - 65
+    - - agent
+      - atlocation
+      - room_003
+      - 65
+    - - sta_002
+      - atlocation
+      - room_003
+      - 65
+    - - ind_000
+      - atlocation
+      - room_003
+      - 65
+  q_values:
+  - 39.76551055908203
+  - 40.958961486816406
+  - 21.036502838134766
+  - 20.26919174194336
+  - 40.37894821166992
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 66
+    - - room_003
+      - east
+      - wall
+      - 66
+    - - room_003
+      - south
+      - room_005
+      - 66
+    - - room_003
+      - west
+      - room_002
+      - 66
+    - - agent
+      - atlocation
+      - room_003
+      - 66
+    - - sta_002
+      - atlocation
+      - room_003
+      - 66
+    - - ind_000
+      - atlocation
+      - room_003
+      - 66
+  q_values:
+  - 39.7957763671875
+  - 40.97492218017578
+  - 21.073436737060547
+  - 20.319477081298828
+  - 40.400146484375
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 67
+    - - room_003
+      - east
+      - wall
+      - 67
+    - - room_003
+      - south
+      - room_005
+      - 67
+    - - room_003
+      - west
+      - room_002
+      - 67
+    - - agent
+      - atlocation
+      - room_003
+      - 67
+    - - sta_002
+      - atlocation
+      - room_003
+      - 67
+    - - ind_000
+      - atlocation
+      - room_003
+      - 67
+  q_values:
+  - 39.71379470825195
+  - 40.87612533569336
+  - 21.167020797729492
+  - 20.41265869140625
+  - 40.31138229370117
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 68
+    - - room_003
+      - east
+      - wall
+      - 68
+    - - room_003
+      - south
+      - room_005
+      - 68
+    - - room_003
+      - west
+      - room_002
+      - 68
+    - - agent
+      - atlocation
+      - room_003
+      - 68
+    - - sta_002
+      - atlocation
+      - room_003
+      - 68
+  q_values:
+  - 31.823951721191406
+  - 33.45564651489258
+  - 15.14118480682373
+  - 15.43624496459961
+  - 32.702335357666016
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 69
+    - - room_003
+      - east
+      - wall
+      - 69
+    - - room_003
+      - south
+      - room_005
+      - 69
+    - - room_003
+      - west
+      - room_002
+      - 69
+    - - agent
+      - atlocation
+      - room_003
+      - 69
+    - - sta_002
+      - atlocation
+      - room_003
+      - 69
+  q_values:
+  - 31.734634399414062
+  - 33.340240478515625
+  - 15.2908296585083
+  - 15.505703926086426
+  - 32.58009338378906
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 70
+    - - room_003
+      - east
+      - wall
+      - 70
+    - - room_003
+      - south
+      - room_005
+      - 70
+    - - room_003
+      - west
+      - room_002
+      - 70
+    - - agent
+      - atlocation
+      - room_003
+      - 70
+    - - sta_002
+      - atlocation
+      - room_003
+      - 70
+  q_values:
+  - 31.842845916748047
+  - 33.462459564208984
+  - 15.152543067932129
+  - 15.321619033813477
+  - 32.69612121582031
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 71
+    - - room_003
+      - east
+      - wall
+      - 71
+    - - room_003
+      - south
+      - room_005
+      - 71
+    - - room_003
+      - west
+      - room_002
+      - 71
+    - - agent
+      - atlocation
+      - room_003
+      - 71
+    - - sta_002
+      - atlocation
+      - room_003
+      - 71
+  q_values:
+  - 31.856338500976562
+  - 33.5308837890625
+  - 14.763315200805664
+  - 14.981940269470215
+  - 32.764774322509766
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 72
+    - - room_003
+      - east
+      - wall
+      - 72
+    - - room_003
+      - south
+      - room_005
+      - 72
+    - - room_003
+      - west
+      - room_002
+      - 72
+    - - agent
+      - atlocation
+      - room_003
+      - 72
+    - - sta_002
+      - atlocation
+      - room_003
+      - 72
+  q_values:
+  - 31.7005558013916
+  - 33.45619583129883
+  - 14.395297050476074
+  - 14.739020347595215
+  - 32.688629150390625
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 73
+    - - room_003
+      - east
+      - wall
+      - 73
+    - - room_003
+      - south
+      - room_005
+      - 73
+    - - room_003
+      - west
+      - room_002
+      - 73
+    - - agent
+      - atlocation
+      - room_003
+      - 73
+    - - sta_002
+      - atlocation
+      - room_003
+      - 73
+  q_values:
+  - 31.456453323364258
+  - 33.25948715209961
+  - 14.24208927154541
+  - 14.694947242736816
+  - 32.49262237548828
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 74
+    - - room_003
+      - east
+      - wall
+      - 74
+    - - room_003
+      - south
+      - room_005
+      - 74
+    - - room_003
+      - west
+      - room_002
+      - 74
+    - - agent
+      - atlocation
+      - room_003
+      - 74
+    - - sta_002
+      - atlocation
+      - room_003
+      - 74
+  q_values:
+  - 31.42789077758789
+  - 33.220829010009766
+  - 14.286519050598145
+  - 14.746718406677246
+  - 32.453060150146484
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 75
+    - - room_003
+      - east
+      - wall
+      - 75
+    - - room_003
+      - south
+      - room_005
+      - 75
+    - - room_003
+      - west
+      - room_002
+      - 75
+    - - agent
+      - atlocation
+      - room_003
+      - 75
+    - - sta_002
+      - atlocation
+      - room_003
+      - 75
+  q_values:
+  - 31.853139877319336
+  - 33.580833435058594
+  - 14.5020112991333
+  - 14.790542602539062
+  - 32.79522705078125
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 76
+    - - room_003
+      - east
+      - wall
+      - 76
+    - - room_003
+      - south
+      - room_005
+      - 76
+    - - room_003
+      - west
+      - room_002
+      - 76
+    - - agent
+      - atlocation
+      - room_003
+      - 76
+    - - sta_002
+      - atlocation
+      - room_003
+      - 76
+  q_values:
+  - 32.574729919433594
+  - 34.221981048583984
+  - 14.676907539367676
+  - 14.717966079711914
+  - 33.41607666015625
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 77
+    - - room_003
+      - east
+      - wall
+      - 77
+    - - room_003
+      - south
+      - room_005
+      - 77
+    - - room_003
+      - west
+      - room_002
+      - 77
+    - - agent
+      - atlocation
+      - room_003
+      - 77
+    - - sta_002
+      - atlocation
+      - room_003
+      - 77
+  q_values:
+  - 33.085208892822266
+  - 34.692054748535156
+  - 14.5874605178833
+  - 14.48951530456543
+  - 33.88093566894531
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 78
+    - - room_003
+      - east
+      - wall
+      - 78
+    - - room_003
+      - south
+      - room_005
+      - 78
+    - - room_003
+      - west
+      - room_002
+      - 78
+    - - agent
+      - atlocation
+      - room_003
+      - 78
+    - - sta_002
+      - atlocation
+      - room_003
+      - 78
+  q_values:
+  - 33.37255096435547
+  - 34.95571517944336
+  - 14.36140251159668
+  - 14.192965507507324
+  - 34.15122604370117
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 79
+    - - room_003
+      - east
+      - wall
+      - 79
+    - - room_003
+      - south
+      - room_005
+      - 79
+    - - room_003
+      - west
+      - room_002
+      - 79
+    - - agent
+      - atlocation
+      - room_003
+      - 79
+    - - sta_002
+      - atlocation
+      - room_003
+      - 79
+  q_values:
+  - 33.425106048583984
+  - 35.00411605834961
+  - 14.227606773376465
+  - 14.052053451538086
+  - 34.20785140991211
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 80
+    - - room_003
+      - east
+      - wall
+      - 80
+    - - room_003
+      - south
+      - room_005
+      - 80
+    - - room_003
+      - west
+      - room_002
+      - 80
+    - - agent
+      - atlocation
+      - room_003
+      - 80
+    - - sta_002
+      - atlocation
+      - room_003
+      - 80
+  q_values:
+  - 33.15355682373047
+  - 34.75835037231445
+  - 14.293042182922363
+  - 14.200859069824219
+  - 33.97003173828125
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 81
+    - - room_003
+      - east
+      - wall
+      - 81
+    - - room_003
+      - south
+      - room_005
+      - 81
+    - - room_003
+      - west
+      - room_002
+      - 81
+    - - agent
+      - atlocation
+      - room_003
+      - 81
+    - - sta_002
+      - atlocation
+      - room_003
+      - 81
+  q_values:
+  - 32.614830017089844
+  - 34.24169921875
+  - 14.57298469543457
+  - 14.592965126037598
+  - 33.462547302246094
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 82
+    - - room_003
+      - east
+      - wall
+      - 82
+    - - room_003
+      - south
+      - room_005
+      - 82
+    - - room_003
+      - west
+      - room_002
+      - 82
+    - - agent
+      - atlocation
+      - room_003
+      - 82
+    - - sta_002
+      - atlocation
+      - room_003
+      - 82
+  q_values:
+  - 32.001220703125
+  - 33.615745544433594
+  - 15.02051067352295
+  - 15.11643123626709
+  - 32.845455169677734
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 83
+    - - room_003
+      - east
+      - wall
+      - 83
+    - - room_003
+      - south
+      - room_005
+      - 83
+    - - room_003
+      - west
+      - room_002
+      - 83
+    - - agent
+      - atlocation
+      - room_003
+      - 83
+    - - sta_002
+      - atlocation
+      - room_003
+      - 83
+  q_values:
+  - 31.52634620666504
+  - 33.09881591796875
+  - 15.36430835723877
+  - 15.48526668548584
+  - 32.33393096923828
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 84
+    - - room_003
+      - east
+      - wall
+      - 84
+    - - room_003
+      - south
+      - room_005
+      - 84
+    - - room_003
+      - west
+      - room_002
+      - 84
+    - - agent
+      - atlocation
+      - room_003
+      - 84
+    - - sta_002
+      - atlocation
+      - room_003
+      - 84
+  q_values:
+  - 31.168277740478516
+  - 32.704010009765625
+  - 15.271904945373535
+  - 15.451266288757324
+  - 31.955739974975586
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 85
+    - - room_003
+      - east
+      - wall
+      - 85
+    - - room_003
+      - south
+      - room_005
+      - 85
+    - - room_003
+      - west
+      - room_002
+      - 85
+    - - agent
+      - atlocation
+      - room_003
+      - 85
+    - - sta_002
+      - atlocation
+      - room_003
+      - 85
+  q_values:
+  - 30.94770050048828
+  - 32.475101470947266
+  - 14.857355117797852
+  - 15.172698974609375
+  - 31.761384963989258
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 86
+    - - room_003
+      - east
+      - wall
+      - 86
+    - - room_003
+      - south
+      - room_005
+      - 86
+    - - room_003
+      - west
+      - room_002
+      - 86
+    - - agent
+      - atlocation
+      - room_003
+      - 86
+    - - sta_002
+      - atlocation
+      - room_003
+      - 86
+  q_values:
+  - 30.847238540649414
+  - 32.39783477783203
+  - 14.495482444763184
+  - 14.972528457641602
+  - 31.720317840576172
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 87
+    - - room_003
+      - east
+      - wall
+      - 87
+    - - room_003
+      - south
+      - room_005
+      - 87
+    - - room_003
+      - west
+      - room_002
+      - 87
+    - - agent
+      - atlocation
+      - room_003
+      - 87
+    - - sta_002
+      - atlocation
+      - room_003
+      - 87
+  q_values:
+  - 30.862092971801758
+  - 32.45887756347656
+  - 14.453330039978027
+  - 14.999778747558594
+  - 31.786449432373047
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 88
+    - - room_003
+      - east
+      - wall
+      - 88
+    - - room_003
+      - south
+      - room_005
+      - 88
+    - - room_003
+      - west
+      - room_002
+      - 88
+    - - agent
+      - atlocation
+      - room_003
+      - 88
+    - - sta_002
+      - atlocation
+      - room_003
+      - 88
+  q_values:
+  - 30.916643142700195
+  - 32.557952880859375
+  - 14.745096206665039
+  - 15.252410888671875
+  - 31.860639572143555
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 89
+    - - room_003
+      - east
+      - wall
+      - 89
+    - - room_003
+      - south
+      - room_005
+      - 89
+    - - room_003
+      - west
+      - room_002
+      - 89
+    - - agent
+      - atlocation
+      - room_003
+      - 89
+    - - sta_002
+      - atlocation
+      - room_003
+      - 89
+  q_values:
+  - 30.90172004699707
+  - 32.5749626159668
+  - 15.06539249420166
+  - 15.506381034851074
+  - 31.847808837890625
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 90
+    - - room_003
+      - east
+      - wall
+      - 90
+    - - room_003
+      - south
+      - room_005
+      - 90
+    - - room_003
+      - west
+      - room_002
+      - 90
+    - - agent
+      - atlocation
+      - room_003
+      - 90
+    - - sta_002
+      - atlocation
+      - room_003
+      - 90
+  q_values:
+  - 30.779172897338867
+  - 32.476295471191406
+  - 15.045122146606445
+  - 15.47787094116211
+  - 31.740392684936523
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 91
+    - - room_003
+      - east
+      - wall
+      - 91
+    - - room_003
+      - south
+      - room_005
+      - 91
+    - - room_003
+      - west
+      - room_002
+      - 91
+    - - agent
+      - atlocation
+      - room_003
+      - 91
+    - - sta_002
+      - atlocation
+      - room_003
+      - 91
+  q_values:
+  - 30.638134002685547
+  - 32.36460876464844
+  - 14.721504211425781
+  - 15.237517356872559
+  - 31.646320343017578
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 92
+    - - room_003
+      - east
+      - wall
+      - 92
+    - - room_003
+      - south
+      - room_005
+      - 92
+    - - room_003
+      - west
+      - room_002
+      - 92
+    - - agent
+      - atlocation
+      - room_003
+      - 92
+    - - sta_002
+      - atlocation
+      - room_003
+      - 92
+  q_values:
+  - 30.527965545654297
+  - 32.289424896240234
+  - 14.349811553955078
+  - 15.012988090515137
+  - 31.602264404296875
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 93
+    - - room_003
+      - east
+      - wall
+      - 93
+    - - room_003
+      - south
+      - room_005
+      - 93
+    - - room_003
+      - west
+      - room_002
+      - 93
+    - - agent
+      - atlocation
+      - room_003
+      - 93
+    - - sta_002
+      - atlocation
+      - room_003
+      - 93
+  q_values:
+  - 30.32707405090332
+  - 32.12507629394531
+  - 14.03203010559082
+  - 14.853812217712402
+  - 31.464876174926758
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 94
+    - - room_003
+      - east
+      - wall
+      - 94
+    - - room_003
+      - south
+      - room_005
+      - 94
+    - - room_003
+      - west
+      - room_002
+      - 94
+    - - agent
+      - atlocation
+      - room_003
+      - 94
+    - - sta_002
+      - atlocation
+      - room_003
+      - 94
+  q_values:
+  - 29.916608810424805
+  - 31.75916290283203
+  - 13.820626258850098
+  - 14.795058250427246
+  - 31.11115837097168
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 95
+    - - room_003
+      - east
+      - wall
+      - 95
+    - - room_003
+      - south
+      - room_005
+      - 95
+    - - room_003
+      - west
+      - room_002
+      - 95
+    - - agent
+      - atlocation
+      - room_003
+      - 95
+    - - sta_002
+      - atlocation
+      - room_003
+      - 95
+  q_values:
+  - 29.504234313964844
+  - 31.37677764892578
+  - 13.832779884338379
+  - 14.90432071685791
+  - 30.72860336303711
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 96
+    - - room_003
+      - east
+      - wall
+      - 96
+    - - room_003
+      - south
+      - room_005
+      - 96
+    - - room_003
+      - west
+      - room_002
+      - 96
+    - - agent
+      - atlocation
+      - room_003
+      - 96
+    - - sta_002
+      - atlocation
+      - room_003
+      - 96
+  q_values:
+  - 29.177743911743164
+  - 31.05182647705078
+  - 13.94747543334961
+  - 15.078705787658691
+  - 30.410673141479492
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 97
+    - - room_003
+      - east
+      - wall
+      - 97
+    - - room_003
+      - south
+      - room_005
+      - 97
+    - - room_003
+      - west
+      - room_002
+      - 97
+    - - agent
+      - atlocation
+      - room_003
+      - 97
+    - - sta_002
+      - atlocation
+      - room_003
+      - 97
+  q_values:
+  - 28.751623153686523
+  - 30.625024795532227
+  - 13.804254531860352
+  - 15.044881820678711
+  - 30.018922805786133
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 98
+    - - room_003
+      - east
+      - wall
+      - 98
+    - - room_003
+      - south
+      - room_005
+      - 98
+    - - room_003
+      - west
+      - room_002
+      - 98
+    - - agent
+      - atlocation
+      - room_003
+      - 98
+    - - sta_002
+      - atlocation
+      - room_003
+      - 98
+  q_values:
+  - 28.141334533691406
+  - 30.040668487548828
+  - 13.283722877502441
+  - 14.699214935302734
+  - 29.492698669433594
+  action: 1
+- state:
+    data:
+    - - room_003
+      - north
+      - wall
+      - 99
+    - - room_003
+      - east
+      - wall
+      - 99
+    - - room_003
+      - south
+      - room_005
+      - 99
+    - - room_003
+      - west
+      - room_002
+      - 99
+    - - agent
+      - atlocation
+      - room_003
+      - 99
+    - - sta_002
+      - atlocation
+      - room_003
+      - 99
+  q_values:
+  - 27.612409591674805
+  - 29.54600715637207
+  - 12.755952835083008
+  - 14.290783882141113
+  - 29.037109375
+  action: 1

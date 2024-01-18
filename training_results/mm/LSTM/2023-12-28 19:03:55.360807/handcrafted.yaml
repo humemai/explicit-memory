@@ -1,0 +1,18 @@
+'{''mm'': ''random'', ''qa'': ''episodic_semantic'', ''explore'': ''random'', ''pretrain_semantic'': False}':
+  mean: 179.68
+  std: 34.68039215464554
+'{''mm'': ''random'', ''qa'': ''episodic_semantic'', ''explore'': ''avoid_walls'', ''pretrain_semantic'': False}':
+  mean: 203.7
+  std: 13.418345650638164
+'{''mm'': ''episodic'', ''qa'': ''episodic_semantic'', ''explore'': ''random'', ''pretrain_semantic'': False}':
+  mean: 97.32000000000001
+  std: 8.730956419545342
+'{''mm'': ''episodic'', ''qa'': ''episodic_semantic'', ''explore'': ''avoid_walls'', ''pretrain_semantic'': False}':
+  mean: 136.5
+  std: 15.034360644869473
+'{''mm'': ''semantic'', ''qa'': ''episodic_semantic'', ''explore'': ''random'', ''pretrain_semantic'': False}':
+  mean: 105.67999999999999
+  std: 10.572492610543645
+'{''mm'': ''semantic'', ''qa'': ''episodic_semantic'', ''explore'': ''avoid_walls'', ''pretrain_semantic'': False}':
+  mean: 110.63999999999999
+  std: 21.481210394202648

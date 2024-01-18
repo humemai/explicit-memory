@@ -131,7 +131,7 @@ dmypy.json
 # checkpoints
 lightning_logs/
 lightning_logs.zip
-training_results/
+# training_results/
 
 # vscode
 .vscode/

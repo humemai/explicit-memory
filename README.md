@@ -15,7 +15,11 @@ This agent was featured in the paper ["A Machine with Short-Term, Episodic, and 
 
 ## [Click here for the agent for RoomEnv-v2](./AgentRoomEnv2/README.md)
 
-This agent was featured in the paper ["Capturing Dynamic Knowledge Graphs with Human-like Memory Systems by Reinforcement Learning"](<>).
+This agent was featured in the paper ["Capturing Dynamic Knowledge Graphs with Human-like Memory Systems by Reinforcement Learning"]().
+
+## pdoc documentation
+
+https://tae898.github.io/explicit-memory-private
 
 ## Contributing
 

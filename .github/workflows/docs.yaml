@@ -44,7 +44,7 @@ jobs:
           mkdir _docs
       - name: Build documentation
         run: |
-          python -m pdoc -d google -o _docs/ explicit_memory AgentRoomEnv0 AgentRoomEnv1 AgentRoomEnv2
+          python -m pdoc -d google -o _docs/ explicit_memory AgentRoomEnv0/agent.py AgentRoomEnv1/agent AgentRoomEnv2/agent
       - uses: actions/upload-pages-artifact@v2
         with:
           path: "./_docs/"

@@ -34,8 +34,11 @@ jobs:
           python-version: "3.10"
       - name: Upgrade pip and build dependencies
         run: |
-          python -m pip install --upgrade pip setuptools wheel gymnasium pdoc matplotlib IPython
-      - name: Install room-env
+          python -m pip install --upgrade pip setuptools wheel gymnasium pdoc matplotlib IPython pandas scikit-learn
+      - name: install room-env
+        run: |
+          python -m pip install git+https://github.com/tae898/room-env-private@main
+      - name: Install explicit-memory
         run: |
           python -m pip install -e .
       - name: Create output dir

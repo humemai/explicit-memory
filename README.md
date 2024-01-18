@@ -9,3 +9,4 @@
    3. `python train-explore-baseline.py` for the $\pi_{explore}$ (baseline with the history room size of 24)
 5. See the trained results at `./training_results` for your trained results.
    1. There are already some trained results reported in the paper.
+      1. Check out `./scores.md` for the test results.

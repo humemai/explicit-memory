@@ -78,6 +78,6 @@ run_handcrafted_baselines:
 run_test: true
 split_reward_training: false
 target_update_interval: 10
-test_seed: 4
-train_seed: 9
+test_seed: 0
+train_seed: 5
 warm_start: 1000.0

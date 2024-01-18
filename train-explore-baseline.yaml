@@ -38,6 +38,6 @@ replay_buffer_size: 20000
 run_handcrafted_baselines: true
 run_test: true
 target_update_interval: 10
-test_seed: 1
-train_seed: 6
+test_seed: 0
+train_seed: 5
 warm_start: 2000.0

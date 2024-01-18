@@ -6,18 +6,10 @@ import gymnasium as gym
 import torch
 from tqdm.auto import trange
 
-from explicit_memory.policy import (
-    answer_question,
-    encode_observation,
-    explore,
-    manage_memory,
-)
-from explicit_memory.utils import (
-    dqn_target_hard_update,
-    select_dqn_action,
-    update_dqn_model,
-    write_yaml,
-)
+from explicit_memory.policy import (answer_question, encode_observation,
+                                    explore, manage_memory)
+from explicit_memory.utils import (dqn_target_hard_update, select_dqn_action,
+                                   update_dqn_model, write_yaml)
 
 from .dqn import DQNAgent
 

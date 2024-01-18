@@ -9,7 +9,7 @@ import shutil
 from collections import deque
 from copy import deepcopy
 from glob import glob
-from typing import Deque, Optional, Union, Literal
+from typing import Deque, Literal, Optional, Union
 
 import gymnasium as gym
 import matplotlib.pyplot as plt

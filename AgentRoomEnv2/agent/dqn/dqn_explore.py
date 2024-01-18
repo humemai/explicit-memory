@@ -2,25 +2,16 @@
 import os
 from copy import deepcopy
 
-import numpy as np
 import gymnasium as gym
+import numpy as np
 import torch
 from tqdm.auto import trange
 
-from explicit_memory.policy import (
-    answer_question,
-    encode_observation,
-    manage_memory,
-    explore,
-)
-from explicit_memory.utils import (
-    dqn_target_hard_update,
-    select_dqn_action,
-    update_dqn_model,
-    read_yaml,
-    write_yaml,
-    read_pickle,
-)
+from explicit_memory.policy import (answer_question, encode_observation,
+                                    explore, manage_memory)
+from explicit_memory.utils import (dqn_target_hard_update, read_pickle,
+                                   read_yaml, select_dqn_action,
+                                   update_dqn_model, write_yaml)
 
 from .dqn import DQNAgent
 

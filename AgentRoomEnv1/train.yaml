@@ -2,7 +2,7 @@ env_str: room_env:RoomEnv-v1
 num_iterations: 2048
 replay_buffer_size: 1024
 warm_start: 1024
-batch_size: 4
+batch_size: 1024
 target_update_interval: 10
 epsilon_decay_until: 1024
 max_epsilon: 1.0

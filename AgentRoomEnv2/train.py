@@ -7,7 +7,7 @@ import logging
 logger = logging.getLogger()
 logger.disabled = True
 
-from agent.dqn import DQNExploreAgent, DQNMMAgent, DQNLSTMBaselineAgent
+from agent.dqn import DQNExploreAgent, DQNLSTMBaselineAgent, DQNMMAgent
 
 from explicit_memory.utils import read_yaml
 

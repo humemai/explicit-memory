@@ -8,15 +8,10 @@ import torch.optim as optim
 from room_env.envs.room2 import RoomEnv2
 
 from explicit_memory.nn import LSTM
-from explicit_memory.utils import (
-    ReplayBuffer,
-    is_running_notebook,
-    plot_results,
-    save_dqn_final_results,
-    save_dqn_validation,
-    save_states_q_values_actions,
-    write_yaml,
-)
+from explicit_memory.utils import (ReplayBuffer, is_running_notebook,
+                                   plot_results, save_dqn_final_results,
+                                   save_dqn_validation,
+                                   save_states_q_values_actions, write_yaml)
 
 from ..handcrafted import HandcraftedAgent
 

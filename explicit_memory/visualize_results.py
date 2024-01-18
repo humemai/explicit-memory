@@ -9,7 +9,7 @@ import shutil
 from collections import deque
 from copy import deepcopy
 from glob import glob
-from typing import Deque, Optional, Union, Literal
+from typing import Deque, Literal, Optional, Union
 
 import gymnasium as gym
 import matplotlib.pyplot as plt
@@ -18,12 +18,11 @@ import torch
 import torch.nn.functional as F
 import yaml
 from IPython.display import clear_output
+from room_env.envs.room2 import RoomEnv2
 from tqdm.auto import tqdm
 
-from room_env.envs.room2 import RoomEnv2
-
-from .utils import read_pickle, write_yaml
 from .policy import answer_question, encode_observation, explore, manage_memory
+from .utils import read_pickle, write_yaml
 
 logging.basicConfig(
     level=os.environ.get("LOGLEVEL", "INFO").upper(),

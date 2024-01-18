@@ -5,15 +5,17 @@ This repo hosts several (RL) agents that learn their policies by interacting wit
 
 These agents all take advantage of have human-like external memory systems that are modeled with knowledge graphs.
 
-## [Click here for the agent for RoomEnv-v0](./RoomEnv0/README.md)
+## [Click here for the agent for RoomEnv-v0](./AgentRoomEnv0/README.md)
 
 This agent was featured in the paper ["A Machine With Human-Like Memory Systems"](https://arxiv.org/abs/2204.01611).
 
-## [Click here for the agent for RoomEnv-v1](./RoomEnv1/README.md)
+## [Click here for the agent for RoomEnv-v1](./AgentRoomEnv1/README.md)
 
 This agent was featured in the paper ["A Machine with Short-Term, Episodic, and Semantic Memory Systems"](https://doi.org/10.1609/aaai.v37i1.25075).
 
-## [Click here for the agent for RoomEnv-v2](./RoomEnv2/README.md)
+## [Click here for the agent for RoomEnv-v2](./AgentRoomEnv2/README.md)
+
+This agent was featured in the paper ["Capturing Dynamic Knowledge Graphs with Human-like Memory Systems by Reinforcement Learning"](<>).
 
 ## Contributing
 

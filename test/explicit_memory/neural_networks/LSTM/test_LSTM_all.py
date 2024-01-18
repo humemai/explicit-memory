@@ -1,7 +1,7 @@
 import unittest
 
-import torch
 import numpy as np
+import torch
 
 from explicit_memory.nn import LSTM
 
@@ -197,7 +197,6 @@ class LSTMTest(unittest.TestCase):
                 "include_positional_encoding": False,
                 "max_timesteps": None,
                 "max_strength": None,
-                
             }
             lstm = LSTM(**config)
             self.assertTrue(

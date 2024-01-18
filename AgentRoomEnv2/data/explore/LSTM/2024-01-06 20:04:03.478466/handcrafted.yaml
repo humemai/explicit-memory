@@ -1,0 +1,39 @@
+'{''mm'': ''random'', ''qa'': ''episodic_semantic'', ''explore'': ''random'', ''pretrain_semantic'': False}':
+  mean: 217.85999999999999
+  std: 36.533031628924526
+'{''mm'': ''random'', ''qa'': ''episodic_semantic'', ''explore'': ''random'', ''pretrain_semantic'': ''exclude_walls''}':
+  mean: 214.24
+  std: 32.34146564396858
+'{''mm'': ''random'', ''qa'': ''episodic_semantic'', ''explore'': ''avoid_walls'', ''pretrain_semantic'': False}':
+  mean: 246.84
+  std: 33.37817250839237
+'{''mm'': ''random'', ''qa'': ''episodic_semantic'', ''explore'': ''avoid_walls'', ''pretrain_semantic'': ''exclude_walls''}':
+  mean: 243.38000000000002
+  std: 20.51413171450355
+'{''mm'': ''episodic'', ''qa'': ''episodic_semantic'', ''explore'': ''random'', ''pretrain_semantic'': False}':
+  mean: 97.32000000000001
+  std: 8.730956419545342
+'{''mm'': ''episodic'', ''qa'': ''episodic_semantic'', ''explore'': ''random'', ''pretrain_semantic'': ''exclude_walls''}':
+  mean: 97.32000000000001
+  std: 8.730956419545342
+'{''mm'': ''episodic'', ''qa'': ''episodic_semantic'', ''explore'': ''avoid_walls'', ''pretrain_semantic'': False}':
+  mean: 136.5
+  std: 15.034360644869473
+'{''mm'': ''episodic'', ''qa'': ''episodic_semantic'', ''explore'': ''avoid_walls'', ''pretrain_semantic'': ''exclude_walls''}':
+  mean: 151.12
+  std: 10.340483547687706
+'{''mm'': ''semantic'', ''qa'': ''episodic_semantic'', ''explore'': ''random'', ''pretrain_semantic'': False}':
+  mean: 141.35999999999999
+  std: 22.59748658590154
+'{''mm'': ''semantic'', ''qa'': ''episodic_semantic'', ''explore'': ''random'', ''pretrain_semantic'': ''exclude_walls''}':
+  mean: 160.38000000000002
+  std: 11.940083751800069
+'{''mm'': ''semantic'', ''qa'': ''episodic_semantic'', ''explore'': ''avoid_walls'', ''pretrain_semantic'': False}':
+  mean: 159.76
+  std: 18.08940021117339
+'{''mm'': ''semantic'', ''qa'': ''episodic_semantic'', ''explore'': ''avoid_walls'', ''pretrain_semantic'': ''exclude_walls''}':
+  mean: 202.04000000000002
+  std: 16.343390101199933
+'{mm: neural, qa: episodic_semantic, explore: avoid_walls}':
+  mean: 311.9
+  std: 116.7608239093918

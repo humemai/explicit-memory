@@ -1,12 +1,11 @@
 # Agent for RoomEnv-v2
 
 This repo is to train an agent that interacts with the [RoomEnv-v2](https://github.com/tae898/room-env).
-The agent is trained with rainbow DQN
 
 ## Prerequisites
 
 1. A unix or unix-like x86 machine
-1. python 3.8 or higher.
+1. python 3.10 or higher.
 1. Running in a virtual environment (e.g., conda, virtualenv, etc.) is highly recommended so that you don't mess up with the system python.
 1. Make sure you are in the same directory where this README is located, i.e., `RoomEnv2`
 1. Install the `explicit_memory` python package, by running `pip install ..`
@@ -23,7 +22,17 @@ checkpoints will be saved at [`./training_results/`](./training_results/).
 
 ## Results
 
-Also check out [`./models/`](./models) to see the saved training results.
+| Comparison of our methods and the baseline |
+| :----------------------------------------: |
+|      ![](./figures/final-results.png)      |
+
+|    Q-values of $\\pi\_{mm}$ (test)     |    Q-values of $\\pi\_{explore}$ (test)     | Q-values of $\\pi\_{explore}$ (baseline history room size of 24) (test) |
+| :---------------------------------: | :--------------------------------------: | :------------------------------------------------------------------: |
+| ![](./figures/q-values-test-mm.png) | ![](./figures/q-values-test-explore.png) | ![](./figures/q-values-test-baseline.png)  |
+
+Also check out [`./trained-agents/`](./trained-agents) to see the saved training results.
+
+## Results
 
 ## Contributing
 

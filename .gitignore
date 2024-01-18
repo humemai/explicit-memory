@@ -144,3 +144,6 @@ train_test_dir_to_remove/
 DELETE_SOON
 
 DEBUG/
+
+# pdoc
+_docs/

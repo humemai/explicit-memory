@@ -1,31 +1,25 @@
 """DQN LSTM Baseline Agent for the RoomEnv2 environment."""
-import os
-from copy import deepcopy
 import datetime
-import shutil
+import os
 import random
+import shutil
+from copy import deepcopy
 from typing import Literal
 
-from tqdm.auto import trange
 import gymnasium as gym
 import numpy as np
 import torch
 import torch.optim as optim
 from room_env.envs.room2 import RoomEnv2
+from tqdm.auto import trange
 
-from explicit_memory.utils import (
-    ReplayBuffer,
-    is_running_notebook,
-    plot_results,
-    save_dqn_final_results,
-    save_dqn_validation,
-    save_states_q_values_actions,
-    write_yaml,
-    select_dqn_action,
-    positional_encoding,
-    update_dqn_model,
-    dqn_target_hard_update,
-)
+from explicit_memory.utils import (ReplayBuffer, dqn_target_hard_update,
+                                   is_running_notebook, plot_results,
+                                   positional_encoding, save_dqn_final_results,
+                                   save_dqn_validation,
+                                   save_states_q_values_actions,
+                                   select_dqn_action, update_dqn_model,
+                                   write_yaml)
 
 
 class LSTM(torch.nn.Module):

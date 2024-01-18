@@ -13,17 +13,25 @@ import torch.optim as optim
 from IPython.display import clear_output
 from tqdm.auto import tqdm, trange
 
-from explicit_memory.memory import (EpisodicMemory, MemorySystems,
-                                    SemanticMemory, ShortMemory)
+from explicit_memory.memory import (
+    EpisodicMemory,
+    MemorySystems,
+    SemanticMemory,
+    ShortMemory,
+)
 from explicit_memory.nn import LSTM
-from explicit_memory.policy import (answer_question, encode_observation,
-                                    manage_memory)
-from explicit_memory.utils import (ReplayBuffer, dqn_target_hard_update,
-                                   plot_results, save_dqn_final_results,
-                                   save_dqn_validation,
-                                   save_states_q_values_actions,
-                                   select_dqn_action, update_dqn_model,
-                                   write_yaml)
+from explicit_memory.policy import answer_question, encode_observation, manage_memory
+from explicit_memory.utils import (
+    ReplayBuffer,
+    dqn_target_hard_update,
+    plot_results,
+    save_dqn_final_results,
+    save_dqn_validation,
+    save_states_q_values_actions,
+    select_dqn_action,
+    update_dqn_model,
+    write_yaml,
+)
 
 from .handcrafted import HandcraftedAgent
 
@@ -68,6 +76,9 @@ class DQNAgent(HandcraftedAgent):
                 "human_embedding_on_object_location": False,
             },
             "v2_params": None,
+            "include_positional_encoding": False,
+            "max_timesteps": None,
+            "max_strength": None,
         },
         run_test: bool = True,
         num_samples_for_results: int = 10,

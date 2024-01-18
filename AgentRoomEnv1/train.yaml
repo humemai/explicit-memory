@@ -21,6 +21,9 @@ nn_params:
     include_human: sum
     human_embedding_on_object_location: false
   v2_params: null
+  include_positional_encoding: false
+  max_timesteps: null
+  max_strength: null
 run_test: true
 num_samples_for_results: 10
 plotting_interval: 10

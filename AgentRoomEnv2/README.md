@@ -26,9 +26,9 @@ checkpoints will be saved at [`./training_results/`](./training_results/).
 | :----------------------------------------: |
 |      ![](./figures/final-results.png)      |
 
-|   Q-values of $\\pi\_{mm}$ (test)   |   Q-values of $\\pi\_{explore}$ (test)   | Q-values of $\\pi\_{explore}$ (baseline history room size of 24) (test) |
-| :---------------------------------: | :--------------------------------------: | :---------------------------------------------------------------------: |
-| ![](./figures/q-values-test-mm.png) | ![](./figures/q-values-test-explore.png) |                ![](./figures/q-values-test-baseline.png)                |
+| Q-values of memory management policy (test) |    Q-values of explore policy (test)     | Q-values of explore policy (baseline history room size of 24) (test) |
+| :-----------------------------------------: | :--------------------------------------: | :------------------------------------------------------------------: |
+|     ![](./figures/q-values-test-mm.png)     | ![](./figures/q-values-test-explore.png) |              ![](./figures/q-values-test-baseline.png)               |
 
 Also check out [`./trained-agents/`](./trained-agents) to see the saved training results.
 

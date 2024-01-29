@@ -1,10 +1,13 @@
 # TODOs
 
-## Tests
+## Remaining
 
-### Remaining
+1. Implement GNN (StarE)
+   1. Write tests
+2. Implement PPO
+   1. Write tests
 
-### Done
+## Done
 
 1. memory managemt neural network loading
 1. LSTM with new params
@@ -15,17 +18,3 @@
 1. positional encoding
 1. avoid_walls
 1. split_reward_training (?)
-
-## Neural Networks
-
-### GNN (StarE)
-
-## RL algorithms
-
-### DQN variants
-
-1. Rainbow
-
-### Policy-gradient variants
-
-1. PPO

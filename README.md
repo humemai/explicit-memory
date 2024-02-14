@@ -1,5 +1,7 @@
 # explicit-memory
 
+[![DOI](https://zenodo.org/badge/411241603.svg)](https://zenodo.org/badge/latestdoi/411241603)
+
 This repo hosts several (RL) agents that learn their policies by interacting with the
 [gymnasium](https://gymnasium.farama.org/) environments.
 

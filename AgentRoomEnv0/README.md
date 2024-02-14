@@ -1,5 +1,7 @@
 # Agent for RoomEnv-v0
 
+[![DOI](https://img.shields.io/badge/Paper-PDF-red.svg)](https://arxiv.org/abs/2204.01611)
+
 This repo is to train an agent that interacts with the [RoomEnv-v0](https://github.com/tae898/room-env).
 The agent is not trained with RL, but with heuristics. See the paper ["A Machine With Human-Like Memory Systems"](https://arxiv.org/abs/2204.01611) for more information.
 
@@ -8,8 +10,9 @@ The agent is not trained with RL, but with heuristics. See the paper ["A Machine
 1. A unix or unix-like x86 machine
 1. python 3.10 or higher.
 1. Running in a virtual environment (e.g., conda, virtualenv, etc.) is highly recommended so that you don't mess up with the system python.
-1. Make sure you are in the same directory where this README is located, i.e., `RoomEnv0`
+1. Make sure you are in the same directory where this README is located, i.e., `AgentRoomEnv0`
 1. Install the `explicit_memory` python package, by running `pip install ..`
+   1. This will install the gymnasium environment [RoomEnv0](https://github.com/tae898/room-env)
 1. `pip install -r requirements.txt`
 
 ## Run training
@@ -118,10 +121,6 @@ Contributions are what make the open source community such an amazing place to b
   copyright = {Creative Commons Attribution 4.0 International}
 }
 ```
-
-## Cite our code
-
-[![DOI](https://zenodo.org/badge/411241603.svg)](https://zenodo.org/badge/latestdoi/411241603)
 
 ## Authors
 

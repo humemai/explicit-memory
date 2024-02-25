@@ -5,24 +5,19 @@ import shutil
 from copy import deepcopy
 
 import gymnasium as gym
-import matplotlib.pyplot as plt
 import numpy as np
-import torch
-import torch.nn.functional as F
-import torch.optim as optim
-from IPython.display import clear_output
-from tqdm.auto import tqdm, trange
 
-from explicit_memory.memory import (EpisodicMemory, MemorySystems,
-                                    SemanticMemory, ShortMemory)
-from explicit_memory.nn import LSTM
-from explicit_memory.policy import (answer_question, encode_observation,
-                                    manage_memory)
-from explicit_memory.utils import ReplayBuffer, is_running_notebook, write_yaml
+from explicit_memory.memory import (
+    EpisodicMemory,
+    MemorySystems,
+    SemanticMemory,
+    ShortMemory,
+)
+from explicit_memory.policy import answer_question, encode_observation, manage_memory
+from explicit_memory.utils import write_yaml
 
 
 class HandcraftedAgent:
-
     """Handcrafted agent interacting with environment. This agent is not trained.
     Only one of the three agents, i.e., random, episodic_only, and semantic_only are
     suported

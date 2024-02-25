@@ -8,17 +8,19 @@ from tqdm.auto import trange
 
 from explicit_memory.nn import LSTM
 from explicit_memory.policy import answer_question, encode_observation, manage_memory
-from explicit_memory.utils import (
+from explicit_memory.utils import write_yaml
+
+from explicit_memory.utils.dqn import (
     ReplayBuffer,
-    dqn_target_hard_update,
+    target_hard_update,
     plot_results,
-    save_dqn_final_results,
-    save_dqn_validation,
+    save_final_results,
+    save_validation,
     save_states_q_values_actions,
-    select_dqn_action,
-    update_dqn_model,
-    write_yaml,
+    select_action,
+    update_model,
 )
+
 
 from .handcrafted import HandcraftedAgent
 
@@ -39,15 +41,15 @@ class DQNAgent(HandcraftedAgent):
             "allow_random_question": False,
             "check_resources": True,
         },
-        num_iterations: int = 128 * 16,
-        replay_buffer_size: int = 1024,
-        warm_start: int = 1024,
-        batch_size: int = 1024,
+        num_iterations: int = 128 * 20,
+        replay_buffer_size: int = 128 * 20,
+        epsilon_decay_until: float = 128 * 20,
+        warm_start: int = 128 * 10,
+        batch_size: int = 128,
         target_update_interval: int = 10,
-        epsilon_decay_until: float = 128 * 16,
         max_epsilon: float = 1.0,
         min_epsilon: float = 0.1,
-        gamma: float = 0.65,
+        gamma: float = 0.9,
         capacity: dict = {
             "episodic": 16,
             "semantic": 16,
@@ -57,15 +59,16 @@ class DQNAgent(HandcraftedAgent):
         nn_params: dict = {
             "hidden_size": 64,
             "num_layers": 2,
-            "embedding_dim": 32,
+            "embedding_dim": 64,
             "v1_params": {
                 "include_human": "sum",
                 "human_embedding_on_object_location": False,
             },
             "v2_params": None,
-            "include_positional_encoding": False,
-            "max_timesteps": None,
-            "max_strength": None,
+            "fuse_information": "sum",
+            "include_positional_encoding": True,
+            "max_timesteps": 128,
+            "max_strength": 128,
         },
         run_test: bool = True,
         num_samples_for_results: int = 10,
@@ -73,8 +76,8 @@ class DQNAgent(HandcraftedAgent):
         train_seed: int = 42,
         test_seed: int = 42,
         device: str = "cpu",
-        ddqn: bool = False,
-        dueling_dqn: bool = False,
+        ddqn: bool = True,
+        dueling_dqn: bool = True,
         default_root_dir: str = "./training_results/",
     ):
         """Initialization.
@@ -163,6 +166,9 @@ class DQNAgent(HandcraftedAgent):
         self.nn_params["memory_of_interest"] = ["episodic", "semantic", "short"]
         self.nn_params["n_actions"] = len(self.action2str)
         self.nn_params["dueling_dqn"] = self.dueling_dqn
+        self.nn_params["is_dqn_or_ppo"] = "dqn"
+        self.nn_params["is_actor"] = False
+        self.nn_params["is_critic"] = False
 
         # networks: dqn, dqn_target
         self.dqn = LSTM(**self.nn_params)
@@ -191,7 +197,7 @@ class DQNAgent(HandcraftedAgent):
 
             while True:
                 state = self.memory_systems.return_as_a_dict_list()
-                action, q_values_ = select_dqn_action(
+                action, q_values_ = select_action(
                     state=state,
                     greedy=False,
                     dqn=self.dqn,
@@ -233,7 +239,7 @@ class DQNAgent(HandcraftedAgent):
 
         self.epsilons = []
         self.training_loss = []
-        self.scores = {"train": [], "validation": [], "test": None}
+        self.scores = {"train": [], "val": [], "test": None}
 
         self.init_memory_systems()
         (observation, question), info = self.env.reset()
@@ -243,7 +249,7 @@ class DQNAgent(HandcraftedAgent):
         bar = trange(1, self.num_iterations + 1)
         for self.iteration_idx in bar:
             state = self.memory_systems.return_as_a_dict_list()
-            action, q_values_ = select_dqn_action(
+            action, q_values_ = select_action(
                 state=state,
                 greedy=False,
                 dqn=self.dqn,
@@ -287,7 +293,7 @@ class DQNAgent(HandcraftedAgent):
                 (observation, question), info = self.env.reset()
                 encode_observation(self.memory_systems, observation)
 
-            loss = update_dqn_model(
+            loss = update_model(
                 replay_buffer=self.replay_buffer,
                 optimizer=self.optimizer,
                 device=self.device,
@@ -308,28 +314,14 @@ class DQNAgent(HandcraftedAgent):
 
             # if hard update is needed
             if self.iteration_idx % self.target_update_interval == 0:
-                dqn_target_hard_update(dqn=self.dqn, dqn_target=self.dqn_target)
+                target_hard_update(dqn=self.dqn, dqn_target=self.dqn_target)
 
             # plotting & show training results
             if (
                 self.iteration_idx == self.num_iterations
                 or self.iteration_idx % self.plotting_interval == 0
             ):
-                plot_results(
-                    self.scores,
-                    self.training_loss,
-                    self.epsilons,
-                    self.q_values,
-                    self.iteration_idx,
-                    self.action_space.n.item(),
-                    self.num_iterations,
-                    self.env.total_maximum_episode_rewards,
-                    self.num_validation,
-                    self.num_samples_for_results,
-                    self.default_root_dir,
-                    "all",
-                    True,
-                )
+                self.plot_results("all", True)
         with torch.no_grad():
             self.test()
 
@@ -361,7 +353,7 @@ class DQNAgent(HandcraftedAgent):
                 if save_results:
                     states.append(deepcopy(state))
 
-                action, q_values_ = select_dqn_action(
+                action, q_values_ = select_action(
                     state=state,
                     greedy=True,
                     dqn=self.dqn,
@@ -369,7 +361,7 @@ class DQNAgent(HandcraftedAgent):
                     action_space=self.action_space,
                 )
                 if save_results:
-                    q_values.append(deepcopy(q_values_))
+                    q_values.append(q_values_)
                     actions.append(action)
                     self.q_values["val"].append(q_values_)
 
@@ -394,7 +386,7 @@ class DQNAgent(HandcraftedAgent):
 
             scores_temp.append(score)
 
-        save_dqn_validation(
+        save_validation(
             scores_temp=scores_temp,
             scores=self.scores,
             default_root_dir=self.default_root_dir,
@@ -448,7 +440,7 @@ class DQNAgent(HandcraftedAgent):
                 if save_results:
                     states.append(deepcopy(state))
 
-                action, q_values_ = select_dqn_action(
+                action, q_values_ = select_action(
                     state=state,
                     greedy=True,
                     dqn=self.dqn,
@@ -456,7 +448,7 @@ class DQNAgent(HandcraftedAgent):
                     action_space=self.action_space,
                 )
                 if save_results:
-                    q_values.append(deepcopy(q_values_))
+                    q_values.append(q_values_)
                     actions.append(action)
                     self.q_values["test"].append(q_values_)
 
@@ -483,7 +475,7 @@ class DQNAgent(HandcraftedAgent):
 
         self.scores["test"] = scores
 
-        save_dqn_final_results(
+        save_final_results(
             self.scores,
             self.training_loss,
             self.default_root_dir,
@@ -494,6 +486,24 @@ class DQNAgent(HandcraftedAgent):
             states, q_values, actions, self.default_root_dir, "test"
         )
 
+        self.plot_results("all", True)
+
+        self.env.close()
+        self.dqn.train()
+
+    def plot_results(self, to_plot: str = "all", save_fig: bool = False) -> None:
+        """Plot things for DQN training.
+
+        Args:
+            to_plot: what to plot:
+                training_td_loss
+                epsilons
+                scores
+                q_values_train
+                q_values_val
+                q_values_test
+
+        """
         plot_results(
             self.scores,
             self.training_loss,
@@ -503,11 +513,7 @@ class DQNAgent(HandcraftedAgent):
             self.action_space.n.item(),
             self.num_iterations,
             self.env.unwrapped.total_maximum_episode_rewards,
-            self.num_validation,
-            self.num_samples_for_results,
             self.default_root_dir,
-            "all",
-            True,
+            to_plot,
+            save_fig,
         )
-        self.env.close()
-        self.dqn.train()

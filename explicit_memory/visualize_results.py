@@ -1,25 +1,11 @@
 """Utility functions."""
-import csv
-import json
+
 import logging
 import os
-import pickle
-import random
 import shutil
-from collections import deque
-from copy import deepcopy
-from glob import glob
-from typing import Deque, Literal, Optional, Union
+from typing import Literal
 
-import gymnasium as gym
-import matplotlib.pyplot as plt
-import numpy as np
-import torch
-import torch.nn.functional as F
-import yaml
-from IPython.display import clear_output
 from room_env.envs.room2 import RoomEnv2
-from tqdm.auto import tqdm
 
 from .policy import answer_question, encode_observation, explore, manage_memory
 from .utils import read_pickle, write_yaml

@@ -346,7 +346,7 @@ def manage_memory(
         state = memory_systems.return_as_a_dict_list()
         with torch.no_grad():
             q_values = (
-                mm_policy_model(np.array([state])).detach().cpu().numpy().tolist()[0]
+                mm_policy_model(np.array([state])).detach().cpu().tolist()[0]
             )
         selected_action = argmax(q_values)
         assert selected_action in [0, 1, 2]

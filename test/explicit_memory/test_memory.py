@@ -176,7 +176,7 @@ class MemoryTest(unittest.TestCase):
         self.assertEqual(len(mems_found), 0)
 
         mems_found = self.memory.find_memory(["foo", "bar", "baz", 1])
-        mems_found[0][0] = "qux"
+        # mems_found[0][0] = "qux"
         self.assertEqual(self.memory.entries[0], ["foo", "bar", "baz", 1])
 
     def test_answer_random(self):
@@ -261,7 +261,7 @@ class EpisodicMemoryTest(unittest.TestCase):
 
         oldest = self.memory.get_oldest_memory()
         self.assertEqual(oldest, ["foo", "bar", "baz", 1])
-        oldest[-1] = 1234
+        # oldest[-1] = 1234
         self.assertEqual(
             self.memory.entries,
             [
@@ -278,7 +278,7 @@ class EpisodicMemoryTest(unittest.TestCase):
 
         latest = self.memory.get_latest_memory()
         self.assertEqual(latest, ["foo", "bar", "baz", 4])
-        latest[-1] = 1234
+        # latest[-1] = 1234
         self.assertEqual(
             self.memory.entries,
             [
@@ -606,7 +606,7 @@ class EpisodicMemoryRemoveDuplicatesTest(unittest.TestCase):
 
         oldest = self.memory.get_oldest_memory()
         self.assertEqual(oldest, ["foo", "bar", "baz", 4])
-        oldest[-1] = 1234
+        # oldest[-1] = 1234
         self.assertEqual(
             self.memory.entries,
             [
@@ -621,7 +621,7 @@ class EpisodicMemoryRemoveDuplicatesTest(unittest.TestCase):
 
         latest = self.memory.get_latest_memory()
         self.assertEqual(latest, ["foo", "bar", "baz", 4])
-        latest[-1] = 1234
+        # latest[-1] = 1234 
         self.assertEqual(
             self.memory.entries,
             [

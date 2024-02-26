@@ -1,4 +1,5 @@
 """DQN LSTM Baseline Agent for the RoomEnv2 environment."""
+
 import datetime
 import os
 import random
@@ -13,13 +14,17 @@ import torch.optim as optim
 from room_env.envs.room2 import RoomEnv2
 from tqdm.auto import trange
 
-from explicit_memory.utils import (ReplayBuffer, dqn_target_hard_update,
-                                   is_running_notebook, plot_results,
-                                   positional_encoding, save_dqn_final_results,
-                                   save_dqn_validation,
-                                   save_states_q_values_actions,
-                                   select_dqn_action, update_dqn_model,
-                                   write_yaml)
+from explicit_memory.utils import is_running_notebook, positional_encoding, write_yaml
+
+from explicit_memory.utils.dqn import (
+    target_hard_update,
+    plot_results,
+    save_final_results,
+    save_validation,
+    save_states_q_values_actions,
+    select_action,
+    update_model,
+)
 
 
 class LSTM(torch.nn.Module):
@@ -547,9 +552,9 @@ class DQNLSTMBaselineAgent:
 
             while True:
                 actions_qa = self.history.answer_questions(observations["questions"])
-                state = deepcopy({"data": self.history.to_list()})
+                state = {"data": self.history.to_list()}
                 # action_explore = self.str2action[self.history.explore("avoid_walls")]
-                action_explore, q_values_ = select_dqn_action(
+                action_explore, q_values_ = select_action(
                     state=state,
                     greedy=False,
                     dqn=self.dqn,
@@ -568,8 +573,14 @@ class DQNLSTMBaselineAgent:
 
                 self.history.add_block(observations["room"])
 
-                next_state = deepcopy({"data": self.history.to_list()})
-                transition = [state, action_explore, reward, next_state, done]
+                next_state = {"data": self.history.to_list()}
+                transition = [
+                    deepcopy(state),
+                    action_explore,
+                    reward,
+                    deepcopy(next_state),
+                    done,
+                ]
                 self.replay_buffer.store(*transition)
 
                 if done or len(self.replay_buffer) >= self.warm_start:
@@ -582,7 +593,7 @@ class DQNLSTMBaselineAgent:
 
         self.epsilons = []
         self.training_loss = []
-        self.scores = {"train": [], "validation": [], "test": None}
+        self.scores = {"train": [], "val": [], "test": None}
 
         self.dqn.train()
 
@@ -597,9 +608,9 @@ class DQNLSTMBaselineAgent:
                 self.history.add_block(observations["room"])
 
             actions_qa = self.history.answer_questions(observations["questions"])
-            state = deepcopy({"data": self.history.to_list()})
+            state = {"data": self.history.to_list()}
 
-            action_explore, q_values_ = select_dqn_action(
+            action_explore, q_values_ = select_action(
                 state=state,
                 greedy=False,
                 dqn=self.dqn,
@@ -621,8 +632,14 @@ class DQNLSTMBaselineAgent:
 
             if not done:
                 self.history.add_block(observations["room"])
-                next_state = deepcopy({"data": self.history.to_list()})
-                transition = [state, action_explore, reward, next_state, done]
+                next_state = {"data": self.history.to_list()}
+                transition = [
+                    deepcopy(state),
+                    action_explore,
+                    reward,
+                    deepcopy(next_state),
+                    done,
+                ]
                 self.replay_buffer.store(*transition)
 
                 training_episode_begins = False
@@ -635,7 +652,7 @@ class DQNLSTMBaselineAgent:
 
                 training_episode_begins = True
 
-            loss = update_dqn_model(
+            loss = update_model(
                 replay_buffer=self.replay_buffer,
                 optimizer=self.optimizer,
                 device=self.device,
@@ -656,7 +673,7 @@ class DQNLSTMBaselineAgent:
 
             # if hard update is needed
             if self.iteration_idx % self.target_update_interval == 0:
-                dqn_target_hard_update(dqn=self.dqn, dqn_target=self.dqn_target)
+                target_hard_update(dqn=self.dqn, dqn_target=self.dqn_target)
 
             # plotting & show training results
             if (
@@ -689,12 +706,12 @@ class DQNLSTMBaselineAgent:
 
             while True:
                 actions_qa = self.history.answer_questions(observations["questions"])
-                state = deepcopy({"data": self.history.to_list()})
+                state = {"data": self.history.to_list()}
 
                 if save_results:
                     states.append(deepcopy(state))
 
-                action_explore, q_values_ = select_dqn_action(
+                action_explore, q_values_ = select_action(
                     state=state,
                     greedy=True,
                     dqn=self.dqn,
@@ -702,7 +719,7 @@ class DQNLSTMBaselineAgent:
                     action_space=self.action_space,
                 )
                 if save_results:
-                    q_values.append(deepcopy(q_values_))
+                    q_values.append(q_values_)
                     actions.append(action_explore)
                     self.q_values[val_or_test].append(q_values_)
 
@@ -730,7 +747,7 @@ class DQNLSTMBaselineAgent:
         self.dqn.eval()
         scores_temp, states, q_values, actions = self.validate_test_middle("val")
 
-        save_dqn_validation(
+        save_validation(
             scores_temp=scores_temp,
             scores=self.scores,
             default_root_dir=self.default_root_dir,
@@ -758,7 +775,7 @@ class DQNLSTMBaselineAgent:
         scores, states, q_values, actions = self.validate_test_middle("test")
         self.scores["test"] = scores
 
-        save_dqn_final_results(
+        save_final_results(
             self.scores, self.training_loss, self.default_root_dir, self.q_values, self
         )
         save_states_q_values_actions(

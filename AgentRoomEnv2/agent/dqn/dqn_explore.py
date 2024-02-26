@@ -1,4 +1,5 @@
-"""DQN Agent for the RoomEnv2 environment."""
+"""DQN explore Agent for the RoomEnv2 environment."""
+
 import os
 from copy import deepcopy
 
@@ -7,17 +8,25 @@ import numpy as np
 import torch
 from tqdm.auto import trange
 
-from explicit_memory.policy import (answer_question, encode_observation,
-                                    explore, manage_memory)
-from explicit_memory.utils import (dqn_target_hard_update, read_pickle,
-                                   read_yaml, select_dqn_action,
-                                   update_dqn_model, write_yaml)
+from explicit_memory.policy import (
+    answer_question,
+    encode_observation,
+    explore,
+    manage_memory,
+)
+from explicit_memory.utils import write_yaml, read_pickle, read_yaml
+
+from explicit_memory.utils.dqn import (
+    target_hard_update,
+    select_action,
+    update_model,
+)
 
 from .dqn import DQNAgent
 
 
 class DQNExploreAgent(DQNAgent):
-    """DQN Agent interacting with environment.
+    """DQN explore Agent interacting with environment.
 
     Based on https://github.com/Curt-Park/rainbow-is-all-you-need/
     """
@@ -66,8 +75,9 @@ class DQNExploreAgent(DQNAgent):
         test_seed: int = 0,
         device: str = "cpu",
         mm_policy: str = "neural",
-        mm_agent_path: str
-        | None = "trained-agents/lstm-mm/2023-12-28 18:13:03.001952/agent.pkl",
+        mm_agent_path: (
+            str | None
+        ) = "trained-agents/lstm-mm/2023-12-28 18:13:03.001952/agent.pkl",
         qa_policy: str = "episodic_semantic",
         env_config: dict = {
             "question_prob": 1.0,
@@ -83,8 +93,7 @@ class DQNExploreAgent(DQNAgent):
         ddqn: bool = True,
         dueling_dqn: bool = True,
         default_root_dir: str = "./training_results/",
-        run_handcrafted_baselines: dict
-        | None = [
+        run_handcrafted_baselines: dict | None = [
             {
                 "mm": mm,
                 "qa": qa,
@@ -288,8 +297,8 @@ class DQNExploreAgent(DQNAgent):
                     for question in observations["questions"]
                 ]
                 state = self.memory_systems.return_as_a_dict_list()
-                action, q_values_ = select_dqn_action(
-                    state=deepcopy(state),
+                action, q_values_ = select_action(
+                    state=state,
                     greedy=False,
                     dqn=self.dqn,
                     epsilon=self.epsilon,
@@ -333,7 +342,7 @@ class DQNExploreAgent(DQNAgent):
 
         self.epsilons = []
         self.training_loss = []
-        self.scores = {"train": [], "validation": [], "test": None}
+        self.scores = {"train": [], "val": [], "test": None}
 
         self.dqn.train()
 
@@ -370,8 +379,8 @@ class DQNExploreAgent(DQNAgent):
             ]
 
             state = self.memory_systems.return_as_a_dict_list()
-            action, q_values_ = select_dqn_action(
-                state=deepcopy(state),
+            action, q_values_ = select_action(
+                state=state,
                 greedy=False,
                 dqn=self.dqn,
                 epsilon=self.epsilon,
@@ -417,7 +426,7 @@ class DQNExploreAgent(DQNAgent):
 
                 training_episode_begins = True
 
-            loss = update_dqn_model(
+            loss = update_model(
                 replay_buffer=self.replay_buffer,
                 optimizer=self.optimizer,
                 device=self.device,
@@ -438,7 +447,7 @@ class DQNExploreAgent(DQNAgent):
 
             # if hard update is needed
             if self.iteration_idx % self.target_update_interval == 0:
-                dqn_target_hard_update(dqn=self.dqn, dqn_target=self.dqn_target)
+                target_hard_update(dqn=self.dqn, dqn_target=self.dqn_target)
 
             # plotting & show training results
             if (
@@ -507,15 +516,15 @@ class DQNExploreAgent(DQNAgent):
                 if save_results:
                     states.append(deepcopy(state))
 
-                action, q_values_ = select_dqn_action(
-                    state=deepcopy(state),
+                action, q_values_ = select_action(
+                    state=state,
                     greedy=True,
                     dqn=self.dqn,
                     epsilon=self.epsilon,
                     action_space=self.action_space,
                 )
                 if save_results:
-                    q_values.append(deepcopy(q_values_))
+                    q_values.append(q_values_)
                     actions.append(action)
                     self.q_values[val_or_test].append(q_values_)
 

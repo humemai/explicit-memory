@@ -9,6 +9,7 @@ from explicit_memory.nn import LSTM
 class LSTMTest(unittest.TestCase):
     def test_v1_fuse_concat(self) -> None:
         config = {
+            "is_dqn_or_ppo": "dqn",
             "hidden_size": 16,
             "num_layers": 2,
             "n_actions": 3,
@@ -75,6 +76,7 @@ class LSTMTest(unittest.TestCase):
 
     def test_v1_fuse_sum(self) -> None:
         config = {
+            "is_dqn_or_ppo": "dqn",
             "hidden_size": 16,
             "num_layers": 2,
             "n_actions": 3,
@@ -141,6 +143,7 @@ class LSTMTest(unittest.TestCase):
 
     def test_v1_positional_encoding(self) -> None:
         config = {
+            "is_dqn_or_ppo": "dqn",
             "hidden_size": 16,
             "num_layers": 2,
             "n_actions": 3,
@@ -213,6 +216,7 @@ class LSTMTest(unittest.TestCase):
 
     def test_v2_fuse_concat(self) -> None:
         config = {
+            "is_dqn_or_ppo": "dqn",
             "hidden_size": 16,
             "num_layers": 2,
             "n_actions": 3,
@@ -272,6 +276,7 @@ class LSTMTest(unittest.TestCase):
 
     def test_v2_fuse_sum(self) -> None:
         config = {
+            "is_dqn_or_ppo": "dqn",
             "hidden_size": 16,
             "num_layers": 2,
             "n_actions": 3,

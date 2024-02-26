@@ -1,10 +1,9 @@
 """Memory system classes."""
+
 import logging
 import os
 import random
-from copy import deepcopy
 from pprint import pformat
-from typing import Union
 
 import numpy as np
 
@@ -154,7 +153,7 @@ class Memory:
             mem: the first memory as a quadraple
 
         """
-        return deepcopy(self.entries[0])
+        return self.entries[0]
 
     def get_last_memory(self) -> None:
         """Get the last memory in the memory system.
@@ -163,7 +162,7 @@ class Memory:
             mem: the last memory as a quadraple
 
         """
-        return deepcopy(self.entries[-1])
+        return self.entries[-1]
 
     def answer_random(self, query: list) -> tuple[str, int]:
         """Answer the question with a uniform-randomly chosen memory.
@@ -324,7 +323,7 @@ class Memory:
         """
         Return the memories as a list of lists.
         """
-        return deepcopy(self.entries)
+        return self.entries
 
     def find_memory(self, mem_query: list) -> list:
         """Find memory.
@@ -348,7 +347,7 @@ class Memory:
                         if (mem_query[3] == mem[3]) or (mem_query[3] == "?"):
                             mems_found.append(mem)
 
-        return deepcopy(mems_found)
+        return mems_found
 
 
 class EpisodicMemory(Memory):
@@ -451,7 +450,7 @@ class EpisodicMemory(Memory):
         """
         logging.debug(f"Turning an observation {ob} into a episodic memory ...")
 
-        mem = deepcopy(ob)
+        mem = ob
 
         logging.info(f"Observation {ob} is now a episodic memory {mem}")
 
@@ -607,7 +606,7 @@ class ShortMemory(Memory):
         """
         logging.debug(f"Turning an observation {ob} into a short memory ...")
 
-        mem = deepcopy(ob)
+        mem = ob
 
         logging.info(f"Observation {ob} is now a short-term memory {mem}")
 
@@ -624,7 +623,7 @@ class ShortMemory(Memory):
             epi: An episodic memory as a quadruple: [head, relation, tail, timestamp]
 
         """
-        epi = deepcopy(short)
+        epi = short
         return epi
 
     @staticmethod
@@ -639,7 +638,7 @@ class ShortMemory(Memory):
             sem: A semantic memory as a quadruple: [head, relation, tail, NUM_GENERALIZED]
 
         """
-        sem = deepcopy(short)[:-1]
+        sem = short[:-1]
 
         if split_possessive:
             sem = [remove_posession(elem) for elem in sem]
@@ -719,7 +718,7 @@ class SemanticMemory(Memory):
                 the episodic memory system.
 
         """
-        self.semantic_knowledge = deepcopy(semantic_knowledge)
+        self.semantic_knowledge = semantic_knowledge
         for triple in self.semantic_knowledge:
             assert len(triple) == 3
             if self.is_full:

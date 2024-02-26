@@ -1,4 +1,4 @@
-"""DQN Agent for the RoomEnv2 environment.
+"""PPO Agent for the RoomEnv2 environment.
 
 This should be inherited. This itself should not be used.
 """
@@ -12,12 +12,11 @@ import torch.optim as optim
 from room_env.envs.room2 import RoomEnv2
 
 from explicit_memory.nn import LSTM
-from explicit_memory.utils.dqn import (
-    ReplayBuffer,
-    plot_results,
-    save_final_results,
+from explicit_memory.utils.ppo import (
+    save_states_actions_probs_values,
     save_validation,
-    save_states_q_values_actions,
+    save_final_results,
+    plot_results,
 )
 from explicit_memory.utils import is_running_notebook, write_yaml
 
@@ -25,24 +24,23 @@ from explicit_memory.utils import is_running_notebook, write_yaml
 from ..handcrafted import HandcraftedAgent
 
 
-class DQNAgent(HandcraftedAgent):
-    """DQN Agent interacting with environment.
+class PPOAgent(HandcraftedAgent):
+    """PPO Agent interacting with environment.
 
-    Based on https://github.com/Curt-Park/rainbow-is-all-you-need/
+    Based on https://github.com/MrSyee/pg-is-all-you-need
     """
 
     def __init__(
         self,
         env_str: str = "room_env:RoomEnv-v2",
-        num_iterations: int = 10000,
-        replay_buffer_size: int = 10000,
-        warm_start: int = 1000,
-        batch_size: int = 32,
-        target_update_interval: int = 10,
-        epsilon_decay_until: float = 10000,
-        max_epsilon: float = 1.0,
-        min_epsilon: float = 0.1,
+        num_episodes: int = 10,
+        rollout_multiples: int = 2,
+        epoch: int = 64,
+        batch_size: int = 128,
         gamma: float = 0.9,
+        tau: float = 0.8,
+        epsilon: float = 0.2,
+        entropy_weight: float = 0.005,
         capacity: dict = {
             "episodic": 16,
             "semantic": 16,
@@ -69,7 +67,6 @@ class DQNAgent(HandcraftedAgent):
         },
         run_test: bool = True,
         num_samples_for_results: int = 10,
-        plotting_interval: int = 10,
         train_seed: int = 5,
         test_seed: int = 0,
         device: str = "cpu",
@@ -87,8 +84,6 @@ class DQNAgent(HandcraftedAgent):
             "question_interval": 1,
             "include_walls_in_observations": True,
         },
-        ddqn: bool = True,
-        dueling_dqn: bool = True,
         default_root_dir: str = "./training_results/",
         run_handcrafted_baselines: dict | None = [
             {
@@ -106,45 +101,7 @@ class DQNAgent(HandcraftedAgent):
         """Initialization.
 
         Args:
-            env_str: This has to be "room_env:RoomEnv-v2"
-            num_iterations: The number of iterations to train the agent.
-            replay_buffer_size: The size of the replay buffer.
-            warm_start: The number of samples to fill the replay buffer with, before
-                starting
-            batch_size: The batch size for training This is the amount of samples sampled
-                from the replay buffer.
-            target_update_interval: The rate to update the target network.
-            epsilon_decay_until: The iteration index until which to decay epsilon.
-            max_epsilon: The maximum epsilon.
-            min_epsilon: The minimum epsilon.
-            gamma: The discount factor.
-            capacity: The capacity of each human-like memory systems.
-            pretrain_semantic: Whether or not to pretrain the semantic memory system.
-            nn_params: The parameters for the DQN (function approximator).
-            run_test: Whether or not to run test.
-            num_samples_for_results: The number of samples to validate / test the agent.
-            plotting_interval: The interval to plot the results.
-            train_seed: The random seed for train.
-            test_seed: The random seed for test.
-            device: The device to run the agent on. This is either "cpu" or "cuda".
-            mm_policy: Memory management policy. Choose one of "generalize",
-                "random", "rl", or "neural"
-            qa_policy: question answering policy Choose one of "episodic_semantic",
-                "random", or "neural". qa_policy shouldn't be trained with RL. There is no
-                sequence of states / actions to learn from.
-            explore_policy: The room exploration policy. Choose one of "random",
-                "avoid_walls", "rl", or "neural"
-            env_config: The configuration of the environment.
-                question_prob: The probability of a question being asked at every
-                    observation.
-                terminates_at: The maximum number of steps to take in an episode.
-                seed: seed for env
-                room_size: The room configuration to use. Choose one of "dev", "xxs", "xs",
-                    "s", "m", or "l".
-            ddqn: wehther to use double dqn
-            dueling_dqn: whether to use dueling dqn
-            default_root_dir: default root directory to store the results.
-            run_handcrafted_baselines: Whether or not to run the handcrafted baselines.
+
 
         """
         self.train_seed = train_seed
@@ -162,60 +119,58 @@ class DQNAgent(HandcraftedAgent):
             pretrain_semantic=pretrain_semantic,
             default_root_dir=default_root_dir,
         )
-
+        self.num_steps_in_episode = self.env.unwrapped.terminates_at + 1
+        self.total_maximum_episode_rewards = (
+            self.env.unwrapped.total_maximum_episode_rewards
+        )
         self.device = torch.device(device)
         print(f"Running on {self.device}")
-
-        self.ddqn = ddqn
-        self.dueling_dqn = dueling_dqn
 
         self.nn_params = nn_params
         self.nn_params["capacity"] = self.capacity
         self.nn_params["device"] = self.device
         self.nn_params["entities"] = self.env.unwrapped.entities
         self.nn_params["relations"] = self.env.unwrapped.relations
-        self.nn_params["dueling_dqn"] = self.dueling_dqn
-        self.nn_params["is_dqn_or_ppo"] = "dqn"
-        self.nn_params["is_actor"] = False
-        self.nn_params["is_critic"] = False
 
         self.val_filenames = []
         self.is_notebook = is_running_notebook()
-        self.num_iterations = num_iterations
-        self.plotting_interval = plotting_interval
+
+        self.num_episodes = num_episodes
+        self.rollout_multiples = rollout_multiples
+        self.epoch = epoch
+        self.batch_size = batch_size
+        self.gamma = gamma
+        self.tau = tau
+        self.epsilon = epsilon
+        self.entropy_weight = entropy_weight
+
         self.run_test = run_test
         self.run_handcrafted_baselines = run_handcrafted_baselines
 
-        self.replay_buffer_size = replay_buffer_size
-        self.batch_size = batch_size
-        self.epsilon = max_epsilon
-        self.max_epsilon = max_epsilon
-        self.min_epsilon = min_epsilon
-        self.epsilon_decay_until = epsilon_decay_until
-        self.target_update_interval = target_update_interval
-        self.gamma = gamma
-        self.warm_start = warm_start
-        assert self.batch_size <= self.warm_start <= self.replay_buffer_size
-
-        # networks: dqn, dqn_target
         if self.nn_params["architecture"].lower() == "lstm":
             function_approximator = LSTM
             del self.nn_params["architecture"]
         elif self.nn_params["architecture"].lower() == "stare":
             raise NotImplementedError
-        self.dqn = function_approximator(**self.nn_params)
-        self.dqn_target = function_approximator(**self.nn_params)
-        self.dqn_target.load_state_dict(self.dqn.state_dict())
-        self.dqn_target.eval()
 
-        self.replay_buffer = ReplayBuffer(
-            observation_type="dict", size=replay_buffer_size, batch_size=batch_size
+        self.actor = function_approximator(
+            **self.nn_params, is_dqn_or_ppo="ppo", is_actor=True, is_critic=False
+        )
+        self.critic = function_approximator(
+            **self.nn_params, is_dqn_or_ppo="ppo", is_actor=False, is_critic=True
         )
 
         # optimizer
-        self.optimizer = optim.Adam(self.dqn.parameters())
+        self.actor_optimizer = optim.Adam(self.actor.parameters())
+        self.critic_optimizer = optim.Adam(self.critic.parameters())
 
-        self.q_values = {"train": [], "val": [], "test": []}
+        # global stats to save
+        self.actor_losses, self.critic_losses = [], []  # training loss
+        self.states_all = {"train": [], "val": [], "test": []}
+        self.scores_all = {"train": [], "val": [], "test": None}
+        self.actions_all = {"train": [], "val": [], "test": []}
+        self.actor_probs_all = {"train": [], "val": [], "test": []}
+        self.critic_values_all = {"train": [], "val": [], "test": []}
 
         if self.run_handcrafted_baselines is not None:
             self.run_and_save_handcrafted_baselines()
@@ -255,85 +210,142 @@ class DQNAgent(HandcraftedAgent):
             }
         write_yaml(results, os.path.join(self.default_root_dir, "handcrafted.yaml"))
 
-    def fill_replay_buffer(self) -> None:
-        """Make the replay buffer full in the beginning with the uniformly-sampled
-        actions. The filling continues until it reaches the warm start size.
+    def create_empty_rollout_buffer(self) -> tuple[list, list, list, list, list, list]:
+        """Create empty buffer for training.
 
+        Make sure to call this before and after each rollout.
+
+        Returns:
+            states_buffer: The states.
+            actions_buffer: The actions.
+            rewards_buffer: The rewards.
+            values_buffer: The values.
+            masks_buffer: The masks.
+            log_probs_buffer: The log probabilities.
         """
-        pass
+        # memory for training
+        states_buffer: list[dict] = []  # this has to be a list of dictionaries
+        actions_buffer: list[torch.Tensor] = []
+        rewards_buffer: list[torch.Tensor] = []
+        values_buffer: list[torch.Tensor] = []
+        masks_buffer: list[torch.Tensor] = []
+        log_probs_buffer: list[torch.Tensor] = []
+
+        return (
+            states_buffer,
+            actions_buffer,
+            rewards_buffer,
+            values_buffer,
+            masks_buffer,
+            log_probs_buffer,
+        )
 
     def train(self) -> None:
         """Code for training"""
 
     def validate(self) -> None:
-        self.dqn.eval()
-        scores_temp, states, q_values, actions = self.validate_test_middle("val")
+        scores = self.validate_test_middle("val")
 
         save_validation(
-            scores_temp=scores_temp,
-            scores=self.scores,
+            scores=scores,
+            scores_all_val=self.scores_all["val"],
             default_root_dir=self.default_root_dir,
             num_validation=self.num_validation,
             val_filenames=self.val_filenames,
-            dqn=self.dqn,
+            actor=self.actor,
+            critic=self.critic,
         )
-        save_states_q_values_actions(
-            states, q_values, actions, self.default_root_dir, "val", self.num_validation
+
+        start = self.num_validation * self.num_steps_in_episode
+        end = (self.num_validation + 1) * self.num_steps_in_episode
+
+        save_states_actions_probs_values(
+            self.states_all["val"][start:end],
+            self.actions_all["val"][start:end],
+            self.actor_probs_all["val"][start:end],
+            self.critic_values_all["val"][start:end],
+            self.default_root_dir,
+            "val",
+            self.num_validation,
         )
+
         self.env.close()
         self.num_validation += 1
-        self.dqn.train()
+        self.actor.train()
+        self.critic.train()
 
     def test(self, checkpoint: str = None) -> None:
-        self.dqn.eval()
         self.env_config["seed"] = self.test_seed
         self.env = gym.make(self.env_str, **self.env_config)
+        self.actor.eval()
+        self.critic.eval()
 
         assert len(self.val_filenames) == 1
-        self.dqn.load_state_dict(torch.load(self.val_filenames[0]))
+        self.actor.load_state_dict(
+            torch.load(os.path.join(self.val_filenames[0], "actor.pt"))
+        )
+        self.critic.load_state_dict(
+            torch.load(os.path.join(self.val_filenames[0], "critic.pt"))
+        )
         if checkpoint is not None:
-            self.dqn.load_state_dict(torch.load(checkpoint))
+            self.actor.load_state_dict(os.path.join(torch.load(checkpoint), "actor.pt"))
+            self.critic.load_state_dict(
+                os.path.join(torch.load(checkpoint), "critic.pt")
+            )
 
-        scores, states, q_values, actions = self.validate_test_middle("test")
-        self.scores["test"] = scores
+        scores = self.validate_test_middle("test")
+
+        self.scores_all["test"] = scores
+
+        save_states_actions_probs_values(
+            self.states_all["test"],
+            self.actions_all["test"],
+            self.actor_probs_all["test"],
+            self.critic_values_all["test"],
+            self.default_root_dir,
+            "test",
+        )
 
         save_final_results(
-            self.scores, self.training_loss, self.default_root_dir, self.q_values, self
-        )
-        save_states_q_values_actions(
-            states, q_values, actions, self.default_root_dir, "test"
+            self.scores_all,
+            self.actor_losses,
+            self.critic_losses,
+            self.default_root_dir,
+            self,
         )
 
-        self.plot_results("all", save_fig=True)
+        self.plot_results("all", True)
         self.env.close()
-        self.dqn.train()
+        self.actor.train()
+        self.critic.train()
 
     def plot_results(self, to_plot: str = "all", save_fig: bool = False) -> None:
-        """Plot things for DQN training.
+        """Plot things for ppo training.
 
         Args:
             to_plot: what to plot:
-                training_td_loss
-                epsilons
-                training_score
-                validation_score
-                test_score
-                q_values_train
-                q_values_val
-                q_values_test
+                all: everything
+                actor_loss: actor loss
+                critic_loss: critic loss
+                scores: train, val, and test scores
+                actor_probs_train: actor probabilities for training
+                actor_probs_val: actor probabilities for validation
+                actor_probs_test: actor probabilities for test
+                critic_values_train: critic values for training
+                critic_values_val: critic values for validation
+                critic_values_test: critic values for test
 
         """
         plot_results(
-            self.scores,
-            self.training_loss,
-            self.epsilons,
-            self.q_values,
-            self.iteration_idx,
-            self.action_space.n.item(),
-            self.num_iterations,
-            self.env.unwrapped.total_maximum_episode_rewards,
+            self.scores_all,
+            self.actor_losses,
+            self.critic_losses,
+            self.actor_probs_all,
+            self.critic_values_all,
             self.num_validation,
-            self.num_samples_for_results,
+            self.action_space.n.item(),
+            self.num_episodes,
+            self.total_maximum_episode_rewards,
             self.default_root_dir,
             to_plot,
             save_fig,

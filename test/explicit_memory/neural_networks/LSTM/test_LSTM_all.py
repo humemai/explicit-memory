@@ -25,6 +25,7 @@ class LSTMTest(unittest.TestCase):
                                             for fuse_information in ["concat", "sum"]:
                                                 configs.append(
                                                     {
+                                                        "is_dqn_or_ppo": "dqn",
                                                         "hidden_size": hidden_size,
                                                         "num_layers": num_layers,
                                                         "n_actions": num_actions,
@@ -66,6 +67,7 @@ class LSTMTest(unittest.TestCase):
     def test_forward_v1(self) -> None:
         for fuse_information in ["concat", "sum"]:
             config = {
+                "is_dqn_or_ppo": "dqn",
                 "hidden_size": 64,
                 "num_layers": 2,
                 "n_actions": 3,
@@ -124,6 +126,7 @@ class LSTMTest(unittest.TestCase):
                 max_timesteps = 100
                 max_strength = 100
             config = {
+                "is_dqn_or_ppo": "dqn",
                 "hidden_size": 64,
                 "num_layers": 2,
                 "n_actions": 3,
@@ -171,6 +174,7 @@ class LSTMTest(unittest.TestCase):
     def test_make_categorical_embeddings(self) -> None:
         for make_categorical_embeddings in [True, False]:
             config = {
+                "is_dqn_or_ppo": "dqn",
                 "hidden_size": 4,
                 "num_layers": 2,
                 "n_actions": 3,

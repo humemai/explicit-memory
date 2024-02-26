@@ -1,3 +1,5 @@
+"""PPO Agent for the RoomEnv1 environment."""
+
 import os
 from copy import deepcopy
 
@@ -38,8 +40,8 @@ class PPOAgent(HandcraftedAgent):
             "allow_random_question": False,
             "check_resources": True,
         },
-        num_iterations: int = 128 * 20,
-        rollout_len: int = 2048,
+        num_episodes: int = 10,
+        rollout_multiples: int = 2,
         epoch: int = 64,
         batch_size: int = 128,
         gamma: float = 0.9,
@@ -79,7 +81,7 @@ class PPOAgent(HandcraftedAgent):
         Args:
             env_str: This has to be "room_env:RoomEnv-v1"
             env_config: The configuration of the environment.
-            num_iterations: The number of iterations to train the agent.
+            num_episodes: The number of iterations to train the agent.
             replay_buffer_size: The size of the replay buffer.
             batch_size: The batch size for training This is the amount of samples
                 sampled from the replay buffer.
@@ -117,7 +119,7 @@ class PPOAgent(HandcraftedAgent):
         write_yaml(self.all_params, os.path.join(self.default_root_dir, "train.yaml"))
 
         self.val_filenames = []
-        self.num_iterations = num_iterations
+        self.num_episodes = num_episodes
         self.plotting_interval = plotting_interval
         self.run_test = run_test
         self.device = torch.device(device)
@@ -128,13 +130,13 @@ class PPOAgent(HandcraftedAgent):
         self.gamma = gamma
         self.tau = tau
         self.epoch = epoch
-        self.rollout_len = rollout_len
+        self.rollout_multiples = rollout_multiples
         self.entropy_weight = entropy_weight
 
-        assert self.num_iterations % self.rollout_len == 0
-        assert self.rollout_len > self.env.unwrapped.total_maximum_episode_rewards
-        assert self.rollout_len % self.env.unwrapped.total_maximum_episode_rewards == 0
-        assert self.batch_size <= self.rollout_len
+        self.num_steps_in_episode = self.env.unwrapped.des.until
+        self.total_maximum_episode_rewards = (
+            self.env.unwrapped.total_maximum_episode_rewards
+        )
 
         self.action2str = {
             0: "episodic",
@@ -166,6 +168,7 @@ class PPOAgent(HandcraftedAgent):
         self.actor_optimizer = optim.Adam(self.actor.parameters())
         self.critic_optimizer = optim.Adam(self.critic.parameters())
 
+        # global stats to save
         self.actor_losses, self.critic_losses = [], []  # training loss
         self.states_all = {"train": [], "val": [], "test": []}
         self.scores_all = {"train": [], "val": [], "test": None}
@@ -208,15 +211,9 @@ class PPOAgent(HandcraftedAgent):
 
         self.num_validation = 0
 
-        self.init_memory_systems()
-        (observation, question), info = self.env.reset()
-        encode_observation(self.memory_systems, observation)
-
         score = 0
-        num_outer_loop = self.num_iterations // self.rollout_len
-        bar = trange(1, num_outer_loop + 1)
+        bar = trange(1, self.num_episodes + 1)
         for self.outer_loop_idx in bar:
-
             (
                 states_buffer,
                 actions_buffer,
@@ -226,10 +223,21 @@ class PPOAgent(HandcraftedAgent):
                 log_probs_buffer,
             ) = self.create_empty_rollout_buffer()
 
-            for self.inner_loop_idx in range(1, self.rollout_len + 1):
-                self.iteration_idx = (
-                    self.outer_loop_idx - 1 * self.rollout_len
-                ) + self.inner_loop_idx  # not sure about this logic.
+            new_episode_starts = True
+            episode_idx = 0
+            for self.inner_loop_idx in range(
+                1, (self.rollout_multiples * self.num_steps_in_episode) + 1
+            ):
+
+                if episode_idx == (self.rollout_multiples - 1):
+                    is_last_episode = True
+                else:
+                    is_last_episode = False
+
+                if new_episode_starts:
+                    self.init_memory_systems()
+                    (observation, question), info = self.env.reset()
+                    encode_observation(self.memory_systems, observation)
 
                 state = self.memory_systems.return_as_a_dict_list()
                 action, actor_probs, critic_value = select_action(
@@ -242,10 +250,12 @@ class PPOAgent(HandcraftedAgent):
                     values=values_buffer,
                     log_probs=log_probs_buffer,
                 )
-                self.states_all["train"].append(None)  # this is a placeholder.
-                self.actions_all["train"].append(action)
-                self.actor_probs_all["train"].append(actor_probs)
-                self.critic_values_all["train"].append(critic_value)
+
+                if is_last_episode:
+                    self.states_all["train"].append(None)  # this is a placeholder.
+                    self.actions_all["train"].append(action)
+                    self.actor_probs_all["train"].append(actor_probs)
+                    self.critic_values_all["train"].append(critic_value)
 
                 manage_memory(
                     self.memory_systems,
@@ -278,21 +288,16 @@ class PPOAgent(HandcraftedAgent):
 
                 # if episode ends
                 if done:
-                    self.scores_all["train"].append(score)
+                    episode_idx += 1
+                    if is_last_episode:
+                        self.scores_all["train"].append(score)
+                        with torch.no_grad():
+                            self.validate()
+
                     score = 0
-                    with torch.no_grad():
-                        self.validate()
-
-                    self.init_memory_systems()
-                    (observation, question), info = self.env.reset()
-                    encode_observation(self.memory_systems, observation)
-
-                # plotting & show training results
-                if (
-                    self.iteration_idx == self.num_iterations
-                    or self.iteration_idx % self.plotting_interval == 0
-                ):
-                    self.plot_results("all", True)
+                    new_episode_starts = True
+                else:
+                    new_episode_starts = False
 
             actor_loss, critic_loss = update_model(
                 next_state,
@@ -316,6 +321,9 @@ class PPOAgent(HandcraftedAgent):
 
             self.actor_losses.append(actor_loss)
             self.critic_losses.append(critic_loss)
+
+            # plotting & show training results
+            self.plot_results("all", True)
 
         with torch.no_grad():
             self.test()
@@ -381,9 +389,8 @@ class PPOAgent(HandcraftedAgent):
                     info,
                 ) = self.env.step(answer)
                 score += reward
-
-                encode_observation(self.memory_systems, observation)
                 done = done or truncated
+                encode_observation(self.memory_systems, observation)
 
             scores.append(score)
 
@@ -397,10 +404,8 @@ class PPOAgent(HandcraftedAgent):
             critic=self.critic,
         )
 
-        start = self.num_validation * self.env.unwrapped.total_maximum_episode_rewards
-        end = (
-            self.num_validation + 1
-        ) * self.env.unwrapped.total_maximum_episode_rewards
+        start = self.num_validation * self.num_steps_in_episode
+        end = (self.num_validation + 1) * self.num_steps_in_episode
 
         save_states_actions_probs_values(
             self.states_all["val"][start:end],
@@ -537,10 +542,10 @@ class PPOAgent(HandcraftedAgent):
             self.critic_losses,
             self.actor_probs_all,
             self.critic_values_all,
-            self.iteration_idx,
+            self.num_validation,
             self.action_space.n.item(),
-            self.num_iterations,
-            self.env.unwrapped.total_maximum_episode_rewards,
+            self.num_episodes,
+            self.total_maximum_episode_rewards,
             self.default_root_dir,
             to_plot,
             save_fig,

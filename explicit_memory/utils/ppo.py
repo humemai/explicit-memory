@@ -62,18 +62,13 @@ def select_action(
     """Select an action from the given state.
 
     Args:
-        actor: the actor model.
-        state: the current state.
-        is_test: if True, the agent is testing.
-        critic: the critic model.
-        states: a list of states (buffer).
-        actions: a list of actions (buffer).
-        values: a list of values (buffer).
-        log_probs: a list of log probabilities (buffer).
+        actor: the actor model. state: the current state. is_test: if True, the agent is
+        testing. critic: the critic model. states: a list of states (buffer). actions: a
+        list of actions (buffer). values: a list of values (buffer). log_probs: a list
+        of log probabilities (buffer).
 
     Returns:
-        selected_action: the action to take.
-        actor_probs: the actor probabilities.
+        selected_action: the action to take. actor_probs: the actor probabilities.
         critic_value: the critic values.
 
     """
@@ -131,22 +126,13 @@ def yield_mini_batches(
     """Yield mini-batches.
 
     Args:
-        epoch: the number of epochs.
-        mini_batch_size: the mini-batch size.
-        states: the states.
-        actions: the actions.
-        values: the values.
-        log_probs: the log probabilities.
-        returns: the returns.
-        advantages: the advantages.
+        epoch: the number of epochs. mini_batch_size: the mini-batch size. states: the
+        states. actions: the actions. values: the values. log_probs: the log
+        probabilities. returns: the returns. advantages: the advantages.
 
     Yields:
-        states: the states.
-        actions: the actions.
-        values: the values.
-        log_probs: the log probabilities.
-        returns: the returns.
-        advantages: the advantages.
+        states: the states. actions: the actions. values: the values. log_probs: the log
+        probabilities. returns: the returns. advantages: the advantages.
 
     """
     batch_size = states.shape[0]
@@ -183,27 +169,16 @@ def update_model(
     log_probs) to update the actor and critic models.
 
     Args:
-        next_state: the next state.
-        states: a list of states.
-        actions: a list of actions.
-        rewards: a list of rewards.
-        values: a list of values.
-        masks: a list of masks.
-        log_probs: a list of log probabilities.
-        gamma: the discount factor.
-        tau: the gae parameter.
-        epoch: the number of epochs.
-        batch_size: the mini-batch size.
-        epsilon: the clipping parameter.
-        entropy_weight: the entropy weight.
-        actor: the actor model.
-        critic: the critic model.
-        actor_optimizer: the actor optimizer.
+        next_state: the next state. states: a list of states. actions: a list of
+        actions. rewards: a list of rewards. values: a list of values. masks: a list of
+        masks. log_probs: a list of log probabilities. gamma: the discount factor. tau:
+        the gae parameter. epoch: the number of epochs. batch_size: the mini-batch size.
+        epsilon: the clipping parameter. entropy_weight: the entropy weight. actor: the
+        actor model. critic: the critic model. actor_optimizer: the actor optimizer.
         critic_optimizer: the critic optimizer.
 
     Returns:
-        actor_loss: the actor loss.
-        critic_loss: the critic loss.
+        actor_loss: the actor loss. critic_loss: the critic loss.
 
     """
     assert len(states) == len(actions) == len(rewards) == len(values) == len(masks), (
@@ -293,13 +268,11 @@ def save_validation(
 
     Args:
         scores: a list of validation scores for the current validation episode.
-        scores_all_val: all val scores
-        default_root_dir: the root directory where the results are saved.
-        num_validation: the current validation episode.
-        val_filenames: a list of filenames for the validation models.
-        actor: the actor model.
-        critic: the critic model.
-        if_duplicate_take_first: if True, take the first duplicate model. This will take
+        scores_all_val: all val scores default_root_dir: the root directory where the
+        results are saved. num_validation: the current validation episode.
+        val_filenames: a list of filenames for the validation models. actor: the actor
+        model. critic: the critic model. if_duplicate_take_first: if True, take the
+        first duplicate model. This will take
             the higher training loss model. If False, take the last duplicate model.
             This will take the lower training loss model.
     """
@@ -348,13 +321,10 @@ def save_states_actions_probs_values(
     """Save states and actions.
 
     Args:
-        states: a list of states.
-        actions: a list of actions.
-        actor_probs: a list of actor probabilities.
-        critic_values: a list of critic values.
-        default_root_dir: the root directory where the results are saved.
-        is_train_val_or_test: "val" or "test".
-        num_validation: the current validation episode.
+        states: a list of states. actions: a list of actions. actor_probs: a list of
+        actor probabilities. critic_values: a list of critic values. default_root_dir:
+        the root directory where the results are saved. is_train_val_or_test: "val" or
+        "test". num_validation: the current validation episode.
 
     """
     assert is_train_val_or_test in ["train", "val", "test"]
@@ -399,15 +369,11 @@ def plot_results(
 
     Args:
         to_plot: what to plot:
-            all: everything
-            actor_loss: actor loss
-            critic_loss: critic loss
-            scores: train, val, and test scores
-            actor_probs_train: actor probabilities for training
-            actor_probs_val: actor probabilities for validation
-            actor_probs_test: actor probabilities for test
-            critic_values_train: critic values for training
-            critic_values_val: critic values for validation
+            all: everything actor_loss: actor loss critic_loss: critic loss scores:
+            train, val, and test scores actor_probs_train: actor probabilities for
+            training actor_probs_val: actor probabilities for validation
+            actor_probs_test: actor probabilities for test critic_values_train: critic
+            values for training critic_values_val: critic values for validation
             critic_values_test: critic values for test
 
     """

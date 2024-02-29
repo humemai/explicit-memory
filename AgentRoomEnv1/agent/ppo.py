@@ -7,7 +7,7 @@ import numpy as np
 import gymnasium as gym
 import torch
 import torch.optim as optim
-from tqdm.auto import trange
+from tqdm.auto import tqdm
 
 from explicit_memory.nn import LSTM
 from explicit_memory.policy import answer_question, encode_observation, manage_memory
@@ -42,7 +42,7 @@ class PPOAgent(HandcraftedAgent):
         },
         num_episodes: int = 10,
         num_rollouts: int = 2,
-        epoch: int = 64,
+        epoch_per_rollout: int = 64,
         batch_size: int = 128,
         gamma: float = 0.9,
         tau: float = 0.8,
@@ -129,7 +129,7 @@ class PPOAgent(HandcraftedAgent):
         self.epsilon = epsilon
         self.gamma = gamma
         self.tau = tau
-        self.epoch = epoch
+        self.epoch_per_rollout = epoch_per_rollout
         self.num_rollouts = num_rollouts
         self.entropy_weight = entropy_weight
 
@@ -138,9 +138,14 @@ class PPOAgent(HandcraftedAgent):
             self.env.unwrapped.total_maximum_episode_rewards
         )
 
+        assert self.num_rollouts % self.num_episodes == 0
         assert (
             self.num_episodes / self.num_rollouts * self.num_steps_in_episode
         ).is_integer()
+
+        self.num_steps_per_rollout = int(
+            self.num_episodes / self.num_rollouts * self.num_steps_in_episode
+        )
 
         self.action2str = {
             0: "episodic",
@@ -218,12 +223,12 @@ class PPOAgent(HandcraftedAgent):
         self.init_memory_systems()
         (observation, question), info = self.env.reset()
         encode_observation(self.memory_systems, observation)
-        new_episode_starts = False
-        is_last_episode = False
 
+        new_episode_starts = True
         score = 0
-        bar = trange(1, self.num_episodes + 1)
-        for self.outer_loop_idx in bar:
+        episode_idx = 0
+
+        for rollout_idx in tqdm(range(self.num_rollouts)):
             (
                 states_buffer,
                 actions_buffer,
@@ -233,15 +238,7 @@ class PPOAgent(HandcraftedAgent):
                 log_probs_buffer,
             ) = self.create_empty_rollout_buffer()
 
-            episode_idx = 0
-            for self.inner_loop_idx in range(
-                1, int(self.num_rollouts * self.num_steps_in_episode) + 1
-            ):
-
-                # if episode_idx == (self.num_rollouts - 1):
-                #     is_last_episode = True
-                # else:
-                #     is_last_episode = False
+            for _ in range(self.num_steps_per_rollout):
 
                 if new_episode_starts:
                     self.init_memory_systems()
@@ -260,11 +257,10 @@ class PPOAgent(HandcraftedAgent):
                     log_probs=log_probs_buffer,
                 )
 
-                if is_last_episode:
-                    self.states_all["train"].append(None)  # this is a placeholder.
-                    self.actions_all["train"].append(action)
-                    self.actor_probs_all["train"].append(actor_probs)
-                    self.critic_values_all["train"].append(critic_value)
+                self.states_all["train"].append(None)  # this is a placeholder.
+                self.actions_all["train"].append(action)
+                self.actor_probs_all["train"].append(actor_probs)
+                self.critic_values_all["train"].append(critic_value)
 
                 manage_memory(
                     self.memory_systems,
@@ -298,10 +294,9 @@ class PPOAgent(HandcraftedAgent):
                 # if episode ends
                 if done:
                     episode_idx += 1
-                    if is_last_episode:
-                        self.scores_all["train"].append(score)
-                        with torch.no_grad():
-                            self.validate()
+                    self.scores_all["train"].append(score)
+                    with torch.no_grad():
+                        self.validate()
 
                     score = 0
                     new_episode_starts = True
@@ -318,7 +313,7 @@ class PPOAgent(HandcraftedAgent):
                 log_probs_buffer,
                 self.gamma,
                 self.tau,
-                self.epoch,
+                self.epoch_per_rollout,
                 self.batch_size,
                 self.epsilon,
                 self.entropy_weight,

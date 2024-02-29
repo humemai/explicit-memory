@@ -41,7 +41,7 @@ class PPOAgent(HandcraftedAgent):
             "check_resources": True,
         },
         num_episodes: int = 10,
-        rollout_multiples: int = 2,
+        num_rollouts: int = 2,
         epoch: int = 64,
         batch_size: int = 128,
         gamma: float = 0.9,
@@ -130,13 +130,17 @@ class PPOAgent(HandcraftedAgent):
         self.gamma = gamma
         self.tau = tau
         self.epoch = epoch
-        self.rollout_multiples = rollout_multiples
+        self.num_rollouts = num_rollouts
         self.entropy_weight = entropy_weight
 
         self.num_steps_in_episode = self.env.unwrapped.des.until
         self.total_maximum_episode_rewards = (
             self.env.unwrapped.total_maximum_episode_rewards
         )
+
+        assert (
+            self.num_episodes / self.num_rollouts * self.num_steps_in_episode
+        ).is_integer()
 
         self.action2str = {
             0: "episodic",
@@ -211,6 +215,12 @@ class PPOAgent(HandcraftedAgent):
 
         self.num_validation = 0
 
+        self.init_memory_systems()
+        (observation, question), info = self.env.reset()
+        encode_observation(self.memory_systems, observation)
+        new_episode_starts = False
+        is_last_episode = False
+
         score = 0
         bar = trange(1, self.num_episodes + 1)
         for self.outer_loop_idx in bar:
@@ -223,16 +233,15 @@ class PPOAgent(HandcraftedAgent):
                 log_probs_buffer,
             ) = self.create_empty_rollout_buffer()
 
-            new_episode_starts = True
             episode_idx = 0
             for self.inner_loop_idx in range(
-                1, (self.rollout_multiples * self.num_steps_in_episode) + 1
+                1, int(self.num_rollouts * self.num_steps_in_episode) + 1
             ):
 
-                if episode_idx == (self.rollout_multiples - 1):
-                    is_last_episode = True
-                else:
-                    is_last_episode = False
+                # if episode_idx == (self.num_rollouts - 1):
+                #     is_last_episode = True
+                # else:
+                #     is_last_episode = False
 
                 if new_episode_starts:
                     self.init_memory_systems()

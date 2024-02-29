@@ -124,7 +124,7 @@ class LSTM(nn.Module):
                 dimensions=self.linear_layer_hidden_size,
                 scaling_factor=10000,
                 return_tensor=True,
-            )
+            ).to(self.device)
 
         if self.v1_params is None:
             assert self.v2_params is not None

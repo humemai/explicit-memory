@@ -263,17 +263,11 @@ def update_model(
         # train critic
         critic_optimizer.zero_grad()
         critic_loss.backward(retain_graph=True)
-
-        # Clip gradients: gradients will be modified in-place
-        # if gradient_max_norm is not None:
-        #     clip_grad_norm_(critic.parameters(), max_norm=gradient_max_norm)
         critic_optimizer.step()
 
         # train actor
         actor_optimizer.zero_grad()
         actor_loss.backward()
-        # if gradient_max_norm is not None:
-        #     clip_grad_norm_(actor.parameters(), max_norm=gradient_max_norm)
         actor_optimizer.step()
 
         actor_losses.append(actor_loss.item())

@@ -1,6 +1,6 @@
 """PPO Agent for the RoomEnv2 environment.
 
-This should be inherited. This itself should not be used.
+This should be inherited. This itself can not be used.
 """
 
 import os
@@ -34,8 +34,8 @@ class PPOAgent(HandcraftedAgent):
         self,
         env_str: str = "room_env:RoomEnv-v2",
         num_episodes: int = 10,
-        rollout_multiples: int = 2,
-        epoch: int = 64,
+        num_rollouts: int = 2,
+        epoch_per_rollout: int = 64,
         batch_size: int = 128,
         gamma: float = 0.9,
         tau: float = 0.8,
@@ -84,7 +84,7 @@ class PPOAgent(HandcraftedAgent):
             "question_interval": 1,
             "include_walls_in_observations": True,
         },
-        default_root_dir: str = "./training_results/",
+        default_root_dir: str = "./training_results/PPO",
         run_handcrafted_baselines: dict | None = [
             {
                 "mm": mm,
@@ -136,8 +136,8 @@ class PPOAgent(HandcraftedAgent):
         self.is_notebook = is_running_notebook()
 
         self.num_episodes = num_episodes
-        self.rollout_multiples = rollout_multiples
-        self.epoch = epoch
+        self.num_rollouts = num_rollouts
+        self.epoch_per_rollout = epoch_per_rollout
         self.batch_size = batch_size
         self.gamma = gamma
         self.tau = tau
@@ -146,6 +146,14 @@ class PPOAgent(HandcraftedAgent):
 
         self.run_test = run_test
         self.run_handcrafted_baselines = run_handcrafted_baselines
+
+        assert (self.num_rollouts % self.num_episodes) == 0 or (
+            self.num_episodes % self.num_rollouts
+        ) == 0
+
+        self.num_steps_per_rollout = int(
+            self.num_episodes / self.num_rollouts * self.num_steps_in_episode
+        )
 
         if self.nn_params["architecture"].lower() == "lstm":
             function_approximator = LSTM
@@ -240,10 +248,17 @@ class PPOAgent(HandcraftedAgent):
             log_probs_buffer,
         )
 
+    def step(self) -> None:
+        """Interact with the actual gymnasium environment by taking a step."""
+
     def train(self) -> None:
         """Code for training"""
 
     def validate(self) -> None:
+        """Validate the agent."""
+        self.actor.eval()
+        self.critic.eval()
+
         scores = self.validate_test_middle("val")
 
         save_validation(

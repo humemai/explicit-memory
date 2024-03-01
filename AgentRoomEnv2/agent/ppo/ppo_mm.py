@@ -6,18 +6,13 @@ from copy import deepcopy
 import gymnasium as gym
 import numpy as np
 import torch
-import torch.optim as optim
-from room_env.envs.room2 import RoomEnv2
-from tqdm import trange
+from tqdm.auto import tqdm
 
-from explicit_memory.nn import LSTM
+from explicit_memory.utils import write_yaml
 from explicit_memory.utils.ppo import (
     save_states_actions_probs_values,
     select_action,
     update_model,
-    save_validation,
-    save_final_results,
-    plot_results,
 )
 from explicit_memory.policy import (
     answer_question,
@@ -25,8 +20,6 @@ from explicit_memory.policy import (
     explore,
     manage_memory,
 )
-
-from explicit_memory.utils import is_running_notebook, write_yaml
 
 from .ppo import PPOAgent
 
@@ -41,8 +34,8 @@ class PPOMMAgent(PPOAgent):
         self,
         env_str: str = "room_env:RoomEnv-v2",
         num_episodes: int = 10,
-        rollout_multiples: int = 2,
-        epoch: int = 64,
+        num_rollouts: int = 2,
+        epoch_per_rollout: int = 64,
         batch_size: int = 128,
         gamma: float = 0.9,
         tau: float = 0.8,
@@ -125,18 +118,148 @@ class PPOMMAgent(PPOAgent):
         super().__init__(**all_params)
         write_yaml(self.all_params, os.path.join(self.default_root_dir, "train.yaml"))
 
-        self.action2str = {0: "episodic", 1: "semantic", 2: "forget"}
         # action: 1. move to episodic, 2. move to semantic, 3. forget
+        self.action2str = {0: "episodic", 1: "semantic", 2: "forget"}
         self.action_space = gym.spaces.Discrete(len(self.action2str))
+
+    def encode_first_observation(self, observations: dict) -> tuple[list, list]:
+        """Encode the first observation. Before we encode the first observation, we
+        will manage (heuristics) the agent and map the memory.
+
+        Args:
+            observations: The raw observations from the environment.
+
+        Returns:
+            observations["room"]: list
+            observations["questions"]: list[str]
+
+        """
+        remaining_observations = self.manage_agent_and_map_memory(observations["room"])
+        first_observation = remaining_observations[0]
+        encode_observation(self.memory_systems, first_observation)
+
+        return observations["room"][1:], observations["questions"]
+
+    def encode_remaining_observations(
+        self,
+        observations: list,
+        is_train_val_test: str,
+        states_buffer: list | None = None,
+        actions_buffer: list | None = None,
+        values_buffer: list | None = None,
+        log_probs_buffer: list | None = None,
+        append_states_actions_probs_values: bool = False,
+        append_states: bool = False,
+    ) -> None:
+        for obs in observations:
+            state = self.memory_systems.return_as_a_dict_list()
+            action, actor_probs, critic_value = select_action(
+                actor=self.actor,
+                critic=self.critic,
+                state=state,
+                is_test=(is_train_val_test in ["val", "test"]),
+                states=states_buffer,
+                actions=actions_buffer,
+                values=values_buffer,
+                log_probs=log_probs_buffer,
+            )
+
+            if append_states_actions_probs_values:
+                if append_states:
+                    # state is a list, which is a mutable object. So, we need to
+                    # deepcopy it.
+                    self.states_all[is_train_val_test].append(deepcopy(state))
+                else:
+                    self.states_all[is_train_val_test].append(None)
+
+                self.actions_all[is_train_val_test].append(action)
+                self.actor_probs_all[is_train_val_test].append(actor_probs)
+                self.critic_values_all[is_train_val_test].append(critic_value)
+
+            manage_memory(
+                self.memory_systems,
+                self.action2str[action],
+                split_possessive=False,
+            )
+            encode_observation(self.memory_systems, obs)
+
+    def step(
+        self,
+        questions: list,
+        is_train_val_test: str,
+        states_buffer: list | None = None,
+        actions_buffer: list | None = None,
+        values_buffer: list | None = None,
+        log_probs_buffer: list | None = None,
+        append_states_actions_probs_values: bool = False,
+        append_states: bool = False,
+    ) -> tuple[int, bool, list, list]:
+        """Step through the environment. This also encodes the first observation from
+        the raw observations from the environment.
+
+        """
+        state = self.memory_systems.return_as_a_dict_list()
+        action, actor_probs, critic_value = select_action(
+            actor=self.actor,
+            critic=self.critic,
+            state=state,
+            is_test=(is_train_val_test in ["val", "test"]),
+            states=states_buffer,
+            actions=actions_buffer,
+            values=values_buffer,
+            log_probs=log_probs_buffer,
+        )
+
+        if append_states_actions_probs_values:
+            if append_states:
+                # state is a list, which is a mutable object. So, we need to
+                # deepcopy it.
+                self.states_all[is_train_val_test].append(deepcopy(state))
+            else:
+                self.states_all[is_train_val_test].append(None)
+
+            self.actions_all[is_train_val_test].append(action)
+            self.actor_probs_all[is_train_val_test].append(actor_probs)
+            self.critic_values_all[is_train_val_test].append(critic_value)
+
+        manage_memory(
+            self.memory_systems,
+            self.action2str[action],
+            split_possessive=True,
+        )
+
+        actions_qa = [
+            answer_question(self.memory_systems, self.qa_policy, question)
+            for question in questions
+        ]
+
+        action_explore = explore(self.memory_systems, self.explore_policy)
+        action_pair = (actions_qa, action_explore)
+        (
+            observations,
+            reward,
+            done,
+            truncated,
+            info,
+        ) = self.env.step(action_pair)
+        done = done or truncated
+
+        remaining_observations = self.manage_agent_and_map_memory(observations["room"])
+        first_observation = remaining_observations[0]
+        encode_observation(self.memory_systems, first_observation)
+        remaining_observations = remaining_observations[1:]
+
+        return reward, done, remaining_observations, observations["questions"]
 
     def train(self):
         """Train the agent."""
 
         self.num_validation = 0
-
+        new_episode_starts = True
         score = 0
-        bar = trange(1, self.num_episodes + 1)
-        for self.outer_loop_idx in bar:
+        episode_idx = 0
+
+        for _ in tqdm(range(self.num_rollouts)):
             (
                 states_buffer,
                 actions_buffer,
@@ -146,156 +269,68 @@ class PPOMMAgent(PPOAgent):
                 log_probs_buffer,
             ) = self.create_empty_rollout_buffer()
 
-            new_episode_starts = True
-            episode_idx = 0
-            num_mm_actions = 0
-            for self.inner_loop_idx in range(
-                1, (self.rollout_multiples * self.num_steps_in_episode) + 1
-            ):
-
-                if episode_idx == (self.rollout_multiples - 1):
-                    is_last_episode = True
-                else:
-                    is_last_episode = False
-
+            for idx in range(self.num_steps_per_rollout):
                 if new_episode_starts:
                     self.init_memory_systems()
                     observations, info = self.env.reset()
-
-                    observations["room"] = self.manage_agent_and_map_memory(
-                        observations["room"]
+                    remaining_observations, questions = self.encode_first_observation(
+                        observations
                     )
-                    obs = observations["room"][0]
-                    encode_observation(self.memory_systems, obs)
 
-                    for obs in observations["room"][1:]:
-                        state = self.memory_systems.return_as_a_dict_list()
-                        action, actor_probs, critic_value = select_action(
-                            actor=self.actor,
-                            critic=self.critic,
-                            state=state,
-                            is_test=False,
-                            states=states_buffer,
-                            actions=actions_buffer,
-                            values=values_buffer,
-                            log_probs=log_probs_buffer,
-                        )
-                        num_mm_actions += 1
-
-                        if is_last_episode:
-                            # None is a placeholder.
-                            self.states_all["train"].append(None)
-                            self.actions_all["train"].append(action)
-                            self.actor_probs_all["train"].append(actor_probs)
-                            self.critic_values_all["train"].append(critic_value)
-
-                        manage_memory(
-                            self.memory_systems,
-                            self.action2str[action],
-                            split_possessive=False,
-                        )
-                        encode_observation(self.memory_systems, obs)
-
-                state = self.memory_systems.return_as_a_dict_list()
-                action, actor_probs, critic_value = select_action(
-                    actor=self.actor,
-                    critic=self.critic,
-                    state=state,
-                    is_test=False,
-                    states=states_buffer,
-                    actions=actions_buffer,
-                    values=values_buffer,
-                    log_probs=log_probs_buffer,
+                self.encode_remaining_observations(
+                    observations=remaining_observations,
+                    is_train_val_test="train",
+                    states_buffer=states_buffer,
+                    actions_buffer=actions_buffer,
+                    values_buffer=values_buffer,
+                    log_probs_buffer=log_probs_buffer,
+                    append_states_actions_probs_values=True,
+                    append_states=False,
                 )
-                num_mm_actions += 1
+                num_mm_actions = 1 + len(remaining_observations)
 
-                if is_last_episode:
-                    self.states_all["train"].append(None)
-                    self.actions_all["train"].append(action)
-                    self.actor_probs_all["train"].append(actor_probs)
-                    self.critic_values_all["train"].append(critic_value)
-
-                manage_memory(
-                    self.memory_systems,
-                    self.action2str[action],
-                    split_possessive=True,
+                reward, done, remaining_observations, questions = self.step(
+                    questions=questions,
+                    is_train_val_test="train",
+                    states_buffer=states_buffer,
+                    actions_buffer=actions_buffer,
+                    values_buffer=values_buffer,
+                    log_probs_buffer=log_probs_buffer,
+                    append_states_actions_probs_values=True,
+                    append_states=False,
                 )
 
-                actions_qa = [
-                    answer_question(self.memory_systems, self.qa_policy, question)
-                    for question in observations["questions"]
-                ]
-
-                action_explore = explore(self.memory_systems, self.explore_policy)
-                action_pair = (actions_qa, action_explore)
-                (
-                    observations,
-                    reward,
-                    done,
-                    truncated,
-                    info,
-                ) = self.env.step(action_pair)
                 score += reward
-                done = done or truncated
 
-                observations["room"] = self.manage_agent_and_map_memory(
-                    observations["room"]
-                )
-
-                obs = observations["room"][0]
-                encode_observation(self.memory_systems, obs)
-                next_state = self.memory_systems.return_as_a_dict_list()
-
-                reward = np.reshape(reward, (1, -1)).astype(np.float64)
-                done = np.reshape(done, (1, -1))
-
-                if not self.split_reward_training:
-                    for _ in range(num_mm_actions):
-                        rewards_buffer.append(torch.FloatTensor(reward).to(self.device))
-                        masks_buffer.append(torch.FloatTensor(1 - done).to(self.device))
+                if self.split_reward_training:
+                    reward = reward / num_mm_actions
+                    rewards = [reward] * (num_mm_actions)
                 else:
-                    raise NotImplementedError
+                    rewards = [0] * (num_mm_actions - 1) + [reward]
+
+                for reward in rewards:
+                    reward = np.reshape(reward, (1, -1)).astype(np.float64)
+                    rewards_buffer.append(torch.FloatTensor(reward).to(self.device))
+
+                dones = [False] * (num_mm_actions - 1) + [done]
+                for done_ in dones:
+                    done_ = np.reshape(done_, (1, -1))
+                    masks_buffer.append(torch.FloatTensor(1 - done_).to(self.device))
 
                 # if episode ends
                 if done:
                     episode_idx += 1
-                    if is_last_episode:
-                        self.scores_all["train"].append(score)
-                        with torch.no_grad():
-                            self.validate()
+                    self.scores_all["train"].append(score)
+                    with torch.no_grad():
+                        self.validate()
 
                     score = 0
                     new_episode_starts = True
+
                 else:
-
-                    for obs in observations["room"][1:]:
-                        state = self.memory_systems.return_as_a_dict_list()
-                        action, actor_probs, critic_value = select_action(
-                            actor=self.actor,
-                            critic=self.critic,
-                            state=state,
-                            is_test=False,
-                            states=states_buffer,
-                            actions=actions_buffer,
-                            values=values_buffer,
-                            log_probs=log_probs_buffer,
-                        )
-                        if is_last_episode:
-                            self.states_all["train"].append(None)
-                            self.actions_all["train"].append(action)
-                            self.actor_probs_all["train"].append(actor_probs)
-                            self.critic_values_all["train"].append(critic_value)
-
-                        manage_memory(
-                            self.memory_systems,
-                            self.action2str[action],
-                            split_possessive=False,
-                        )
-                        encode_observation(self.memory_systems, obs)
-                        next_state = self.memory_systems.return_as_a_dict_list()
-
                     new_episode_starts = False
 
+            next_state = self.memory_systems.return_as_a_dict_list()
             actor_loss, critic_loss = update_model(
                 next_state,
                 states_buffer,
@@ -306,7 +341,7 @@ class PPOMMAgent(PPOAgent):
                 log_probs_buffer,
                 self.gamma,
                 self.tau,
-                self.epoch,
+                self.epoch_per_rollout,
                 self.batch_size,
                 self.epsilon,
                 self.entropy_weight,
@@ -353,104 +388,50 @@ class PPOMMAgent(PPOAgent):
                 save_results = True
             else:
                 save_results = False
-            score = 0
 
+            score = 0
             self.init_memory_systems()
             observations, info = self.env.reset()
-            observations["room"] = self.manage_agent_and_map_memory(
-                observations["room"]
+            remaining_observations, questions = self.encode_first_observation(
+                observations
+            )
+            self.encode_remaining_observations(
+                observations=remaining_observations,
+                is_train_val_test=val_or_test,
+                states_buffer=None,
+                actions_buffer=None,
+                values_buffer=None,
+                log_probs_buffer=None,
+                append_states_actions_probs_values=save_results,
+                append_states=save_results,
             )
 
-            obs = observations["room"][0]
-            encode_observation(self.memory_systems, obs)
-            for obs in observations["room"][1:]:
-                state = self.memory_systems.return_as_a_dict_list()
-
-                action, actor_probs, critic_value = select_action(
-                    actor=self.actor,
-                    critic=self.critic,
-                    state=state,
-                    is_test=True,
-                )
-                if save_results:
-                    self.states_all["val"].append(deepcopy(state))
-                    self.actions_all["val"].append(action)
-                    self.actor_probs_all["val"].append(actor_probs)
-                    self.critic_values_all["val"].append(critic_value)
-
-                manage_memory(
-                    self.memory_systems,
-                    self.action2str[action],
-                    split_possessive=True,
-                )
-                encode_observation(self.memory_systems, obs)
-
             while True:
-                state = self.memory_systems.return_as_a_dict_list()
-
-                action, actor_probs, critic_value = select_action(
-                    actor=self.actor,
-                    critic=self.critic,
-                    state=state,
-                    is_test=True,
+                reward, done, remaining_observations, questions = self.step(
+                    questions=questions,
+                    is_train_val_test=val_or_test,
+                    states_buffer=None,
+                    actions_buffer=None,
+                    values_buffer=None,
+                    log_probs_buffer=None,
+                    append_states_actions_probs_values=save_results,
+                    append_states=save_results,
                 )
-                if save_results:
-                    self.states_all["val"].append(deepcopy(state))
-                    self.actions_all["val"].append(action)
-                    self.actor_probs_all["val"].append(actor_probs)
-                    self.critic_values_all["val"].append(critic_value)
-
-                manage_memory(
-                    self.memory_systems, self.action2str[action], split_possessive=False
-                )
-                actions_qa = [
-                    answer_question(self.memory_systems, self.qa_policy, question)
-                    for question in observations["questions"]
-                ]
-                action_explore = explore(self.memory_systems, self.explore_policy)
-                action_pair = (actions_qa, action_explore)
-                (
-                    observations,
-                    reward,
-                    done,
-                    truncated,
-                    info,
-                ) = self.env.step(action_pair)
                 score += reward
-                done = done or truncated
-
-                observations["room"] = self.manage_agent_and_map_memory(
-                    observations["room"]
-                )
-
-                obs = observations["room"][0]
-                encode_observation(self.memory_systems, obs)
 
                 if done:
                     break
-
-                for obs in observations["room"][1:]:
-                    state = self.memory_systems.return_as_a_dict_list()
-
-                    action, actor_probs, critic_value = select_action(
-                        actor=self.actor,
-                        critic=self.critic,
-                        state=state,
-                        is_test=True,
+                else:
+                    self.encode_remaining_observations(
+                        observations=remaining_observations,
+                        is_train_val_test=val_or_test,
+                        states_buffer=None,
+                        actions_buffer=None,
+                        values_buffer=None,
+                        log_probs_buffer=None,
+                        append_states_actions_probs_values=save_results,
+                        append_states=save_results,
                     )
-                    if save_results:
-                        self.states_all["val"].append(deepcopy(state))
-                        self.actions_all["val"].append(action)
-                        self.actor_probs_all["val"].append(actor_probs)
-                        self.critic_values_all["val"].append(critic_value)
-
-                    manage_memory(
-                        self.memory_systems,
-                        self.action2str[action],
-                        split_possessive=True,
-                    )
-                    encode_observation(self.memory_systems, obs)
-
             scores.append(score)
 
         return scores

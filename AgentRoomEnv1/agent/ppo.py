@@ -79,20 +79,26 @@ class PPOAgent(HandcraftedAgent):
         """Initialization.
 
         Args:
-            env_str: This has to be "room_env:RoomEnv-v1" env_config: The configuration
-            of the environment. num_episodes: The number of iterations to train the
-            agent. replay_buffer_size: The size of the replay buffer. batch_size: The
-            batch size for training This is the amount of samples
+            env_str: This has to be "room_env:RoomEnv-v1"
+            env_config: The configuration of the environment.
+            num_episodes: The number of iterations to train the agent.
+            replay_buffer_size: The size of the replay buffer.
+            batch_size: The batch size for training This is the amount of samples
                 sampled from the replay buffer.
-            max_epsilon: The maximum epsilon. min_epsilon: The minimum epsilon. gamma:
-            The discount factor. capacity: The capacity of each human-like memory
-            systems. pretrain_semantic: Whether or not to pretrain the semantic memory
-            system. nn_params: The parameters for the function approximator. run_test:
-            Whether or not to run test. num_samples_for_results: The number of samples
-            to validate / test the agent. plotting_interval: The interval to plot the
-            results. train_seed: The random seed for train. test_seed: The random seed
-            for test. device: The device to run the agent on. This is either "cpu" or
-            "cuda". default_root_dir: default root directory to store the results.
+            max_epsilon: The maximum epsilon.
+            min_epsilon: The minimum epsilon.
+            gamma: The discount factor.
+            capacity: The capacity of each human-like memory systems.
+            pretrain_semantic: Whether or not to pretrain the semantic memory
+                system.
+            nn_params: The parameters for the function approximator.
+            run_test: Whether or not to run test.
+            num_samples_for_results: The number of samples to validate / test the agent.
+            plotting_interval: The interval to plot the results.
+            train_seed: The random seed for train.
+            test_seed: The random seed for test.
+            device: The device to run the agent on. This is either "cpu" or "cuda".
+            default_root_dir: default root directory to store the results.
 
         """
         all_params = deepcopy(locals())
@@ -179,6 +185,33 @@ class PPOAgent(HandcraftedAgent):
         self.actor_probs_all = {"train": [], "val": [], "test": []}
         self.critic_values_all = {"train": [], "val": [], "test": []}
 
+    def create_empty_rollout_buffer(self) -> tuple[list, list, list, list, list, list]:
+        """Create empty buffer for training.
+
+        Make sure to call this before and after each rollout.
+
+        Returns:
+            states_buffer: The states. actions_buffer: The actions. rewards_buffer: The
+            rewards. values_buffer: The values. masks_buffer: The masks.
+            log_probs_buffer: The log probabilities.
+        """
+        # memory for training
+        states_buffer: list[dict] = []  # this has to be a list of dictionaries
+        actions_buffer: list[torch.Tensor] = []
+        rewards_buffer: list[torch.Tensor] = []
+        values_buffer: list[torch.Tensor] = []
+        masks_buffer: list[torch.Tensor] = []
+        log_probs_buffer: list[torch.Tensor] = []
+
+        return (
+            states_buffer,
+            actions_buffer,
+            rewards_buffer,
+            values_buffer,
+            masks_buffer,
+            log_probs_buffer,
+        )
+
     def init_memory_env_reset_encode_observation(self) -> list:
         """Init memory systems, reset environment, and encode observation.
 
@@ -194,13 +227,13 @@ class PPOAgent(HandcraftedAgent):
     def step(
         self,
         question: list,
-        is_train_val_test: bool,
+        is_train_val_test: str,
         states_buffer: list | None = None,
         actions_buffer: list | None = None,
         values_buffer: list | None = None,
         log_probs_buffer: list | None = None,
         append_states_actions_probs_values: bool = False,
-        save_states: bool = False,
+        append_states: bool = False,
     ) -> tuple[int, bool, list[str]]:
         """Interact with the actual gymnasium environment by taking a step.
 
@@ -229,7 +262,7 @@ class PPOAgent(HandcraftedAgent):
         )
 
         if append_states_actions_probs_values:
-            if save_states:
+            if append_states:
                 # state is a list, which is a mutable object. So, we need to deepcopy
                 # it.
                 self.states_all[is_train_val_test].append(deepcopy(state))
@@ -262,40 +295,10 @@ class PPOAgent(HandcraftedAgent):
 
         return reward, done, question
 
-    def create_empty_rollout_buffer(self) -> tuple[list, list, list, list, list, list]:
-        """Create empty buffer for training.
-
-        Make sure to call this before and after each rollout.
-
-        Returns:
-            states_buffer: The states. actions_buffer: The actions. rewards_buffer: The
-            rewards. values_buffer: The values. masks_buffer: The masks.
-            log_probs_buffer: The log probabilities.
-        """
-        # memory for training
-        states_buffer: list[dict] = []  # this has to be a list of dictionaries
-        actions_buffer: list[torch.Tensor] = []
-        rewards_buffer: list[torch.Tensor] = []
-        values_buffer: list[torch.Tensor] = []
-        masks_buffer: list[torch.Tensor] = []
-        log_probs_buffer: list[torch.Tensor] = []
-
-        return (
-            states_buffer,
-            actions_buffer,
-            rewards_buffer,
-            values_buffer,
-            masks_buffer,
-            log_probs_buffer,
-        )
-
     def train(self):
         """Train the agent."""
 
         self.num_validation = 0
-
-        question = self.init_memory_env_reset_encode_observation()
-
         new_episode_starts = True
         score = 0
         episode_idx = 0
@@ -323,11 +326,9 @@ class PPOAgent(HandcraftedAgent):
                     values_buffer=values_buffer,
                     log_probs_buffer=log_probs_buffer,
                     append_states_actions_probs_values=True,
-                    save_states=False,
+                    append_states=False,
                 )
                 score += reward
-
-                next_state = self.memory_systems.return_as_a_dict_list()
 
                 reward = np.reshape(reward, (1, -1)).astype(np.float64)
                 done = np.reshape(done, (1, -1))
@@ -346,6 +347,7 @@ class PPOAgent(HandcraftedAgent):
                 else:
                     new_episode_starts = False
 
+            next_state = self.memory_systems.return_as_a_dict_list()
             actor_loss, critic_loss = update_model(
                 next_state,
                 states_buffer,
@@ -410,7 +412,7 @@ class PPOAgent(HandcraftedAgent):
                     values_buffer=None,
                     log_probs_buffer=None,
                     append_states_actions_probs_values=append_results,
-                    save_states=True,
+                    append_states=True,
                 )
                 score += reward
 
@@ -489,7 +491,7 @@ class PPOAgent(HandcraftedAgent):
                     values_buffer=None,
                     log_probs_buffer=None,
                     append_states_actions_probs_values=append_results,
-                    save_states=True,
+                    append_states=True,
                 )
                 score += reward
 
@@ -524,12 +526,16 @@ class PPOAgent(HandcraftedAgent):
 
         Args:
             to_plot: what to plot:
-                all: everything actor_loss: actor loss critic_loss: critic loss scores:
-                train, val, and test scores actor_probs_train: actor probabilities for
-                training actor_probs_val: actor probabilities for validation
-                actor_probs_test: actor probabilities for test critic_values_train:
-                critic values for training critic_values_val: critic values for
-                validation critic_values_test: critic values for test
+                all: everything
+                actor_loss: actor loss
+                critic_loss: critic loss
+                scores: train, val, and test scores
+                actor_probs_train: actor probabilities for training
+                actor_probs_val: actor probabilities for validation
+                actor_probs_test: actor probabilities for test
+                critic_values_train: critic values for training
+                critic_values_val: critic values for validation
+                critic_values_test: critic values for test
 
         """
         plot_results(

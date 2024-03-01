@@ -1,4 +1,4 @@
-"""Deep Q-network architecture. Currently only LSTM is implemented."""
+"""LSTM to approximate a function."""
 
 from typing import Literal
 from copy import deepcopy

@@ -2,7 +2,6 @@
 
 import os
 from copy import deepcopy
-
 import gymnasium as gym
 import numpy as np
 import torch
@@ -92,7 +91,7 @@ class DQNExploreAgent(DQNAgent):
         },
         ddqn: bool = True,
         dueling_dqn: bool = True,
-        default_root_dir: str = "./training_results/",
+        default_root_dir: str = "./training_results/DQN/LSTM/explore",
         run_handcrafted_baselines: dict | None = [
             {
                 "mm": mm,

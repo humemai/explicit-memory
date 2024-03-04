@@ -87,7 +87,7 @@ class DQNMMAgent(DQNAgent):
         ddqn: bool = True,
         dueling_dqn: bool = True,
         split_reward_training: bool = False,
-        default_root_dir: str = "./training_results/",
+        default_root_dir: str = "./training_results/DQN/LSTM/mm",
         run_handcrafted_baselines: dict | None = [
             {
                 "mm": mm,
@@ -151,14 +151,14 @@ class DQNMMAgent(DQNAgent):
         del all_params["split_reward_training"]
         self.split_reward_training = split_reward_training
 
-        all_params["nn_params"]["n_actions"] = 3
+        # action: 1. move to episodic, 2. move to semantic, 3. forget
+        self.action2str = {0: "episodic", 1: "semantic", 2: "forget"}
+        self.action_space = gym.spaces.Discrete(len(self.action2str))
+
+        all_params["nn_params"]["n_actions"] = len(self.action2str)
         all_params["mm_policy"] = "rl"
         super().__init__(**all_params)
         write_yaml(self.all_params, os.path.join(self.default_root_dir, "train.yaml"))
-
-        self.action2str = {0: "episodic", 1: "semantic", 2: "forget"}
-        # action: 1. move to episodic, 2. move to semantic, 3. forget
-        self.action_space = gym.spaces.Discrete(len(self.action2str))
 
     def fill_replay_buffer(self) -> None:
         """Make the replay buffer full in the beginning with the uniformly-sampled

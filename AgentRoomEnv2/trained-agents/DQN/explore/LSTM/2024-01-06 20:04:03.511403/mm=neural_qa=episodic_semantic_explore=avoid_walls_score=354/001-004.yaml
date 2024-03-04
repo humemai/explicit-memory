@@ -1,0 +1,43 @@
+episodic:
+- - agent
+  - atlocation
+  - room_000
+  - 0
+semantic:
+- - room_000
+  - west
+  - wall
+  - 1
+- - room_001
+  - north
+  - wall
+  - 1
+- - room_001
+  - east
+  - room_002
+  - 1
+- - room_000
+  - north
+  - wall
+  - 1
+- - room_001
+  - south
+  - room_004
+  - 1
+- - room_000
+  - east
+  - room_001
+  - 1
+- - room_001
+  - west
+  - room_000
+  - 1
+- - room_000
+  - south
+  - wall
+  - 1
+short:
+- - agent
+  - atlocation
+  - room_001
+  - 1

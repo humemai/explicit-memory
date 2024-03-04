@@ -84,7 +84,7 @@ class PPOAgent(HandcraftedAgent):
             "question_interval": 1,
             "include_walls_in_observations": True,
         },
-        default_root_dir: str = "./training_results/PPO",
+        default_root_dir: str = "./training_results/PPO/",
         run_handcrafted_baselines: dict | None = [
             {
                 "mm": mm,

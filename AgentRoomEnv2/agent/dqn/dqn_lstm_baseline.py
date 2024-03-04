@@ -395,7 +395,7 @@ class DQNLSTMBaselineAgent:
         },
         ddqn: bool = True,
         dueling_dqn: bool = True,
-        default_root_dir: str = "./training_results/",
+        default_root_dir: str = "./training_results/DQN/LSTM/baselines",
         run_handcrafted_baselines: bool = True,
     ) -> None:
         params_to_save = deepcopy(locals())

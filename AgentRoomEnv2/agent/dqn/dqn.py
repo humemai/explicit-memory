@@ -89,7 +89,7 @@ class DQNAgent(HandcraftedAgent):
         },
         ddqn: bool = True,
         dueling_dqn: bool = True,
-        default_root_dir: str = "./training_results/",
+        default_root_dir: str = "./training_results/DQN/",
         run_handcrafted_baselines: dict | None = [
             {
                 "mm": mm,
@@ -332,8 +332,6 @@ class DQNAgent(HandcraftedAgent):
             self.action_space.n.item(),
             self.num_iterations,
             self.env.unwrapped.total_maximum_episode_rewards,
-            self.num_validation,
-            self.num_samples_for_results,
             self.default_root_dir,
             to_plot,
             save_fig,

@@ -1,0 +1,7800 @@
+- state:
+    episodic:
+    - - room_000
+      - west
+      - wall
+      - 30
+    - - agent
+      - atlocation
+      - room_000
+      - 30
+    - - room_001
+      - north
+      - wall
+      - 31
+    - - room_001
+      - east
+      - room_002
+      - 31
+    - - room_002
+      - north
+      - wall
+      - 32
+    - - room_002
+      - east
+      - room_003
+      - 32
+    - - room_002
+      - south
+      - wall
+      - 32
+    - - room_002
+      - west
+      - room_001
+      - 32
+    - - agent
+      - atlocation
+      - room_002
+      - 32
+    - - room_001
+      - north
+      - wall
+      - 33
+    - - room_001
+      - east
+      - room_002
+      - 33
+    - - room_000
+      - north
+      - wall
+      - 34
+    - - room_000
+      - east
+      - room_001
+      - 34
+    - - room_000
+      - west
+      - wall
+      - 34
+    - - agent
+      - atlocation
+      - room_000
+      - 34
+    - - room_001
+      - north
+      - wall
+      - 35
+    semantic: []
+    short:
+    - - agent
+      - atlocation
+      - room_001
+      - 35
+  action: 2
+  actor_probs:
+  - 0.24618501961231232
+  - 0.2808878421783447
+  - 0.47292715311050415
+  critic_value: 1.298132061958313
+- state:
+    episodic:
+    - - room_000
+      - west
+      - wall
+      - 30
+    - - agent
+      - atlocation
+      - room_000
+      - 30
+    - - room_001
+      - north
+      - wall
+      - 31
+    - - room_001
+      - east
+      - room_002
+      - 31
+    - - room_002
+      - north
+      - wall
+      - 32
+    - - room_002
+      - east
+      - room_003
+      - 32
+    - - room_002
+      - south
+      - wall
+      - 32
+    - - room_002
+      - west
+      - room_001
+      - 32
+    - - agent
+      - atlocation
+      - room_002
+      - 32
+    - - room_001
+      - north
+      - wall
+      - 33
+    - - room_001
+      - east
+      - room_002
+      - 33
+    - - room_000
+      - north
+      - wall
+      - 34
+    - - room_000
+      - east
+      - room_001
+      - 34
+    - - room_000
+      - west
+      - wall
+      - 34
+    - - agent
+      - atlocation
+      - room_000
+      - 34
+    - - room_001
+      - north
+      - wall
+      - 35
+    semantic: []
+    short:
+    - - dep_003
+      - atlocation
+      - room_001
+      - 35
+  action: 2
+  actor_probs:
+  - 0.2548673450946808
+  - 0.28441107273101807
+  - 0.46072161197662354
+  critic_value: 1.7073705196380615
+- state:
+    episodic:
+    - - room_000
+      - west
+      - wall
+      - 30
+    - - agent
+      - atlocation
+      - room_000
+      - 30
+    - - room_001
+      - north
+      - wall
+      - 31
+    - - room_001
+      - east
+      - room_002
+      - 31
+    - - room_002
+      - north
+      - wall
+      - 32
+    - - room_002
+      - east
+      - room_003
+      - 32
+    - - room_002
+      - south
+      - wall
+      - 32
+    - - room_002
+      - west
+      - room_001
+      - 32
+    - - agent
+      - atlocation
+      - room_002
+      - 32
+    - - room_001
+      - north
+      - wall
+      - 33
+    - - room_001
+      - east
+      - room_002
+      - 33
+    - - room_000
+      - north
+      - wall
+      - 34
+    - - room_000
+      - east
+      - room_001
+      - 34
+    - - room_000
+      - west
+      - wall
+      - 34
+    - - agent
+      - atlocation
+      - room_000
+      - 34
+    - - room_001
+      - north
+      - wall
+      - 35
+    semantic: []
+    short:
+    - - room_002
+      - north
+      - wall
+      - 36
+  action: 0
+  actor_probs:
+  - 0.4727875888347626
+  - 0.281718909740448
+  - 0.24549339711666107
+  critic_value: 0.17785698175430298
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 30
+    - - room_001
+      - north
+      - wall
+      - 31
+    - - room_001
+      - east
+      - room_002
+      - 31
+    - - room_002
+      - north
+      - wall
+      - 32
+    - - room_002
+      - east
+      - room_003
+      - 32
+    - - room_002
+      - south
+      - wall
+      - 32
+    - - room_002
+      - west
+      - room_001
+      - 32
+    - - agent
+      - atlocation
+      - room_002
+      - 32
+    - - room_001
+      - north
+      - wall
+      - 33
+    - - room_001
+      - east
+      - room_002
+      - 33
+    - - room_000
+      - north
+      - wall
+      - 34
+    - - room_000
+      - east
+      - room_001
+      - 34
+    - - room_000
+      - west
+      - wall
+      - 34
+    - - agent
+      - atlocation
+      - room_000
+      - 34
+    - - room_001
+      - north
+      - wall
+      - 35
+    - - room_002
+      - north
+      - wall
+      - 36
+    semantic: []
+    short:
+    - - room_002
+      - east
+      - room_003
+      - 36
+  action: 0
+  actor_probs:
+  - 0.37735190987586975
+  - 0.29657065868377686
+  - 0.326077401638031
+  critic_value: 0.1924613118171692
+- state:
+    episodic:
+    - - room_001
+      - north
+      - wall
+      - 31
+    - - room_001
+      - east
+      - room_002
+      - 31
+    - - room_002
+      - north
+      - wall
+      - 32
+    - - room_002
+      - east
+      - room_003
+      - 32
+    - - room_002
+      - south
+      - wall
+      - 32
+    - - room_002
+      - west
+      - room_001
+      - 32
+    - - agent
+      - atlocation
+      - room_002
+      - 32
+    - - room_001
+      - north
+      - wall
+      - 33
+    - - room_001
+      - east
+      - room_002
+      - 33
+    - - room_000
+      - north
+      - wall
+      - 34
+    - - room_000
+      - east
+      - room_001
+      - 34
+    - - room_000
+      - west
+      - wall
+      - 34
+    - - agent
+      - atlocation
+      - room_000
+      - 34
+    - - room_001
+      - north
+      - wall
+      - 35
+    - - room_002
+      - north
+      - wall
+      - 36
+    - - room_002
+      - east
+      - room_003
+      - 36
+    semantic: []
+    short:
+    - - room_002
+      - south
+      - wall
+      - 36
+  action: 0
+  actor_probs:
+  - 0.43892136216163635
+  - 0.2656283378601074
+  - 0.2954503297805786
+  critic_value: 0.25246983766555786
+- state:
+    episodic:
+    - - room_001
+      - east
+      - room_002
+      - 31
+    - - room_002
+      - north
+      - wall
+      - 32
+    - - room_002
+      - east
+      - room_003
+      - 32
+    - - room_002
+      - south
+      - wall
+      - 32
+    - - room_002
+      - west
+      - room_001
+      - 32
+    - - agent
+      - atlocation
+      - room_002
+      - 32
+    - - room_001
+      - north
+      - wall
+      - 33
+    - - room_001
+      - east
+      - room_002
+      - 33
+    - - room_000
+      - north
+      - wall
+      - 34
+    - - room_000
+      - east
+      - room_001
+      - 34
+    - - room_000
+      - west
+      - wall
+      - 34
+    - - agent
+      - atlocation
+      - room_000
+      - 34
+    - - room_001
+      - north
+      - wall
+      - 35
+    - - room_002
+      - north
+      - wall
+      - 36
+    - - room_002
+      - east
+      - room_003
+      - 36
+    - - room_002
+      - south
+      - wall
+      - 36
+    semantic: []
+    short:
+    - - room_002
+      - west
+      - room_001
+      - 36
+  action: 0
+  actor_probs:
+  - 0.40074193477630615
+  - 0.2852230668067932
+  - 0.31403499841690063
+  critic_value: 0.3013095259666443
+- state:
+    episodic:
+    - - room_002
+      - north
+      - wall
+      - 32
+    - - room_002
+      - east
+      - room_003
+      - 32
+    - - room_002
+      - south
+      - wall
+      - 32
+    - - room_002
+      - west
+      - room_001
+      - 32
+    - - agent
+      - atlocation
+      - room_002
+      - 32
+    - - room_001
+      - north
+      - wall
+      - 33
+    - - room_001
+      - east
+      - room_002
+      - 33
+    - - room_000
+      - north
+      - wall
+      - 34
+    - - room_000
+      - east
+      - room_001
+      - 34
+    - - room_000
+      - west
+      - wall
+      - 34
+    - - agent
+      - atlocation
+      - room_000
+      - 34
+    - - room_001
+      - north
+      - wall
+      - 35
+    - - room_002
+      - north
+      - wall
+      - 36
+    - - room_002
+      - east
+      - room_003
+      - 36
+    - - room_002
+      - south
+      - wall
+      - 36
+    - - room_002
+      - west
+      - room_001
+      - 36
+    semantic: []
+    short:
+    - - agent
+      - atlocation
+      - room_002
+      - 36
+  action: 0
+  actor_probs:
+  - 0.6216832399368286
+  - 0.17875297367572784
+  - 0.19956375658512115
+  critic_value: 0.7138234376907349
+- state:
+    episodic:
+    - - room_002
+      - east
+      - room_003
+      - 32
+    - - room_002
+      - south
+      - wall
+      - 32
+    - - room_002
+      - west
+      - room_001
+      - 32
+    - - agent
+      - atlocation
+      - room_002
+      - 32
+    - - room_001
+      - north
+      - wall
+      - 33
+    - - room_001
+      - east
+      - room_002
+      - 33
+    - - room_000
+      - north
+      - wall
+      - 34
+    - - room_000
+      - east
+      - room_001
+      - 34
+    - - room_000
+      - west
+      - wall
+      - 34
+    - - agent
+      - atlocation
+      - room_000
+      - 34
+    - - room_001
+      - north
+      - wall
+      - 35
+    - - room_002
+      - north
+      - wall
+      - 36
+    - - room_002
+      - east
+      - room_003
+      - 36
+    - - room_002
+      - south
+      - wall
+      - 36
+    - - room_002
+      - west
+      - room_001
+      - 36
+    - - agent
+      - atlocation
+      - room_002
+      - 36
+    semantic: []
+    short:
+    - - room_003
+      - north
+      - wall
+      - 37
+  action: 0
+  actor_probs:
+  - 0.4229041337966919
+  - 0.27818697690963745
+  - 0.29890888929367065
+  critic_value: 0.25908270478248596
+- state:
+    episodic:
+    - - room_002
+      - south
+      - wall
+      - 32
+    - - room_002
+      - west
+      - room_001
+      - 32
+    - - agent
+      - atlocation
+      - room_002
+      - 32
+    - - room_001
+      - north
+      - wall
+      - 33
+    - - room_001
+      - east
+      - room_002
+      - 33
+    - - room_000
+      - north
+      - wall
+      - 34
+    - - room_000
+      - east
+      - room_001
+      - 34
+    - - room_000
+      - west
+      - wall
+      - 34
+    - - agent
+      - atlocation
+      - room_000
+      - 34
+    - - room_001
+      - north
+      - wall
+      - 35
+    - - room_002
+      - north
+      - wall
+      - 36
+    - - room_002
+      - east
+      - room_003
+      - 36
+    - - room_002
+      - south
+      - wall
+      - 36
+    - - room_002
+      - west
+      - room_001
+      - 36
+    - - agent
+      - atlocation
+      - room_002
+      - 36
+    - - room_003
+      - north
+      - wall
+      - 37
+    semantic: []
+    short:
+    - - room_003
+      - east
+      - wall
+      - 37
+  action: 0
+  actor_probs:
+  - 0.41375499963760376
+  - 0.27424293756484985
+  - 0.312002032995224
+  critic_value: 0.2628311514854431
+- state:
+    episodic:
+    - - room_002
+      - west
+      - room_001
+      - 32
+    - - agent
+      - atlocation
+      - room_002
+      - 32
+    - - room_001
+      - north
+      - wall
+      - 33
+    - - room_001
+      - east
+      - room_002
+      - 33
+    - - room_000
+      - north
+      - wall
+      - 34
+    - - room_000
+      - east
+      - room_001
+      - 34
+    - - room_000
+      - west
+      - wall
+      - 34
+    - - agent
+      - atlocation
+      - room_000
+      - 34
+    - - room_001
+      - north
+      - wall
+      - 35
+    - - room_002
+      - north
+      - wall
+      - 36
+    - - room_002
+      - east
+      - room_003
+      - 36
+    - - room_002
+      - south
+      - wall
+      - 36
+    - - room_002
+      - west
+      - room_001
+      - 36
+    - - agent
+      - atlocation
+      - room_002
+      - 36
+    - - room_003
+      - north
+      - wall
+      - 37
+    - - room_003
+      - east
+      - wall
+      - 37
+    semantic: []
+    short:
+    - - room_003
+      - south
+      - room_005
+      - 37
+  action: 0
+  actor_probs:
+  - 0.42278942465782166
+  - 0.26862412691116333
+  - 0.3085864782333374
+  critic_value: 0.17570221424102783
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_002
+      - 32
+    - - room_001
+      - north
+      - wall
+      - 33
+    - - room_001
+      - east
+      - room_002
+      - 33
+    - - room_000
+      - north
+      - wall
+      - 34
+    - - room_000
+      - east
+      - room_001
+      - 34
+    - - room_000
+      - west
+      - wall
+      - 34
+    - - agent
+      - atlocation
+      - room_000
+      - 34
+    - - room_001
+      - north
+      - wall
+      - 35
+    - - room_002
+      - north
+      - wall
+      - 36
+    - - room_002
+      - east
+      - room_003
+      - 36
+    - - room_002
+      - south
+      - wall
+      - 36
+    - - room_002
+      - west
+      - room_001
+      - 36
+    - - agent
+      - atlocation
+      - room_002
+      - 36
+    - - room_003
+      - north
+      - wall
+      - 37
+    - - room_003
+      - east
+      - wall
+      - 37
+    - - room_003
+      - south
+      - room_005
+      - 37
+    semantic: []
+    short:
+    - - room_003
+      - west
+      - room_002
+      - 37
+  action: 0
+  actor_probs:
+  - 0.3927479684352875
+  - 0.2865960896015167
+  - 0.3206559121608734
+  critic_value: 0.4383079409599304
+- state:
+    episodic:
+    - - room_001
+      - north
+      - wall
+      - 33
+    - - room_001
+      - east
+      - room_002
+      - 33
+    - - room_000
+      - north
+      - wall
+      - 34
+    - - room_000
+      - east
+      - room_001
+      - 34
+    - - room_000
+      - west
+      - wall
+      - 34
+    - - agent
+      - atlocation
+      - room_000
+      - 34
+    - - room_001
+      - north
+      - wall
+      - 35
+    - - room_002
+      - north
+      - wall
+      - 36
+    - - room_002
+      - east
+      - room_003
+      - 36
+    - - room_002
+      - south
+      - wall
+      - 36
+    - - room_002
+      - west
+      - room_001
+      - 36
+    - - agent
+      - atlocation
+      - room_002
+      - 36
+    - - room_003
+      - north
+      - wall
+      - 37
+    - - room_003
+      - east
+      - wall
+      - 37
+    - - room_003
+      - south
+      - room_005
+      - 37
+    - - room_003
+      - west
+      - room_002
+      - 37
+    semantic: []
+    short:
+    - - agent
+      - atlocation
+      - room_003
+      - 37
+  action: 0
+  actor_probs:
+  - 0.46765634417533875
+  - 0.23155494034290314
+  - 0.3007887303829193
+  critic_value: 0.8761920928955078
+- state:
+    episodic:
+    - - room_001
+      - east
+      - room_002
+      - 33
+    - - room_000
+      - north
+      - wall
+      - 34
+    - - room_000
+      - east
+      - room_001
+      - 34
+    - - room_000
+      - west
+      - wall
+      - 34
+    - - agent
+      - atlocation
+      - room_000
+      - 34
+    - - room_001
+      - north
+      - wall
+      - 35
+    - - room_002
+      - north
+      - wall
+      - 36
+    - - room_002
+      - east
+      - room_003
+      - 36
+    - - room_002
+      - south
+      - wall
+      - 36
+    - - room_002
+      - west
+      - room_001
+      - 36
+    - - agent
+      - atlocation
+      - room_002
+      - 36
+    - - room_003
+      - north
+      - wall
+      - 37
+    - - room_003
+      - east
+      - wall
+      - 37
+    - - room_003
+      - south
+      - room_005
+      - 37
+    - - room_003
+      - west
+      - room_002
+      - 37
+    - - agent
+      - atlocation
+      - room_003
+      - 37
+    semantic: []
+    short:
+    - - sta_002
+      - atlocation
+      - room_003
+      - 37
+  action: 0
+  actor_probs:
+  - 0.42981553077697754
+  - 0.2578509449958801
+  - 0.3123336136341095
+  critic_value: 2.4988203048706055
+- state:
+    episodic:
+    - - room_000
+      - north
+      - wall
+      - 34
+    - - room_000
+      - east
+      - room_001
+      - 34
+    - - room_000
+      - west
+      - wall
+      - 34
+    - - agent
+      - atlocation
+      - room_000
+      - 34
+    - - room_001
+      - north
+      - wall
+      - 35
+    - - room_002
+      - north
+      - wall
+      - 36
+    - - room_002
+      - east
+      - room_003
+      - 36
+    - - room_002
+      - south
+      - wall
+      - 36
+    - - room_002
+      - west
+      - room_001
+      - 36
+    - - agent
+      - atlocation
+      - room_002
+      - 36
+    - - room_003
+      - north
+      - wall
+      - 37
+    - - room_003
+      - east
+      - wall
+      - 37
+    - - room_003
+      - south
+      - room_005
+      - 37
+    - - room_003
+      - west
+      - room_002
+      - 37
+    - - agent
+      - atlocation
+      - room_003
+      - 37
+    - - sta_002
+      - atlocation
+      - room_003
+      - 37
+    semantic: []
+    short:
+    - - room_005
+      - north
+      - room_003
+      - 38
+  action: 0
+  actor_probs:
+  - 0.4524819552898407
+  - 0.24182593822479248
+  - 0.305692195892334
+  critic_value: 0.2529914081096649
+- state:
+    episodic:
+    - - room_000
+      - east
+      - room_001
+      - 34
+    - - room_000
+      - west
+      - wall
+      - 34
+    - - agent
+      - atlocation
+      - room_000
+      - 34
+    - - room_001
+      - north
+      - wall
+      - 35
+    - - room_002
+      - north
+      - wall
+      - 36
+    - - room_002
+      - east
+      - room_003
+      - 36
+    - - room_002
+      - south
+      - wall
+      - 36
+    - - room_002
+      - west
+      - room_001
+      - 36
+    - - agent
+      - atlocation
+      - room_002
+      - 36
+    - - room_003
+      - north
+      - wall
+      - 37
+    - - room_003
+      - east
+      - wall
+      - 37
+    - - room_003
+      - south
+      - room_005
+      - 37
+    - - room_003
+      - west
+      - room_002
+      - 37
+    - - agent
+      - atlocation
+      - room_003
+      - 37
+    - - sta_002
+      - atlocation
+      - room_003
+      - 37
+    - - room_005
+      - north
+      - room_003
+      - 38
+    semantic: []
+    short:
+    - - room_005
+      - east
+      - room_006
+      - 38
+  action: 0
+  actor_probs:
+  - 0.44174841046333313
+  - 0.2553927004337311
+  - 0.302858829498291
+  critic_value: 0.36335840821266174
+- state:
+    episodic:
+    - - room_000
+      - west
+      - wall
+      - 34
+    - - agent
+      - atlocation
+      - room_000
+      - 34
+    - - room_001
+      - north
+      - wall
+      - 35
+    - - room_002
+      - north
+      - wall
+      - 36
+    - - room_002
+      - east
+      - room_003
+      - 36
+    - - room_002
+      - south
+      - wall
+      - 36
+    - - room_002
+      - west
+      - room_001
+      - 36
+    - - agent
+      - atlocation
+      - room_002
+      - 36
+    - - room_003
+      - north
+      - wall
+      - 37
+    - - room_003
+      - east
+      - wall
+      - 37
+    - - room_003
+      - south
+      - room_005
+      - 37
+    - - room_003
+      - west
+      - room_002
+      - 37
+    - - agent
+      - atlocation
+      - room_003
+      - 37
+    - - sta_002
+      - atlocation
+      - room_003
+      - 37
+    - - room_005
+      - north
+      - room_003
+      - 38
+    - - room_005
+      - east
+      - room_006
+      - 38
+    semantic: []
+    short:
+    - - room_005
+      - south
+      - room_010
+      - 38
+  action: 0
+  actor_probs:
+  - 0.4535749852657318
+  - 0.2487739771604538
+  - 0.297651082277298
+  critic_value: 0.8354873061180115
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_000
+      - 34
+    - - room_001
+      - north
+      - wall
+      - 35
+    - - room_002
+      - north
+      - wall
+      - 36
+    - - room_002
+      - east
+      - room_003
+      - 36
+    - - room_002
+      - south
+      - wall
+      - 36
+    - - room_002
+      - west
+      - room_001
+      - 36
+    - - agent
+      - atlocation
+      - room_002
+      - 36
+    - - room_003
+      - north
+      - wall
+      - 37
+    - - room_003
+      - east
+      - wall
+      - 37
+    - - room_003
+      - south
+      - room_005
+      - 37
+    - - room_003
+      - west
+      - room_002
+      - 37
+    - - agent
+      - atlocation
+      - room_003
+      - 37
+    - - sta_002
+      - atlocation
+      - room_003
+      - 37
+    - - room_005
+      - north
+      - room_003
+      - 38
+    - - room_005
+      - east
+      - room_006
+      - 38
+    - - room_005
+      - south
+      - room_010
+      - 38
+    semantic: []
+    short:
+    - - room_005
+      - west
+      - wall
+      - 38
+  action: 0
+  actor_probs:
+  - 0.5155675411224365
+  - 0.22339874505996704
+  - 0.2610337436199188
+  critic_value: 2.3045153617858887
+- state:
+    episodic:
+    - - room_001
+      - north
+      - wall
+      - 35
+    - - room_002
+      - north
+      - wall
+      - 36
+    - - room_002
+      - east
+      - room_003
+      - 36
+    - - room_002
+      - south
+      - wall
+      - 36
+    - - room_002
+      - west
+      - room_001
+      - 36
+    - - agent
+      - atlocation
+      - room_002
+      - 36
+    - - room_003
+      - north
+      - wall
+      - 37
+    - - room_003
+      - east
+      - wall
+      - 37
+    - - room_003
+      - south
+      - room_005
+      - 37
+    - - room_003
+      - west
+      - room_002
+      - 37
+    - - agent
+      - atlocation
+      - room_003
+      - 37
+    - - sta_002
+      - atlocation
+      - room_003
+      - 37
+    - - room_005
+      - north
+      - room_003
+      - 38
+    - - room_005
+      - east
+      - room_006
+      - 38
+    - - room_005
+      - south
+      - room_010
+      - 38
+    - - room_005
+      - west
+      - wall
+      - 38
+    semantic: []
+    short:
+    - - agent
+      - atlocation
+      - room_005
+      - 38
+  action: 0
+  actor_probs:
+  - 0.4410203695297241
+  - 0.2576165497303009
+  - 0.3013630211353302
+  critic_value: 2.6398887634277344
+- state:
+    episodic:
+    - - room_002
+      - north
+      - wall
+      - 36
+    - - room_002
+      - east
+      - room_003
+      - 36
+    - - room_002
+      - south
+      - wall
+      - 36
+    - - room_002
+      - west
+      - room_001
+      - 36
+    - - agent
+      - atlocation
+      - room_002
+      - 36
+    - - room_003
+      - north
+      - wall
+      - 37
+    - - room_003
+      - east
+      - wall
+      - 37
+    - - room_003
+      - south
+      - room_005
+      - 37
+    - - room_003
+      - west
+      - room_002
+      - 37
+    - - agent
+      - atlocation
+      - room_003
+      - 37
+    - - sta_002
+      - atlocation
+      - room_003
+      - 37
+    - - room_005
+      - north
+      - room_003
+      - 38
+    - - room_005
+      - east
+      - room_006
+      - 38
+    - - room_005
+      - south
+      - room_010
+      - 38
+    - - room_005
+      - west
+      - wall
+      - 38
+    - - agent
+      - atlocation
+      - room_005
+      - 38
+    semantic: []
+    short:
+    - - ind_000
+      - atlocation
+      - room_005
+      - 38
+  action: 0
+  actor_probs:
+  - 0.41967839002609253
+  - 0.272471159696579
+  - 0.3078504502773285
+  critic_value: 4.2074079513549805
+- state:
+    episodic:
+    - - room_002
+      - east
+      - room_003
+      - 36
+    - - room_002
+      - south
+      - wall
+      - 36
+    - - room_002
+      - west
+      - room_001
+      - 36
+    - - agent
+      - atlocation
+      - room_002
+      - 36
+    - - room_003
+      - north
+      - wall
+      - 37
+    - - room_003
+      - east
+      - wall
+      - 37
+    - - room_003
+      - south
+      - room_005
+      - 37
+    - - room_003
+      - west
+      - room_002
+      - 37
+    - - agent
+      - atlocation
+      - room_003
+      - 37
+    - - sta_002
+      - atlocation
+      - room_003
+      - 37
+    - - room_005
+      - north
+      - room_003
+      - 38
+    - - room_005
+      - east
+      - room_006
+      - 38
+    - - room_005
+      - south
+      - room_010
+      - 38
+    - - room_005
+      - west
+      - wall
+      - 38
+    - - agent
+      - atlocation
+      - room_005
+      - 38
+    - - ind_000
+      - atlocation
+      - room_005
+      - 38
+    semantic: []
+    short:
+    - - room_010
+      - north
+      - room_005
+      - 39
+  action: 0
+  actor_probs:
+  - 0.4208999276161194
+  - 0.27448415756225586
+  - 0.30461597442626953
+  critic_value: 0.395158588886261
+- state:
+    episodic:
+    - - room_002
+      - south
+      - wall
+      - 36
+    - - room_002
+      - west
+      - room_001
+      - 36
+    - - agent
+      - atlocation
+      - room_002
+      - 36
+    - - room_003
+      - north
+      - wall
+      - 37
+    - - room_003
+      - east
+      - wall
+      - 37
+    - - room_003
+      - south
+      - room_005
+      - 37
+    - - room_003
+      - west
+      - room_002
+      - 37
+    - - agent
+      - atlocation
+      - room_003
+      - 37
+    - - sta_002
+      - atlocation
+      - room_003
+      - 37
+    - - room_005
+      - north
+      - room_003
+      - 38
+    - - room_005
+      - east
+      - room_006
+      - 38
+    - - room_005
+      - south
+      - room_010
+      - 38
+    - - room_005
+      - west
+      - wall
+      - 38
+    - - agent
+      - atlocation
+      - room_005
+      - 38
+    - - ind_000
+      - atlocation
+      - room_005
+      - 38
+    - - room_010
+      - north
+      - room_005
+      - 39
+    semantic: []
+    short:
+    - - room_010
+      - east
+      - wall
+      - 39
+  action: 0
+  actor_probs:
+  - 0.4471755921840668
+  - 0.26360538601875305
+  - 0.2892189621925354
+  critic_value: 0.43482786417007446
+- state:
+    episodic:
+    - - room_002
+      - west
+      - room_001
+      - 36
+    - - agent
+      - atlocation
+      - room_002
+      - 36
+    - - room_003
+      - north
+      - wall
+      - 37
+    - - room_003
+      - east
+      - wall
+      - 37
+    - - room_003
+      - south
+      - room_005
+      - 37
+    - - room_003
+      - west
+      - room_002
+      - 37
+    - - agent
+      - atlocation
+      - room_003
+      - 37
+    - - sta_002
+      - atlocation
+      - room_003
+      - 37
+    - - room_005
+      - north
+      - room_003
+      - 38
+    - - room_005
+      - east
+      - room_006
+      - 38
+    - - room_005
+      - south
+      - room_010
+      - 38
+    - - room_005
+      - west
+      - wall
+      - 38
+    - - agent
+      - atlocation
+      - room_005
+      - 38
+    - - ind_000
+      - atlocation
+      - room_005
+      - 38
+    - - room_010
+      - north
+      - room_005
+      - 39
+    - - room_010
+      - east
+      - wall
+      - 39
+    semantic: []
+    short:
+    - - room_010
+      - south
+      - wall
+      - 39
+  action: 0
+  actor_probs:
+  - 0.41651424765586853
+  - 0.2858283221721649
+  - 0.29765740036964417
+  critic_value: 0.9121397137641907
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_002
+      - 36
+    - - room_003
+      - north
+      - wall
+      - 37
+    - - room_003
+      - east
+      - wall
+      - 37
+    - - room_003
+      - south
+      - room_005
+      - 37
+    - - room_003
+      - west
+      - room_002
+      - 37
+    - - agent
+      - atlocation
+      - room_003
+      - 37
+    - - sta_002
+      - atlocation
+      - room_003
+      - 37
+    - - room_005
+      - north
+      - room_003
+      - 38
+    - - room_005
+      - east
+      - room_006
+      - 38
+    - - room_005
+      - south
+      - room_010
+      - 38
+    - - room_005
+      - west
+      - wall
+      - 38
+    - - agent
+      - atlocation
+      - room_005
+      - 38
+    - - ind_000
+      - atlocation
+      - room_005
+      - 38
+    - - room_010
+      - north
+      - room_005
+      - 39
+    - - room_010
+      - east
+      - wall
+      - 39
+    - - room_010
+      - south
+      - wall
+      - 39
+    semantic: []
+    short:
+    - - room_010
+      - west
+      - room_009
+      - 39
+  action: 0
+  actor_probs:
+  - 0.3525778353214264
+  - 0.3053639233112335
+  - 0.3420582413673401
+  critic_value: 0.45112934708595276
+- state:
+    episodic:
+    - - room_003
+      - north
+      - wall
+      - 37
+    - - room_003
+      - east
+      - wall
+      - 37
+    - - room_003
+      - south
+      - room_005
+      - 37
+    - - room_003
+      - west
+      - room_002
+      - 37
+    - - agent
+      - atlocation
+      - room_003
+      - 37
+    - - sta_002
+      - atlocation
+      - room_003
+      - 37
+    - - room_005
+      - north
+      - room_003
+      - 38
+    - - room_005
+      - east
+      - room_006
+      - 38
+    - - room_005
+      - south
+      - room_010
+      - 38
+    - - room_005
+      - west
+      - wall
+      - 38
+    - - agent
+      - atlocation
+      - room_005
+      - 38
+    - - ind_000
+      - atlocation
+      - room_005
+      - 38
+    - - room_010
+      - north
+      - room_005
+      - 39
+    - - room_010
+      - east
+      - wall
+      - 39
+    - - room_010
+      - south
+      - wall
+      - 39
+    - - room_010
+      - west
+      - room_009
+      - 39
+    semantic: []
+    short:
+    - - agent
+      - atlocation
+      - room_010
+      - 39
+  action: 0
+  actor_probs:
+  - 0.3804970383644104
+  - 0.30923670530319214
+  - 0.3102663457393646
+  critic_value: 0.9688085913658142
+- state:
+    episodic:
+    - - room_003
+      - east
+      - wall
+      - 37
+    - - room_003
+      - south
+      - room_005
+      - 37
+    - - room_003
+      - west
+      - room_002
+      - 37
+    - - agent
+      - atlocation
+      - room_003
+      - 37
+    - - sta_002
+      - atlocation
+      - room_003
+      - 37
+    - - room_005
+      - north
+      - room_003
+      - 38
+    - - room_005
+      - east
+      - room_006
+      - 38
+    - - room_005
+      - south
+      - room_010
+      - 38
+    - - room_005
+      - west
+      - wall
+      - 38
+    - - agent
+      - atlocation
+      - room_005
+      - 38
+    - - ind_000
+      - atlocation
+      - room_005
+      - 38
+    - - room_010
+      - north
+      - room_005
+      - 39
+    - - room_010
+      - east
+      - wall
+      - 39
+    - - room_010
+      - south
+      - wall
+      - 39
+    - - room_010
+      - west
+      - room_009
+      - 39
+    - - agent
+      - atlocation
+      - room_010
+      - 39
+    semantic: []
+    short:
+    - - room_009
+      - north
+      - wall
+      - 40
+  action: 0
+  actor_probs:
+  - 0.4771287143230438
+  - 0.2628490626811981
+  - 0.2600221633911133
+  critic_value: 0.25251853466033936
+- state:
+    episodic:
+    - - room_003
+      - south
+      - room_005
+      - 37
+    - - room_003
+      - west
+      - room_002
+      - 37
+    - - agent
+      - atlocation
+      - room_003
+      - 37
+    - - sta_002
+      - atlocation
+      - room_003
+      - 37
+    - - room_005
+      - north
+      - room_003
+      - 38
+    - - room_005
+      - east
+      - room_006
+      - 38
+    - - room_005
+      - south
+      - room_010
+      - 38
+    - - room_005
+      - west
+      - wall
+      - 38
+    - - agent
+      - atlocation
+      - room_005
+      - 38
+    - - ind_000
+      - atlocation
+      - room_005
+      - 38
+    - - room_010
+      - north
+      - room_005
+      - 39
+    - - room_010
+      - east
+      - wall
+      - 39
+    - - room_010
+      - south
+      - wall
+      - 39
+    - - room_010
+      - west
+      - room_009
+      - 39
+    - - agent
+      - atlocation
+      - room_010
+      - 39
+    - - room_009
+      - north
+      - wall
+      - 40
+    semantic: []
+    short:
+    - - room_009
+      - east
+      - room_010
+      - 40
+  action: 0
+  actor_probs:
+  - 0.4161692261695862
+  - 0.28156590461730957
+  - 0.30226489901542664
+  critic_value: 0.3371095061302185
+- state:
+    episodic:
+    - - room_003
+      - west
+      - room_002
+      - 37
+    - - agent
+      - atlocation
+      - room_003
+      - 37
+    - - sta_002
+      - atlocation
+      - room_003
+      - 37
+    - - room_005
+      - north
+      - room_003
+      - 38
+    - - room_005
+      - east
+      - room_006
+      - 38
+    - - room_005
+      - south
+      - room_010
+      - 38
+    - - room_005
+      - west
+      - wall
+      - 38
+    - - agent
+      - atlocation
+      - room_005
+      - 38
+    - - ind_000
+      - atlocation
+      - room_005
+      - 38
+    - - room_010
+      - north
+      - room_005
+      - 39
+    - - room_010
+      - east
+      - wall
+      - 39
+    - - room_010
+      - south
+      - wall
+      - 39
+    - - room_010
+      - west
+      - room_009
+      - 39
+    - - agent
+      - atlocation
+      - room_010
+      - 39
+    - - room_009
+      - north
+      - wall
+      - 40
+    - - room_009
+      - east
+      - room_010
+      - 40
+    semantic: []
+    short:
+    - - room_009
+      - south
+      - wall
+      - 40
+  action: 0
+  actor_probs:
+  - 0.4299539625644684
+  - 0.2708904445171356
+  - 0.299155592918396
+  critic_value: 0.6079433560371399
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_003
+      - 37
+    - - sta_002
+      - atlocation
+      - room_003
+      - 37
+    - - room_005
+      - north
+      - room_003
+      - 38
+    - - room_005
+      - east
+      - room_006
+      - 38
+    - - room_005
+      - south
+      - room_010
+      - 38
+    - - room_005
+      - west
+      - wall
+      - 38
+    - - agent
+      - atlocation
+      - room_005
+      - 38
+    - - ind_000
+      - atlocation
+      - room_005
+      - 38
+    - - room_010
+      - north
+      - room_005
+      - 39
+    - - room_010
+      - east
+      - wall
+      - 39
+    - - room_010
+      - south
+      - wall
+      - 39
+    - - room_010
+      - west
+      - room_009
+      - 39
+    - - agent
+      - atlocation
+      - room_010
+      - 39
+    - - room_009
+      - north
+      - wall
+      - 40
+    - - room_009
+      - east
+      - room_010
+      - 40
+    - - room_009
+      - south
+      - wall
+      - 40
+    semantic: []
+    short:
+    - - room_009
+      - west
+      - room_008
+      - 40
+  action: 0
+  actor_probs:
+  - 0.4054874777793884
+  - 0.2861006259918213
+  - 0.3084118664264679
+  critic_value: 0.8666979670524597
+- state:
+    episodic:
+    - - sta_002
+      - atlocation
+      - room_003
+      - 37
+    - - room_005
+      - north
+      - room_003
+      - 38
+    - - room_005
+      - east
+      - room_006
+      - 38
+    - - room_005
+      - south
+      - room_010
+      - 38
+    - - room_005
+      - west
+      - wall
+      - 38
+    - - agent
+      - atlocation
+      - room_005
+      - 38
+    - - ind_000
+      - atlocation
+      - room_005
+      - 38
+    - - room_010
+      - north
+      - room_005
+      - 39
+    - - room_010
+      - east
+      - wall
+      - 39
+    - - room_010
+      - south
+      - wall
+      - 39
+    - - room_010
+      - west
+      - room_009
+      - 39
+    - - agent
+      - atlocation
+      - room_010
+      - 39
+    - - room_009
+      - north
+      - wall
+      - 40
+    - - room_009
+      - east
+      - room_010
+      - 40
+    - - room_009
+      - south
+      - wall
+      - 40
+    - - room_009
+      - west
+      - room_008
+      - 40
+    semantic: []
+    short:
+    - - agent
+      - atlocation
+      - room_009
+      - 40
+  action: 0
+  actor_probs:
+  - 0.49704980850219727
+  - 0.22495093941688538
+  - 0.27799925208091736
+  critic_value: 1.046386957168579
+- state:
+    episodic:
+    - - room_005
+      - north
+      - room_003
+      - 38
+    - - room_005
+      - east
+      - room_006
+      - 38
+    - - room_005
+      - south
+      - room_010
+      - 38
+    - - room_005
+      - west
+      - wall
+      - 38
+    - - agent
+      - atlocation
+      - room_005
+      - 38
+    - - ind_000
+      - atlocation
+      - room_005
+      - 38
+    - - room_010
+      - north
+      - room_005
+      - 39
+    - - room_010
+      - east
+      - wall
+      - 39
+    - - room_010
+      - south
+      - wall
+      - 39
+    - - room_010
+      - west
+      - room_009
+      - 39
+    - - agent
+      - atlocation
+      - room_010
+      - 39
+    - - room_009
+      - north
+      - wall
+      - 40
+    - - room_009
+      - east
+      - room_010
+      - 40
+    - - room_009
+      - south
+      - wall
+      - 40
+    - - room_009
+      - west
+      - room_008
+      - 40
+    - - agent
+      - atlocation
+      - room_009
+      - 40
+    semantic: []
+    short:
+    - - dep_002
+      - atlocation
+      - room_009
+      - 40
+  action: 0
+  actor_probs:
+  - 0.4223281145095825
+  - 0.2703244984149933
+  - 0.3073473870754242
+  critic_value: 2.1776862144470215
+- state:
+    episodic:
+    - - room_005
+      - east
+      - room_006
+      - 38
+    - - room_005
+      - south
+      - room_010
+      - 38
+    - - room_005
+      - west
+      - wall
+      - 38
+    - - agent
+      - atlocation
+      - room_005
+      - 38
+    - - ind_000
+      - atlocation
+      - room_005
+      - 38
+    - - room_010
+      - north
+      - room_005
+      - 39
+    - - room_010
+      - east
+      - wall
+      - 39
+    - - room_010
+      - south
+      - wall
+      - 39
+    - - room_010
+      - west
+      - room_009
+      - 39
+    - - agent
+      - atlocation
+      - room_010
+      - 39
+    - - room_009
+      - north
+      - wall
+      - 40
+    - - room_009
+      - east
+      - room_010
+      - 40
+    - - room_009
+      - south
+      - wall
+      - 40
+    - - room_009
+      - west
+      - room_008
+      - 40
+    - - agent
+      - atlocation
+      - room_009
+      - 40
+    - - dep_002
+      - atlocation
+      - room_009
+      - 40
+    semantic: []
+    short:
+    - - room_010
+      - north
+      - room_005
+      - 41
+  action: 0
+  actor_probs:
+  - 0.456204354763031
+  - 0.24700476229190826
+  - 0.29679083824157715
+  critic_value: 0.3919203281402588
+- state:
+    episodic:
+    - - room_005
+      - south
+      - room_010
+      - 38
+    - - room_005
+      - west
+      - wall
+      - 38
+    - - agent
+      - atlocation
+      - room_005
+      - 38
+    - - ind_000
+      - atlocation
+      - room_005
+      - 38
+    - - room_010
+      - north
+      - room_005
+      - 39
+    - - room_010
+      - east
+      - wall
+      - 39
+    - - room_010
+      - south
+      - wall
+      - 39
+    - - room_010
+      - west
+      - room_009
+      - 39
+    - - agent
+      - atlocation
+      - room_010
+      - 39
+    - - room_009
+      - north
+      - wall
+      - 40
+    - - room_009
+      - east
+      - room_010
+      - 40
+    - - room_009
+      - south
+      - wall
+      - 40
+    - - room_009
+      - west
+      - room_008
+      - 40
+    - - agent
+      - atlocation
+      - room_009
+      - 40
+    - - dep_002
+      - atlocation
+      - room_009
+      - 40
+    - - room_010
+      - north
+      - room_005
+      - 41
+    semantic: []
+    short:
+    - - room_010
+      - east
+      - wall
+      - 41
+  action: 0
+  actor_probs:
+  - 0.47315001487731934
+  - 0.24737006425857544
+  - 0.2794799506664276
+  critic_value: 0.5172096490859985
+- state:
+    episodic:
+    - - room_005
+      - west
+      - wall
+      - 38
+    - - agent
+      - atlocation
+      - room_005
+      - 38
+    - - ind_000
+      - atlocation
+      - room_005
+      - 38
+    - - room_010
+      - north
+      - room_005
+      - 39
+    - - room_010
+      - east
+      - wall
+      - 39
+    - - room_010
+      - south
+      - wall
+      - 39
+    - - room_010
+      - west
+      - room_009
+      - 39
+    - - agent
+      - atlocation
+      - room_010
+      - 39
+    - - room_009
+      - north
+      - wall
+      - 40
+    - - room_009
+      - east
+      - room_010
+      - 40
+    - - room_009
+      - south
+      - wall
+      - 40
+    - - room_009
+      - west
+      - room_008
+      - 40
+    - - agent
+      - atlocation
+      - room_009
+      - 40
+    - - dep_002
+      - atlocation
+      - room_009
+      - 40
+    - - room_010
+      - north
+      - room_005
+      - 41
+    - - room_010
+      - east
+      - wall
+      - 41
+    semantic: []
+    short:
+    - - room_010
+      - south
+      - wall
+      - 41
+  action: 0
+  actor_probs:
+  - 0.43030449748039246
+  - 0.2732885479927063
+  - 0.29640698432922363
+  critic_value: 1.059554100036621
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_005
+      - 38
+    - - ind_000
+      - atlocation
+      - room_005
+      - 38
+    - - room_010
+      - north
+      - room_005
+      - 39
+    - - room_010
+      - east
+      - wall
+      - 39
+    - - room_010
+      - south
+      - wall
+      - 39
+    - - room_010
+      - west
+      - room_009
+      - 39
+    - - agent
+      - atlocation
+      - room_010
+      - 39
+    - - room_009
+      - north
+      - wall
+      - 40
+    - - room_009
+      - east
+      - room_010
+      - 40
+    - - room_009
+      - south
+      - wall
+      - 40
+    - - room_009
+      - west
+      - room_008
+      - 40
+    - - agent
+      - atlocation
+      - room_009
+      - 40
+    - - dep_002
+      - atlocation
+      - room_009
+      - 40
+    - - room_010
+      - north
+      - room_005
+      - 41
+    - - room_010
+      - east
+      - wall
+      - 41
+    - - room_010
+      - south
+      - wall
+      - 41
+    semantic: []
+    short:
+    - - room_010
+      - west
+      - room_009
+      - 41
+  action: 0
+  actor_probs:
+  - 0.360239714384079
+  - 0.30355140566825867
+  - 0.33620887994766235
+  critic_value: 0.878484308719635
+- state:
+    episodic:
+    - - ind_000
+      - atlocation
+      - room_005
+      - 38
+    - - room_010
+      - north
+      - room_005
+      - 39
+    - - room_010
+      - east
+      - wall
+      - 39
+    - - room_010
+      - south
+      - wall
+      - 39
+    - - room_010
+      - west
+      - room_009
+      - 39
+    - - agent
+      - atlocation
+      - room_010
+      - 39
+    - - room_009
+      - north
+      - wall
+      - 40
+    - - room_009
+      - east
+      - room_010
+      - 40
+    - - room_009
+      - south
+      - wall
+      - 40
+    - - room_009
+      - west
+      - room_008
+      - 40
+    - - agent
+      - atlocation
+      - room_009
+      - 40
+    - - dep_002
+      - atlocation
+      - room_009
+      - 40
+    - - room_010
+      - north
+      - room_005
+      - 41
+    - - room_010
+      - east
+      - wall
+      - 41
+    - - room_010
+      - south
+      - wall
+      - 41
+    - - room_010
+      - west
+      - room_009
+      - 41
+    semantic: []
+    short:
+    - - agent
+      - atlocation
+      - room_010
+      - 41
+  action: 0
+  actor_probs:
+  - 0.3832699954509735
+  - 0.3077632784843445
+  - 0.3089667558670044
+  critic_value: 1.3520350456237793
+- state:
+    episodic:
+    - - room_010
+      - north
+      - room_005
+      - 39
+    - - room_010
+      - east
+      - wall
+      - 39
+    - - room_010
+      - south
+      - wall
+      - 39
+    - - room_010
+      - west
+      - room_009
+      - 39
+    - - agent
+      - atlocation
+      - room_010
+      - 39
+    - - room_009
+      - north
+      - wall
+      - 40
+    - - room_009
+      - east
+      - room_010
+      - 40
+    - - room_009
+      - south
+      - wall
+      - 40
+    - - room_009
+      - west
+      - room_008
+      - 40
+    - - agent
+      - atlocation
+      - room_009
+      - 40
+    - - dep_002
+      - atlocation
+      - room_009
+      - 40
+    - - room_010
+      - north
+      - room_005
+      - 41
+    - - room_010
+      - east
+      - wall
+      - 41
+    - - room_010
+      - south
+      - wall
+      - 41
+    - - room_010
+      - west
+      - room_009
+      - 41
+    - - agent
+      - atlocation
+      - room_010
+      - 41
+    semantic: []
+    short:
+    - - room_009
+      - north
+      - wall
+      - 42
+  action: 0
+  actor_probs:
+  - 0.4782831370830536
+  - 0.262561559677124
+  - 0.2591552436351776
+  critic_value: 0.26766836643218994
+- state:
+    episodic:
+    - - room_010
+      - east
+      - wall
+      - 39
+    - - room_010
+      - south
+      - wall
+      - 39
+    - - room_010
+      - west
+      - room_009
+      - 39
+    - - agent
+      - atlocation
+      - room_010
+      - 39
+    - - room_009
+      - north
+      - wall
+      - 40
+    - - room_009
+      - east
+      - room_010
+      - 40
+    - - room_009
+      - south
+      - wall
+      - 40
+    - - room_009
+      - west
+      - room_008
+      - 40
+    - - agent
+      - atlocation
+      - room_009
+      - 40
+    - - dep_002
+      - atlocation
+      - room_009
+      - 40
+    - - room_010
+      - north
+      - room_005
+      - 41
+    - - room_010
+      - east
+      - wall
+      - 41
+    - - room_010
+      - south
+      - wall
+      - 41
+    - - room_010
+      - west
+      - room_009
+      - 41
+    - - agent
+      - atlocation
+      - room_010
+      - 41
+    - - room_009
+      - north
+      - wall
+      - 42
+    semantic: []
+    short:
+    - - room_009
+      - east
+      - room_010
+      - 42
+  action: 0
+  actor_probs:
+  - 0.41374385356903076
+  - 0.28275755047798157
+  - 0.3034985661506653
+  critic_value: 0.36099451780319214
+- state:
+    episodic:
+    - - room_010
+      - south
+      - wall
+      - 39
+    - - room_010
+      - west
+      - room_009
+      - 39
+    - - agent
+      - atlocation
+      - room_010
+      - 39
+    - - room_009
+      - north
+      - wall
+      - 40
+    - - room_009
+      - east
+      - room_010
+      - 40
+    - - room_009
+      - south
+      - wall
+      - 40
+    - - room_009
+      - west
+      - room_008
+      - 40
+    - - agent
+      - atlocation
+      - room_009
+      - 40
+    - - dep_002
+      - atlocation
+      - room_009
+      - 40
+    - - room_010
+      - north
+      - room_005
+      - 41
+    - - room_010
+      - east
+      - wall
+      - 41
+    - - room_010
+      - south
+      - wall
+      - 41
+    - - room_010
+      - west
+      - room_009
+      - 41
+    - - agent
+      - atlocation
+      - room_010
+      - 41
+    - - room_009
+      - north
+      - wall
+      - 42
+    - - room_009
+      - east
+      - room_010
+      - 42
+    semantic: []
+    short:
+    - - room_009
+      - south
+      - wall
+      - 42
+  action: 0
+  actor_probs:
+  - 0.4290269613265991
+  - 0.2709234058856964
+  - 0.30004972219467163
+  critic_value: 0.718593418598175
+- state:
+    episodic:
+    - - room_010
+      - west
+      - room_009
+      - 39
+    - - agent
+      - atlocation
+      - room_010
+      - 39
+    - - room_009
+      - north
+      - wall
+      - 40
+    - - room_009
+      - east
+      - room_010
+      - 40
+    - - room_009
+      - south
+      - wall
+      - 40
+    - - room_009
+      - west
+      - room_008
+      - 40
+    - - agent
+      - atlocation
+      - room_009
+      - 40
+    - - dep_002
+      - atlocation
+      - room_009
+      - 40
+    - - room_010
+      - north
+      - room_005
+      - 41
+    - - room_010
+      - east
+      - wall
+      - 41
+    - - room_010
+      - south
+      - wall
+      - 41
+    - - room_010
+      - west
+      - room_009
+      - 41
+    - - agent
+      - atlocation
+      - room_010
+      - 41
+    - - room_009
+      - north
+      - wall
+      - 42
+    - - room_009
+      - east
+      - room_010
+      - 42
+    - - room_009
+      - south
+      - wall
+      - 42
+    semantic: []
+    short:
+    - - room_009
+      - west
+      - room_008
+      - 42
+  action: 0
+  actor_probs:
+  - 0.40470898151397705
+  - 0.28586265444755554
+  - 0.309428334236145
+  critic_value: 1.0089937448501587
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_010
+      - 39
+    - - room_009
+      - north
+      - wall
+      - 40
+    - - room_009
+      - east
+      - room_010
+      - 40
+    - - room_009
+      - south
+      - wall
+      - 40
+    - - room_009
+      - west
+      - room_008
+      - 40
+    - - agent
+      - atlocation
+      - room_009
+      - 40
+    - - dep_002
+      - atlocation
+      - room_009
+      - 40
+    - - room_010
+      - north
+      - room_005
+      - 41
+    - - room_010
+      - east
+      - wall
+      - 41
+    - - room_010
+      - south
+      - wall
+      - 41
+    - - room_010
+      - west
+      - room_009
+      - 41
+    - - agent
+      - atlocation
+      - room_010
+      - 41
+    - - room_009
+      - north
+      - wall
+      - 42
+    - - room_009
+      - east
+      - room_010
+      - 42
+    - - room_009
+      - south
+      - wall
+      - 42
+    - - room_009
+      - west
+      - room_008
+      - 42
+    semantic: []
+    short:
+    - - agent
+      - atlocation
+      - room_009
+      - 42
+  action: 0
+  actor_probs:
+  - 0.490130215883255
+  - 0.23049111664295197
+  - 0.27937865257263184
+  critic_value: 1.1361885070800781
+- state:
+    episodic:
+    - - room_009
+      - north
+      - wall
+      - 40
+    - - room_009
+      - east
+      - room_010
+      - 40
+    - - room_009
+      - south
+      - wall
+      - 40
+    - - room_009
+      - west
+      - room_008
+      - 40
+    - - agent
+      - atlocation
+      - room_009
+      - 40
+    - - dep_002
+      - atlocation
+      - room_009
+      - 40
+    - - room_010
+      - north
+      - room_005
+      - 41
+    - - room_010
+      - east
+      - wall
+      - 41
+    - - room_010
+      - south
+      - wall
+      - 41
+    - - room_010
+      - west
+      - room_009
+      - 41
+    - - agent
+      - atlocation
+      - room_010
+      - 41
+    - - room_009
+      - north
+      - wall
+      - 42
+    - - room_009
+      - east
+      - room_010
+      - 42
+    - - room_009
+      - south
+      - wall
+      - 42
+    - - room_009
+      - west
+      - room_008
+      - 42
+    - - agent
+      - atlocation
+      - room_009
+      - 42
+    semantic: []
+    short:
+    - - dep_002
+      - atlocation
+      - room_009
+      - 42
+  action: 0
+  actor_probs:
+  - 0.4244711995124817
+  - 0.2687349319458008
+  - 0.30679380893707275
+  critic_value: 2.118760108947754
+- state:
+    episodic:
+    - - room_009
+      - east
+      - room_010
+      - 40
+    - - room_009
+      - south
+      - wall
+      - 40
+    - - room_009
+      - west
+      - room_008
+      - 40
+    - - agent
+      - atlocation
+      - room_009
+      - 40
+    - - dep_002
+      - atlocation
+      - room_009
+      - 40
+    - - room_010
+      - north
+      - room_005
+      - 41
+    - - room_010
+      - east
+      - wall
+      - 41
+    - - room_010
+      - south
+      - wall
+      - 41
+    - - room_010
+      - west
+      - room_009
+      - 41
+    - - agent
+      - atlocation
+      - room_010
+      - 41
+    - - room_009
+      - north
+      - wall
+      - 42
+    - - room_009
+      - east
+      - room_010
+      - 42
+    - - room_009
+      - south
+      - wall
+      - 42
+    - - room_009
+      - west
+      - room_008
+      - 42
+    - - agent
+      - atlocation
+      - room_009
+      - 42
+    - - dep_002
+      - atlocation
+      - room_009
+      - 42
+    semantic: []
+    short:
+    - - room_008
+      - north
+      - room_004
+      - 43
+  action: 0
+  actor_probs:
+  - 0.44338518381118774
+  - 0.25694307684898376
+  - 0.29967179894447327
+  critic_value: 0.35503697395324707
+- state:
+    episodic:
+    - - room_009
+      - south
+      - wall
+      - 40
+    - - room_009
+      - west
+      - room_008
+      - 40
+    - - agent
+      - atlocation
+      - room_009
+      - 40
+    - - dep_002
+      - atlocation
+      - room_009
+      - 40
+    - - room_010
+      - north
+      - room_005
+      - 41
+    - - room_010
+      - east
+      - wall
+      - 41
+    - - room_010
+      - south
+      - wall
+      - 41
+    - - room_010
+      - west
+      - room_009
+      - 41
+    - - agent
+      - atlocation
+      - room_010
+      - 41
+    - - room_009
+      - north
+      - wall
+      - 42
+    - - room_009
+      - east
+      - room_010
+      - 42
+    - - room_009
+      - south
+      - wall
+      - 42
+    - - room_009
+      - west
+      - room_008
+      - 42
+    - - agent
+      - atlocation
+      - room_009
+      - 42
+    - - dep_002
+      - atlocation
+      - room_009
+      - 42
+    - - room_008
+      - north
+      - room_004
+      - 43
+    semantic: []
+    short:
+    - - room_008
+      - east
+      - room_009
+      - 43
+  action: 0
+  actor_probs:
+  - 0.44073379039764404
+  - 0.2561423182487488
+  - 0.3031238913536072
+  critic_value: 0.4237724244594574
+- state:
+    episodic:
+    - - room_009
+      - west
+      - room_008
+      - 40
+    - - agent
+      - atlocation
+      - room_009
+      - 40
+    - - dep_002
+      - atlocation
+      - room_009
+      - 40
+    - - room_010
+      - north
+      - room_005
+      - 41
+    - - room_010
+      - east
+      - wall
+      - 41
+    - - room_010
+      - south
+      - wall
+      - 41
+    - - room_010
+      - west
+      - room_009
+      - 41
+    - - agent
+      - atlocation
+      - room_010
+      - 41
+    - - room_009
+      - north
+      - wall
+      - 42
+    - - room_009
+      - east
+      - room_010
+      - 42
+    - - room_009
+      - south
+      - wall
+      - 42
+    - - room_009
+      - west
+      - room_008
+      - 42
+    - - agent
+      - atlocation
+      - room_009
+      - 42
+    - - dep_002
+      - atlocation
+      - room_009
+      - 42
+    - - room_008
+      - north
+      - room_004
+      - 43
+    - - room_008
+      - east
+      - room_009
+      - 43
+    semantic: []
+    short:
+    - - room_008
+      - south
+      - room_011
+      - 43
+  action: 0
+  actor_probs:
+  - 0.4385989308357239
+  - 0.2575572729110718
+  - 0.30384376645088196
+  critic_value: 1.6959116458892822
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_009
+      - 40
+    - - dep_002
+      - atlocation
+      - room_009
+      - 40
+    - - room_010
+      - north
+      - room_005
+      - 41
+    - - room_010
+      - east
+      - wall
+      - 41
+    - - room_010
+      - south
+      - wall
+      - 41
+    - - room_010
+      - west
+      - room_009
+      - 41
+    - - agent
+      - atlocation
+      - room_010
+      - 41
+    - - room_009
+      - north
+      - wall
+      - 42
+    - - room_009
+      - east
+      - room_010
+      - 42
+    - - room_009
+      - south
+      - wall
+      - 42
+    - - room_009
+      - west
+      - room_008
+      - 42
+    - - agent
+      - atlocation
+      - room_009
+      - 42
+    - - dep_002
+      - atlocation
+      - room_009
+      - 42
+    - - room_008
+      - north
+      - room_004
+      - 43
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    semantic: []
+    short:
+    - - room_008
+      - west
+      - room_007
+      - 43
+  action: 0
+  actor_probs:
+  - 0.43852949142456055
+  - 0.26026156544685364
+  - 0.3012089729309082
+  critic_value: 2.555917739868164
+- state:
+    episodic:
+    - - dep_002
+      - atlocation
+      - room_009
+      - 40
+    - - room_010
+      - north
+      - room_005
+      - 41
+    - - room_010
+      - east
+      - wall
+      - 41
+    - - room_010
+      - south
+      - wall
+      - 41
+    - - room_010
+      - west
+      - room_009
+      - 41
+    - - agent
+      - atlocation
+      - room_010
+      - 41
+    - - room_009
+      - north
+      - wall
+      - 42
+    - - room_009
+      - east
+      - room_010
+      - 42
+    - - room_009
+      - south
+      - wall
+      - 42
+    - - room_009
+      - west
+      - room_008
+      - 42
+    - - agent
+      - atlocation
+      - room_009
+      - 42
+    - - dep_002
+      - atlocation
+      - room_009
+      - 42
+    - - room_008
+      - north
+      - room_004
+      - 43
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    semantic: []
+    short:
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+  action: 0
+  actor_probs:
+  - 0.43630725145339966
+  - 0.2579357624053955
+  - 0.3057570159435272
+  critic_value: 2.188011407852173
+- state:
+    episodic:
+    - - room_010
+      - north
+      - room_005
+      - 41
+    - - room_010
+      - east
+      - wall
+      - 41
+    - - room_010
+      - south
+      - wall
+      - 41
+    - - room_010
+      - west
+      - room_009
+      - 41
+    - - agent
+      - atlocation
+      - room_010
+      - 41
+    - - room_009
+      - north
+      - wall
+      - 42
+    - - room_009
+      - east
+      - room_010
+      - 42
+    - - room_009
+      - south
+      - wall
+      - 42
+    - - room_009
+      - west
+      - room_008
+      - 42
+    - - agent
+      - atlocation
+      - room_009
+      - 42
+    - - dep_002
+      - atlocation
+      - room_009
+      - 42
+    - - room_008
+      - north
+      - room_004
+      - 43
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    semantic: []
+    short:
+    - - room_004
+      - north
+      - room_001
+      - 44
+  action: 0
+  actor_probs:
+  - 0.5022537112236023
+  - 0.2601866126060486
+  - 0.23755964636802673
+  critic_value: 0.27551043033599854
+- state:
+    episodic:
+    - - room_010
+      - east
+      - wall
+      - 41
+    - - room_010
+      - south
+      - wall
+      - 41
+    - - room_010
+      - west
+      - room_009
+      - 41
+    - - agent
+      - atlocation
+      - room_010
+      - 41
+    - - room_009
+      - north
+      - wall
+      - 42
+    - - room_009
+      - east
+      - room_010
+      - 42
+    - - room_009
+      - south
+      - wall
+      - 42
+    - - room_009
+      - west
+      - room_008
+      - 42
+    - - agent
+      - atlocation
+      - room_009
+      - 42
+    - - dep_002
+      - atlocation
+      - room_009
+      - 42
+    - - room_008
+      - north
+      - room_004
+      - 43
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    semantic: []
+    short:
+    - - room_004
+      - east
+      - wall
+      - 44
+  action: 0
+  actor_probs:
+  - 0.5045352578163147
+  - 0.25254568457603455
+  - 0.24291899800300598
+  critic_value: 0.31792542338371277
+- state:
+    episodic:
+    - - room_010
+      - south
+      - wall
+      - 41
+    - - room_010
+      - west
+      - room_009
+      - 41
+    - - agent
+      - atlocation
+      - room_010
+      - 41
+    - - room_009
+      - north
+      - wall
+      - 42
+    - - room_009
+      - east
+      - room_010
+      - 42
+    - - room_009
+      - south
+      - wall
+      - 42
+    - - room_009
+      - west
+      - room_008
+      - 42
+    - - agent
+      - atlocation
+      - room_009
+      - 42
+    - - dep_002
+      - atlocation
+      - room_009
+      - 42
+    - - room_008
+      - north
+      - room_004
+      - 43
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    - - room_004
+      - east
+      - wall
+      - 44
+    semantic: []
+    short:
+    - - room_004
+      - south
+      - room_008
+      - 44
+  action: 2
+  actor_probs:
+  - 0.291901558637619
+  - 0.29506051540374756
+  - 0.4130379259586334
+  critic_value: 0.9281753897666931
+- state:
+    episodic:
+    - - room_010
+      - south
+      - wall
+      - 41
+    - - room_010
+      - west
+      - room_009
+      - 41
+    - - agent
+      - atlocation
+      - room_010
+      - 41
+    - - room_009
+      - north
+      - wall
+      - 42
+    - - room_009
+      - east
+      - room_010
+      - 42
+    - - room_009
+      - south
+      - wall
+      - 42
+    - - room_009
+      - west
+      - room_008
+      - 42
+    - - agent
+      - atlocation
+      - room_009
+      - 42
+    - - dep_002
+      - atlocation
+      - room_009
+      - 42
+    - - room_008
+      - north
+      - room_004
+      - 43
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    - - room_004
+      - east
+      - wall
+      - 44
+    semantic: []
+    short:
+    - - room_004
+      - west
+      - wall
+      - 44
+  action: 0
+  actor_probs:
+  - 0.3912215232849121
+  - 0.3113236427307129
+  - 0.2974548935890198
+  critic_value: 2.242410182952881
+- state:
+    episodic:
+    - - room_010
+      - west
+      - room_009
+      - 41
+    - - agent
+      - atlocation
+      - room_010
+      - 41
+    - - room_009
+      - north
+      - wall
+      - 42
+    - - room_009
+      - east
+      - room_010
+      - 42
+    - - room_009
+      - south
+      - wall
+      - 42
+    - - room_009
+      - west
+      - room_008
+      - 42
+    - - agent
+      - atlocation
+      - room_009
+      - 42
+    - - dep_002
+      - atlocation
+      - room_009
+      - 42
+    - - room_008
+      - north
+      - room_004
+      - 43
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    - - room_004
+      - east
+      - wall
+      - 44
+    - - room_004
+      - west
+      - wall
+      - 44
+    semantic: []
+    short:
+    - - agent
+      - atlocation
+      - room_004
+      - 44
+  action: 0
+  actor_probs:
+  - 0.5844870805740356
+  - 0.21801218390464783
+  - 0.19750070571899414
+  critic_value: 2.686800956726074
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_010
+      - 41
+    - - room_009
+      - north
+      - wall
+      - 42
+    - - room_009
+      - east
+      - room_010
+      - 42
+    - - room_009
+      - south
+      - wall
+      - 42
+    - - room_009
+      - west
+      - room_008
+      - 42
+    - - agent
+      - atlocation
+      - room_009
+      - 42
+    - - dep_002
+      - atlocation
+      - room_009
+      - 42
+    - - room_008
+      - north
+      - room_004
+      - 43
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    - - room_004
+      - east
+      - wall
+      - 44
+    - - room_004
+      - west
+      - wall
+      - 44
+    - - agent
+      - atlocation
+      - room_004
+      - 44
+    semantic: []
+    short:
+    - - sta_003
+      - atlocation
+      - room_004
+      - 44
+  action: 2
+  actor_probs:
+  - 0.30189311504364014
+  - 0.3028171956539154
+  - 0.39528968930244446
+  critic_value: 3.760624408721924
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_010
+      - 41
+    - - room_009
+      - north
+      - wall
+      - 42
+    - - room_009
+      - east
+      - room_010
+      - 42
+    - - room_009
+      - south
+      - wall
+      - 42
+    - - room_009
+      - west
+      - room_008
+      - 42
+    - - agent
+      - atlocation
+      - room_009
+      - 42
+    - - dep_002
+      - atlocation
+      - room_009
+      - 42
+    - - room_008
+      - north
+      - room_004
+      - 43
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    - - room_004
+      - east
+      - wall
+      - 44
+    - - room_004
+      - west
+      - wall
+      - 44
+    - - agent
+      - atlocation
+      - room_004
+      - 44
+    semantic: []
+    short:
+    - - room_001
+      - north
+      - wall
+      - 45
+  action: 0
+  actor_probs:
+  - 0.37590402364730835
+  - 0.34714069962501526
+  - 0.2769552767276764
+  critic_value: 0.10949331521987915
+- state:
+    episodic:
+    - - room_009
+      - north
+      - wall
+      - 42
+    - - room_009
+      - east
+      - room_010
+      - 42
+    - - room_009
+      - south
+      - wall
+      - 42
+    - - room_009
+      - west
+      - room_008
+      - 42
+    - - agent
+      - atlocation
+      - room_009
+      - 42
+    - - dep_002
+      - atlocation
+      - room_009
+      - 42
+    - - room_008
+      - north
+      - room_004
+      - 43
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    - - room_004
+      - east
+      - wall
+      - 44
+    - - room_004
+      - west
+      - wall
+      - 44
+    - - agent
+      - atlocation
+      - room_004
+      - 44
+    - - room_001
+      - north
+      - wall
+      - 45
+    semantic: []
+    short:
+    - - room_001
+      - east
+      - room_002
+      - 45
+  action: 2
+  actor_probs:
+  - 0.32296082377433777
+  - 0.3137513995170593
+  - 0.3632878065109253
+  critic_value: 0.13232938945293427
+- state:
+    episodic:
+    - - room_009
+      - north
+      - wall
+      - 42
+    - - room_009
+      - east
+      - room_010
+      - 42
+    - - room_009
+      - south
+      - wall
+      - 42
+    - - room_009
+      - west
+      - room_008
+      - 42
+    - - agent
+      - atlocation
+      - room_009
+      - 42
+    - - dep_002
+      - atlocation
+      - room_009
+      - 42
+    - - room_008
+      - north
+      - room_004
+      - 43
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    - - room_004
+      - east
+      - wall
+      - 44
+    - - room_004
+      - west
+      - wall
+      - 44
+    - - agent
+      - atlocation
+      - room_004
+      - 44
+    - - room_001
+      - north
+      - wall
+      - 45
+    semantic: []
+    short:
+    - - room_001
+      - south
+      - room_004
+      - 45
+  action: 2
+  actor_probs:
+  - 0.245767280459404
+  - 0.27907508611679077
+  - 0.47515764832496643
+  critic_value: 0.1234418973326683
+- state:
+    episodic:
+    - - room_009
+      - north
+      - wall
+      - 42
+    - - room_009
+      - east
+      - room_010
+      - 42
+    - - room_009
+      - south
+      - wall
+      - 42
+    - - room_009
+      - west
+      - room_008
+      - 42
+    - - agent
+      - atlocation
+      - room_009
+      - 42
+    - - dep_002
+      - atlocation
+      - room_009
+      - 42
+    - - room_008
+      - north
+      - room_004
+      - 43
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    - - room_004
+      - east
+      - wall
+      - 44
+    - - room_004
+      - west
+      - wall
+      - 44
+    - - agent
+      - atlocation
+      - room_004
+      - 44
+    - - room_001
+      - north
+      - wall
+      - 45
+    semantic: []
+    short:
+    - - room_001
+      - west
+      - room_000
+      - 45
+  action: 2
+  actor_probs:
+  - 0.3004225194454193
+  - 0.30411994457244873
+  - 0.39545753598213196
+  critic_value: 0.3819512724876404
+- state:
+    episodic:
+    - - room_009
+      - north
+      - wall
+      - 42
+    - - room_009
+      - east
+      - room_010
+      - 42
+    - - room_009
+      - south
+      - wall
+      - 42
+    - - room_009
+      - west
+      - room_008
+      - 42
+    - - agent
+      - atlocation
+      - room_009
+      - 42
+    - - dep_002
+      - atlocation
+      - room_009
+      - 42
+    - - room_008
+      - north
+      - room_004
+      - 43
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    - - room_004
+      - east
+      - wall
+      - 44
+    - - room_004
+      - west
+      - wall
+      - 44
+    - - agent
+      - atlocation
+      - room_004
+      - 44
+    - - room_001
+      - north
+      - wall
+      - 45
+    semantic: []
+    short:
+    - - agent
+      - atlocation
+      - room_001
+      - 45
+  action: 2
+  actor_probs:
+  - 0.23619996011257172
+  - 0.280139684677124
+  - 0.48366039991378784
+  critic_value: 1.122666835784912
+- state:
+    episodic:
+    - - room_009
+      - north
+      - wall
+      - 42
+    - - room_009
+      - east
+      - room_010
+      - 42
+    - - room_009
+      - south
+      - wall
+      - 42
+    - - room_009
+      - west
+      - room_008
+      - 42
+    - - agent
+      - atlocation
+      - room_009
+      - 42
+    - - dep_002
+      - atlocation
+      - room_009
+      - 42
+    - - room_008
+      - north
+      - room_004
+      - 43
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    - - room_004
+      - east
+      - wall
+      - 44
+    - - room_004
+      - west
+      - wall
+      - 44
+    - - agent
+      - atlocation
+      - room_004
+      - 44
+    - - room_001
+      - north
+      - wall
+      - 45
+    semantic: []
+    short:
+    - - dep_003
+      - atlocation
+      - room_001
+      - 45
+  action: 2
+  actor_probs:
+  - 0.23750323057174683
+  - 0.28266167640686035
+  - 0.47983506321907043
+  critic_value: 1.41770601272583
+- state:
+    episodic:
+    - - room_009
+      - north
+      - wall
+      - 42
+    - - room_009
+      - east
+      - room_010
+      - 42
+    - - room_009
+      - south
+      - wall
+      - 42
+    - - room_009
+      - west
+      - room_008
+      - 42
+    - - agent
+      - atlocation
+      - room_009
+      - 42
+    - - dep_002
+      - atlocation
+      - room_009
+      - 42
+    - - room_008
+      - north
+      - room_004
+      - 43
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    - - room_004
+      - east
+      - wall
+      - 44
+    - - room_004
+      - west
+      - wall
+      - 44
+    - - agent
+      - atlocation
+      - room_004
+      - 44
+    - - room_001
+      - north
+      - wall
+      - 45
+    semantic: []
+    short:
+    - - room_001
+      - north
+      - wall
+      - 46
+  action: 0
+  actor_probs:
+  - 0.4199748635292053
+  - 0.3243217468261719
+  - 0.2557033896446228
+  critic_value: 0.14241573214530945
+- state:
+    episodic:
+    - - room_009
+      - east
+      - room_010
+      - 42
+    - - room_009
+      - south
+      - wall
+      - 42
+    - - room_009
+      - west
+      - room_008
+      - 42
+    - - agent
+      - atlocation
+      - room_009
+      - 42
+    - - dep_002
+      - atlocation
+      - room_009
+      - 42
+    - - room_008
+      - north
+      - room_004
+      - 43
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    - - room_004
+      - east
+      - wall
+      - 44
+    - - room_004
+      - west
+      - wall
+      - 44
+    - - agent
+      - atlocation
+      - room_004
+      - 44
+    - - room_001
+      - north
+      - wall
+      - 45
+    - - room_001
+      - north
+      - wall
+      - 46
+    semantic: []
+    short:
+    - - room_001
+      - east
+      - room_002
+      - 46
+  action: 2
+  actor_probs:
+  - 0.3366524875164032
+  - 0.3112773597240448
+  - 0.3520700931549072
+  critic_value: 0.16133666038513184
+- state:
+    episodic:
+    - - room_009
+      - east
+      - room_010
+      - 42
+    - - room_009
+      - south
+      - wall
+      - 42
+    - - room_009
+      - west
+      - room_008
+      - 42
+    - - agent
+      - atlocation
+      - room_009
+      - 42
+    - - dep_002
+      - atlocation
+      - room_009
+      - 42
+    - - room_008
+      - north
+      - room_004
+      - 43
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    - - room_004
+      - east
+      - wall
+      - 44
+    - - room_004
+      - west
+      - wall
+      - 44
+    - - agent
+      - atlocation
+      - room_004
+      - 44
+    - - room_001
+      - north
+      - wall
+      - 45
+    - - room_001
+      - north
+      - wall
+      - 46
+    semantic: []
+    short:
+    - - room_001
+      - south
+      - room_004
+      - 46
+  action: 2
+  actor_probs:
+  - 0.2569412589073181
+  - 0.2793525457382202
+  - 0.4637061655521393
+  critic_value: 0.1617145538330078
+- state:
+    episodic:
+    - - room_009
+      - east
+      - room_010
+      - 42
+    - - room_009
+      - south
+      - wall
+      - 42
+    - - room_009
+      - west
+      - room_008
+      - 42
+    - - agent
+      - atlocation
+      - room_009
+      - 42
+    - - dep_002
+      - atlocation
+      - room_009
+      - 42
+    - - room_008
+      - north
+      - room_004
+      - 43
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    - - room_004
+      - east
+      - wall
+      - 44
+    - - room_004
+      - west
+      - wall
+      - 44
+    - - agent
+      - atlocation
+      - room_004
+      - 44
+    - - room_001
+      - north
+      - wall
+      - 45
+    - - room_001
+      - north
+      - wall
+      - 46
+    semantic: []
+    short:
+    - - room_001
+      - west
+      - room_000
+      - 46
+  action: 2
+  actor_probs:
+  - 0.31335654854774475
+  - 0.3014928698539734
+  - 0.38515058159828186
+  critic_value: 0.2894027531147003
+- state:
+    episodic:
+    - - room_009
+      - east
+      - room_010
+      - 42
+    - - room_009
+      - south
+      - wall
+      - 42
+    - - room_009
+      - west
+      - room_008
+      - 42
+    - - agent
+      - atlocation
+      - room_009
+      - 42
+    - - dep_002
+      - atlocation
+      - room_009
+      - 42
+    - - room_008
+      - north
+      - room_004
+      - 43
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    - - room_004
+      - east
+      - wall
+      - 44
+    - - room_004
+      - west
+      - wall
+      - 44
+    - - agent
+      - atlocation
+      - room_004
+      - 44
+    - - room_001
+      - north
+      - wall
+      - 45
+    - - room_001
+      - north
+      - wall
+      - 46
+    semantic: []
+    short:
+    - - agent
+      - atlocation
+      - room_001
+      - 46
+  action: 2
+  actor_probs:
+  - 0.2458404153585434
+  - 0.28133633732795715
+  - 0.47282320261001587
+  critic_value: 0.8929492235183716
+- state:
+    episodic:
+    - - room_009
+      - east
+      - room_010
+      - 42
+    - - room_009
+      - south
+      - wall
+      - 42
+    - - room_009
+      - west
+      - room_008
+      - 42
+    - - agent
+      - atlocation
+      - room_009
+      - 42
+    - - dep_002
+      - atlocation
+      - room_009
+      - 42
+    - - room_008
+      - north
+      - room_004
+      - 43
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    - - room_004
+      - east
+      - wall
+      - 44
+    - - room_004
+      - west
+      - wall
+      - 44
+    - - agent
+      - atlocation
+      - room_004
+      - 44
+    - - room_001
+      - north
+      - wall
+      - 45
+    - - room_001
+      - north
+      - wall
+      - 46
+    semantic: []
+    short:
+    - - dep_003
+      - atlocation
+      - room_001
+      - 46
+  action: 2
+  actor_probs:
+  - 0.24622540175914764
+  - 0.2832622230052948
+  - 0.470512330532074
+  critic_value: 1.202683925628662
+- state:
+    episodic:
+    - - room_009
+      - east
+      - room_010
+      - 42
+    - - room_009
+      - south
+      - wall
+      - 42
+    - - room_009
+      - west
+      - room_008
+      - 42
+    - - agent
+      - atlocation
+      - room_009
+      - 42
+    - - dep_002
+      - atlocation
+      - room_009
+      - 42
+    - - room_008
+      - north
+      - room_004
+      - 43
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    - - room_004
+      - east
+      - wall
+      - 44
+    - - room_004
+      - west
+      - wall
+      - 44
+    - - agent
+      - atlocation
+      - room_004
+      - 44
+    - - room_001
+      - north
+      - wall
+      - 45
+    - - room_001
+      - north
+      - wall
+      - 46
+    semantic: []
+    short:
+    - - room_001
+      - north
+      - wall
+      - 47
+  action: 0
+  actor_probs:
+  - 0.43917316198349
+  - 0.3102932274341583
+  - 0.2505336105823517
+  critic_value: 0.1646733433008194
+- state:
+    episodic:
+    - - room_009
+      - south
+      - wall
+      - 42
+    - - room_009
+      - west
+      - room_008
+      - 42
+    - - agent
+      - atlocation
+      - room_009
+      - 42
+    - - dep_002
+      - atlocation
+      - room_009
+      - 42
+    - - room_008
+      - north
+      - room_004
+      - 43
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    - - room_004
+      - east
+      - wall
+      - 44
+    - - room_004
+      - west
+      - wall
+      - 44
+    - - agent
+      - atlocation
+      - room_004
+      - 44
+    - - room_001
+      - north
+      - wall
+      - 45
+    - - room_001
+      - north
+      - wall
+      - 46
+    - - room_001
+      - north
+      - wall
+      - 47
+    semantic: []
+    short:
+    - - room_001
+      - east
+      - room_002
+      - 47
+  action: 2
+  actor_probs:
+  - 0.34179335832595825
+  - 0.30938631296157837
+  - 0.3488203287124634
+  critic_value: 0.1828841120004654
+- state:
+    episodic:
+    - - room_009
+      - south
+      - wall
+      - 42
+    - - room_009
+      - west
+      - room_008
+      - 42
+    - - agent
+      - atlocation
+      - room_009
+      - 42
+    - - dep_002
+      - atlocation
+      - room_009
+      - 42
+    - - room_008
+      - north
+      - room_004
+      - 43
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    - - room_004
+      - east
+      - wall
+      - 44
+    - - room_004
+      - west
+      - wall
+      - 44
+    - - agent
+      - atlocation
+      - room_004
+      - 44
+    - - room_001
+      - north
+      - wall
+      - 45
+    - - room_001
+      - north
+      - wall
+      - 46
+    - - room_001
+      - north
+      - wall
+      - 47
+    semantic: []
+    short:
+    - - room_001
+      - south
+      - room_004
+      - 47
+  action: 2
+  actor_probs:
+  - 0.2608199715614319
+  - 0.2782537639141083
+  - 0.4609262943267822
+  critic_value: 0.1882198303937912
+- state:
+    episodic:
+    - - room_009
+      - south
+      - wall
+      - 42
+    - - room_009
+      - west
+      - room_008
+      - 42
+    - - agent
+      - atlocation
+      - room_009
+      - 42
+    - - dep_002
+      - atlocation
+      - room_009
+      - 42
+    - - room_008
+      - north
+      - room_004
+      - 43
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    - - room_004
+      - east
+      - wall
+      - 44
+    - - room_004
+      - west
+      - wall
+      - 44
+    - - agent
+      - atlocation
+      - room_004
+      - 44
+    - - room_001
+      - north
+      - wall
+      - 45
+    - - room_001
+      - north
+      - wall
+      - 46
+    - - room_001
+      - north
+      - wall
+      - 47
+    semantic: []
+    short:
+    - - room_001
+      - west
+      - room_000
+      - 47
+  action: 2
+  actor_probs:
+  - 0.3194355070590973
+  - 0.30028367042541504
+  - 0.3802807927131653
+  critic_value: 0.3480263650417328
+- state:
+    episodic:
+    - - room_009
+      - south
+      - wall
+      - 42
+    - - room_009
+      - west
+      - room_008
+      - 42
+    - - agent
+      - atlocation
+      - room_009
+      - 42
+    - - dep_002
+      - atlocation
+      - room_009
+      - 42
+    - - room_008
+      - north
+      - room_004
+      - 43
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    - - room_004
+      - east
+      - wall
+      - 44
+    - - room_004
+      - west
+      - wall
+      - 44
+    - - agent
+      - atlocation
+      - room_004
+      - 44
+    - - room_001
+      - north
+      - wall
+      - 45
+    - - room_001
+      - north
+      - wall
+      - 46
+    - - room_001
+      - north
+      - wall
+      - 47
+    semantic: []
+    short:
+    - - agent
+      - atlocation
+      - room_001
+      - 47
+  action: 2
+  actor_probs:
+  - 0.24784429371356964
+  - 0.28012827038764954
+  - 0.47202736139297485
+  critic_value: 0.9526049494743347
+- state:
+    episodic:
+    - - room_009
+      - south
+      - wall
+      - 42
+    - - room_009
+      - west
+      - room_008
+      - 42
+    - - agent
+      - atlocation
+      - room_009
+      - 42
+    - - dep_002
+      - atlocation
+      - room_009
+      - 42
+    - - room_008
+      - north
+      - room_004
+      - 43
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    - - room_004
+      - east
+      - wall
+      - 44
+    - - room_004
+      - west
+      - wall
+      - 44
+    - - agent
+      - atlocation
+      - room_004
+      - 44
+    - - room_001
+      - north
+      - wall
+      - 45
+    - - room_001
+      - north
+      - wall
+      - 46
+    - - room_001
+      - north
+      - wall
+      - 47
+    semantic: []
+    short:
+    - - dep_003
+      - atlocation
+      - room_001
+      - 47
+  action: 2
+  actor_probs:
+  - 0.2509673535823822
+  - 0.2828071713447571
+  - 0.4662255644798279
+  critic_value: 1.284706473350525
+- state:
+    episodic:
+    - - room_009
+      - south
+      - wall
+      - 42
+    - - room_009
+      - west
+      - room_008
+      - 42
+    - - agent
+      - atlocation
+      - room_009
+      - 42
+    - - dep_002
+      - atlocation
+      - room_009
+      - 42
+    - - room_008
+      - north
+      - room_004
+      - 43
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    - - room_004
+      - east
+      - wall
+      - 44
+    - - room_004
+      - west
+      - wall
+      - 44
+    - - agent
+      - atlocation
+      - room_004
+      - 44
+    - - room_001
+      - north
+      - wall
+      - 45
+    - - room_001
+      - north
+      - wall
+      - 46
+    - - room_001
+      - north
+      - wall
+      - 47
+    semantic: []
+    short:
+    - - room_001
+      - north
+      - wall
+      - 48
+  action: 0
+  actor_probs:
+  - 0.4479915499687195
+  - 0.304054856300354
+  - 0.24795357882976532
+  critic_value: 0.1761491894721985
+- state:
+    episodic:
+    - - room_009
+      - west
+      - room_008
+      - 42
+    - - agent
+      - atlocation
+      - room_009
+      - 42
+    - - dep_002
+      - atlocation
+      - room_009
+      - 42
+    - - room_008
+      - north
+      - room_004
+      - 43
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    - - room_004
+      - east
+      - wall
+      - 44
+    - - room_004
+      - west
+      - wall
+      - 44
+    - - agent
+      - atlocation
+      - room_004
+      - 44
+    - - room_001
+      - north
+      - wall
+      - 45
+    - - room_001
+      - north
+      - wall
+      - 46
+    - - room_001
+      - north
+      - wall
+      - 47
+    - - room_001
+      - north
+      - wall
+      - 48
+    semantic: []
+    short:
+    - - room_001
+      - east
+      - room_002
+      - 48
+  action: 2
+  actor_probs:
+  - 0.34329700469970703
+  - 0.30843445658683777
+  - 0.3482685089111328
+  critic_value: 0.19327004253864288
+- state:
+    episodic:
+    - - room_009
+      - west
+      - room_008
+      - 42
+    - - agent
+      - atlocation
+      - room_009
+      - 42
+    - - dep_002
+      - atlocation
+      - room_009
+      - 42
+    - - room_008
+      - north
+      - room_004
+      - 43
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    - - room_004
+      - east
+      - wall
+      - 44
+    - - room_004
+      - west
+      - wall
+      - 44
+    - - agent
+      - atlocation
+      - room_004
+      - 44
+    - - room_001
+      - north
+      - wall
+      - 45
+    - - room_001
+      - north
+      - wall
+      - 46
+    - - room_001
+      - north
+      - wall
+      - 47
+    - - room_001
+      - north
+      - wall
+      - 48
+    semantic: []
+    short:
+    - - room_001
+      - south
+      - room_004
+      - 48
+  action: 2
+  actor_probs:
+  - 0.2606829106807709
+  - 0.27768823504447937
+  - 0.46162885427474976
+  critic_value: 0.20421768724918365
+- state:
+    episodic:
+    - - room_009
+      - west
+      - room_008
+      - 42
+    - - agent
+      - atlocation
+      - room_009
+      - 42
+    - - dep_002
+      - atlocation
+      - room_009
+      - 42
+    - - room_008
+      - north
+      - room_004
+      - 43
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    - - room_004
+      - east
+      - wall
+      - 44
+    - - room_004
+      - west
+      - wall
+      - 44
+    - - agent
+      - atlocation
+      - room_004
+      - 44
+    - - room_001
+      - north
+      - wall
+      - 45
+    - - room_001
+      - north
+      - wall
+      - 46
+    - - room_001
+      - north
+      - wall
+      - 47
+    - - room_001
+      - north
+      - wall
+      - 48
+    semantic: []
+    short:
+    - - room_001
+      - west
+      - room_000
+      - 48
+  action: 2
+  actor_probs:
+  - 0.3227059245109558
+  - 0.30035731196403503
+  - 0.37693679332733154
+  critic_value: 0.46510985493659973
+- state:
+    episodic:
+    - - room_009
+      - west
+      - room_008
+      - 42
+    - - agent
+      - atlocation
+      - room_009
+      - 42
+    - - dep_002
+      - atlocation
+      - room_009
+      - 42
+    - - room_008
+      - north
+      - room_004
+      - 43
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    - - room_004
+      - east
+      - wall
+      - 44
+    - - room_004
+      - west
+      - wall
+      - 44
+    - - agent
+      - atlocation
+      - room_004
+      - 44
+    - - room_001
+      - north
+      - wall
+      - 45
+    - - room_001
+      - north
+      - wall
+      - 46
+    - - room_001
+      - north
+      - wall
+      - 47
+    - - room_001
+      - north
+      - wall
+      - 48
+    semantic: []
+    short:
+    - - agent
+      - atlocation
+      - room_001
+      - 48
+  action: 2
+  actor_probs:
+  - 0.2462461143732071
+  - 0.279330313205719
+  - 0.4744235873222351
+  critic_value: 1.1118890047073364
+- state:
+    episodic:
+    - - room_009
+      - west
+      - room_008
+      - 42
+    - - agent
+      - atlocation
+      - room_009
+      - 42
+    - - dep_002
+      - atlocation
+      - room_009
+      - 42
+    - - room_008
+      - north
+      - room_004
+      - 43
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    - - room_004
+      - east
+      - wall
+      - 44
+    - - room_004
+      - west
+      - wall
+      - 44
+    - - agent
+      - atlocation
+      - room_004
+      - 44
+    - - room_001
+      - north
+      - wall
+      - 45
+    - - room_001
+      - north
+      - wall
+      - 46
+    - - room_001
+      - north
+      - wall
+      - 47
+    - - room_001
+      - north
+      - wall
+      - 48
+    semantic: []
+    short:
+    - - dep_003
+      - atlocation
+      - room_001
+      - 48
+  action: 2
+  actor_probs:
+  - 0.25314003229141235
+  - 0.28290343284606934
+  - 0.4639565348625183
+  critic_value: 1.4596720933914185
+- state:
+    episodic:
+    - - room_009
+      - west
+      - room_008
+      - 42
+    - - agent
+      - atlocation
+      - room_009
+      - 42
+    - - dep_002
+      - atlocation
+      - room_009
+      - 42
+    - - room_008
+      - north
+      - room_004
+      - 43
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    - - room_004
+      - east
+      - wall
+      - 44
+    - - room_004
+      - west
+      - wall
+      - 44
+    - - agent
+      - atlocation
+      - room_004
+      - 44
+    - - room_001
+      - north
+      - wall
+      - 45
+    - - room_001
+      - north
+      - wall
+      - 46
+    - - room_001
+      - north
+      - wall
+      - 47
+    - - room_001
+      - north
+      - wall
+      - 48
+    semantic: []
+    short:
+    - - room_001
+      - north
+      - wall
+      - 49
+  action: 0
+  actor_probs:
+  - 0.4515552222728729
+  - 0.3018856942653656
+  - 0.24655915796756744
+  critic_value: 0.18264828622341156
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_009
+      - 42
+    - - dep_002
+      - atlocation
+      - room_009
+      - 42
+    - - room_008
+      - north
+      - room_004
+      - 43
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    - - room_004
+      - east
+      - wall
+      - 44
+    - - room_004
+      - west
+      - wall
+      - 44
+    - - agent
+      - atlocation
+      - room_004
+      - 44
+    - - room_001
+      - north
+      - wall
+      - 45
+    - - room_001
+      - north
+      - wall
+      - 46
+    - - room_001
+      - north
+      - wall
+      - 47
+    - - room_001
+      - north
+      - wall
+      - 48
+    - - room_001
+      - north
+      - wall
+      - 49
+    semantic: []
+    short:
+    - - room_001
+      - east
+      - room_002
+      - 49
+  action: 2
+  actor_probs:
+  - 0.3442188799381256
+  - 0.3082757294178009
+  - 0.3475053906440735
+  critic_value: 0.18732957541942596
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_009
+      - 42
+    - - dep_002
+      - atlocation
+      - room_009
+      - 42
+    - - room_008
+      - north
+      - room_004
+      - 43
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    - - room_004
+      - east
+      - wall
+      - 44
+    - - room_004
+      - west
+      - wall
+      - 44
+    - - agent
+      - atlocation
+      - room_004
+      - 44
+    - - room_001
+      - north
+      - wall
+      - 45
+    - - room_001
+      - north
+      - wall
+      - 46
+    - - room_001
+      - north
+      - wall
+      - 47
+    - - room_001
+      - north
+      - wall
+      - 48
+    - - room_001
+      - north
+      - wall
+      - 49
+    semantic: []
+    short:
+    - - room_001
+      - south
+      - room_004
+      - 49
+  action: 2
+  actor_probs:
+  - 0.25937387347221375
+  - 0.2778477966785431
+  - 0.46277832984924316
+  critic_value: 0.19788439571857452
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_009
+      - 42
+    - - dep_002
+      - atlocation
+      - room_009
+      - 42
+    - - room_008
+      - north
+      - room_004
+      - 43
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    - - room_004
+      - east
+      - wall
+      - 44
+    - - room_004
+      - west
+      - wall
+      - 44
+    - - agent
+      - atlocation
+      - room_004
+      - 44
+    - - room_001
+      - north
+      - wall
+      - 45
+    - - room_001
+      - north
+      - wall
+      - 46
+    - - room_001
+      - north
+      - wall
+      - 47
+    - - room_001
+      - north
+      - wall
+      - 48
+    - - room_001
+      - north
+      - wall
+      - 49
+    semantic: []
+    short:
+    - - room_001
+      - west
+      - room_000
+      - 49
+  action: 2
+  actor_probs:
+  - 0.3243485987186432
+  - 0.301313579082489
+  - 0.3743378520011902
+  critic_value: 0.5379875898361206
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_009
+      - 42
+    - - dep_002
+      - atlocation
+      - room_009
+      - 42
+    - - room_008
+      - north
+      - room_004
+      - 43
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    - - room_004
+      - east
+      - wall
+      - 44
+    - - room_004
+      - west
+      - wall
+      - 44
+    - - agent
+      - atlocation
+      - room_004
+      - 44
+    - - room_001
+      - north
+      - wall
+      - 45
+    - - room_001
+      - north
+      - wall
+      - 46
+    - - room_001
+      - north
+      - wall
+      - 47
+    - - room_001
+      - north
+      - wall
+      - 48
+    - - room_001
+      - north
+      - wall
+      - 49
+    semantic: []
+    short:
+    - - agent
+      - atlocation
+      - room_001
+      - 49
+  action: 2
+  actor_probs:
+  - 0.24438732862472534
+  - 0.27945542335510254
+  - 0.47615718841552734
+  critic_value: 1.2252508401870728
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_009
+      - 42
+    - - dep_002
+      - atlocation
+      - room_009
+      - 42
+    - - room_008
+      - north
+      - room_004
+      - 43
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    - - room_004
+      - east
+      - wall
+      - 44
+    - - room_004
+      - west
+      - wall
+      - 44
+    - - agent
+      - atlocation
+      - room_004
+      - 44
+    - - room_001
+      - north
+      - wall
+      - 45
+    - - room_001
+      - north
+      - wall
+      - 46
+    - - room_001
+      - north
+      - wall
+      - 47
+    - - room_001
+      - north
+      - wall
+      - 48
+    - - room_001
+      - north
+      - wall
+      - 49
+    semantic: []
+    short:
+    - - dep_003
+      - atlocation
+      - room_001
+      - 49
+  action: 2
+  actor_probs:
+  - 0.25401929020881653
+  - 0.2835879623889923
+  - 0.46239274740219116
+  critic_value: 1.5719897747039795
+- state:
+    episodic:
+    - - agent
+      - atlocation
+      - room_009
+      - 42
+    - - dep_002
+      - atlocation
+      - room_009
+      - 42
+    - - room_008
+      - north
+      - room_004
+      - 43
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    - - room_004
+      - east
+      - wall
+      - 44
+    - - room_004
+      - west
+      - wall
+      - 44
+    - - agent
+      - atlocation
+      - room_004
+      - 44
+    - - room_001
+      - north
+      - wall
+      - 45
+    - - room_001
+      - north
+      - wall
+      - 46
+    - - room_001
+      - north
+      - wall
+      - 47
+    - - room_001
+      - north
+      - wall
+      - 48
+    - - room_001
+      - north
+      - wall
+      - 49
+    semantic: []
+    short:
+    - - room_001
+      - north
+      - wall
+      - 50
+  action: 0
+  actor_probs:
+  - 0.4533683657646179
+  - 0.3012310266494751
+  - 0.245400533080101
+  critic_value: 0.17479178309440613
+- state:
+    episodic:
+    - - dep_002
+      - atlocation
+      - room_009
+      - 42
+    - - room_008
+      - north
+      - room_004
+      - 43
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    - - room_004
+      - east
+      - wall
+      - 44
+    - - room_004
+      - west
+      - wall
+      - 44
+    - - agent
+      - atlocation
+      - room_004
+      - 44
+    - - room_001
+      - north
+      - wall
+      - 45
+    - - room_001
+      - north
+      - wall
+      - 46
+    - - room_001
+      - north
+      - wall
+      - 47
+    - - room_001
+      - north
+      - wall
+      - 48
+    - - room_001
+      - north
+      - wall
+      - 49
+    - - room_001
+      - north
+      - wall
+      - 50
+    semantic: []
+    short:
+    - - room_001
+      - east
+      - room_002
+      - 50
+  action: 2
+  actor_probs:
+  - 0.3444700539112091
+  - 0.30860504508018494
+  - 0.34692490100860596
+  critic_value: 0.17393101751804352
+- state:
+    episodic:
+    - - dep_002
+      - atlocation
+      - room_009
+      - 42
+    - - room_008
+      - north
+      - room_004
+      - 43
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    - - room_004
+      - east
+      - wall
+      - 44
+    - - room_004
+      - west
+      - wall
+      - 44
+    - - agent
+      - atlocation
+      - room_004
+      - 44
+    - - room_001
+      - north
+      - wall
+      - 45
+    - - room_001
+      - north
+      - wall
+      - 46
+    - - room_001
+      - north
+      - wall
+      - 47
+    - - room_001
+      - north
+      - wall
+      - 48
+    - - room_001
+      - north
+      - wall
+      - 49
+    - - room_001
+      - north
+      - wall
+      - 50
+    semantic: []
+    short:
+    - - room_001
+      - south
+      - room_004
+      - 50
+  action: 2
+  actor_probs:
+  - 0.2574084401130676
+  - 0.2783169150352478
+  - 0.46427464485168457
+  critic_value: 0.18334388732910156
+- state:
+    episodic:
+    - - dep_002
+      - atlocation
+      - room_009
+      - 42
+    - - room_008
+      - north
+      - room_004
+      - 43
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    - - room_004
+      - east
+      - wall
+      - 44
+    - - room_004
+      - west
+      - wall
+      - 44
+    - - agent
+      - atlocation
+      - room_004
+      - 44
+    - - room_001
+      - north
+      - wall
+      - 45
+    - - room_001
+      - north
+      - wall
+      - 46
+    - - room_001
+      - north
+      - wall
+      - 47
+    - - room_001
+      - north
+      - wall
+      - 48
+    - - room_001
+      - north
+      - wall
+      - 49
+    - - room_001
+      - north
+      - wall
+      - 50
+    semantic: []
+    short:
+    - - room_001
+      - west
+      - room_000
+      - 50
+  action: 2
+  actor_probs:
+  - 0.3247493803501129
+  - 0.3024257719516754
+  - 0.37282490730285645
+  critic_value: 0.5418931245803833
+- state:
+    episodic:
+    - - dep_002
+      - atlocation
+      - room_009
+      - 42
+    - - room_008
+      - north
+      - room_004
+      - 43
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    - - room_004
+      - east
+      - wall
+      - 44
+    - - room_004
+      - west
+      - wall
+      - 44
+    - - agent
+      - atlocation
+      - room_004
+      - 44
+    - - room_001
+      - north
+      - wall
+      - 45
+    - - room_001
+      - north
+      - wall
+      - 46
+    - - room_001
+      - north
+      - wall
+      - 47
+    - - room_001
+      - north
+      - wall
+      - 48
+    - - room_001
+      - north
+      - wall
+      - 49
+    - - room_001
+      - north
+      - wall
+      - 50
+    semantic: []
+    short:
+    - - agent
+      - atlocation
+      - room_001
+      - 50
+  action: 2
+  actor_probs:
+  - 0.24218566715717316
+  - 0.2796342670917511
+  - 0.47818008065223694
+  critic_value: 1.2772908210754395
+- state:
+    episodic:
+    - - dep_002
+      - atlocation
+      - room_009
+      - 42
+    - - room_008
+      - north
+      - room_004
+      - 43
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    - - room_004
+      - east
+      - wall
+      - 44
+    - - room_004
+      - west
+      - wall
+      - 44
+    - - agent
+      - atlocation
+      - room_004
+      - 44
+    - - room_001
+      - north
+      - wall
+      - 45
+    - - room_001
+      - north
+      - wall
+      - 46
+    - - room_001
+      - north
+      - wall
+      - 47
+    - - room_001
+      - north
+      - wall
+      - 48
+    - - room_001
+      - north
+      - wall
+      - 49
+    - - room_001
+      - north
+      - wall
+      - 50
+    semantic: []
+    short:
+    - - dep_003
+      - atlocation
+      - room_001
+      - 50
+  action: 2
+  actor_probs:
+  - 0.25314512848854065
+  - 0.28410065174102783
+  - 0.4627542495727539
+  critic_value: 1.6061327457427979
+- state:
+    episodic:
+    - - dep_002
+      - atlocation
+      - room_009
+      - 42
+    - - room_008
+      - north
+      - room_004
+      - 43
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    - - room_004
+      - east
+      - wall
+      - 44
+    - - room_004
+      - west
+      - wall
+      - 44
+    - - agent
+      - atlocation
+      - room_004
+      - 44
+    - - room_001
+      - north
+      - wall
+      - 45
+    - - room_001
+      - north
+      - wall
+      - 46
+    - - room_001
+      - north
+      - wall
+      - 47
+    - - room_001
+      - north
+      - wall
+      - 48
+    - - room_001
+      - north
+      - wall
+      - 49
+    - - room_001
+      - north
+      - wall
+      - 50
+    semantic: []
+    short:
+    - - room_001
+      - north
+      - wall
+      - 51
+  action: 0
+  actor_probs:
+  - 0.45428216457366943
+  - 0.3012981414794922
+  - 0.24441969394683838
+  critic_value: 0.1631132811307907
+- state:
+    episodic:
+    - - room_008
+      - north
+      - room_004
+      - 43
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    - - room_004
+      - east
+      - wall
+      - 44
+    - - room_004
+      - west
+      - wall
+      - 44
+    - - agent
+      - atlocation
+      - room_004
+      - 44
+    - - room_001
+      - north
+      - wall
+      - 45
+    - - room_001
+      - north
+      - wall
+      - 46
+    - - room_001
+      - north
+      - wall
+      - 47
+    - - room_001
+      - north
+      - wall
+      - 48
+    - - room_001
+      - north
+      - wall
+      - 49
+    - - room_001
+      - north
+      - wall
+      - 50
+    - - room_001
+      - north
+      - wall
+      - 51
+    semantic: []
+    short:
+    - - room_001
+      - east
+      - room_002
+      - 51
+  action: 2
+  actor_probs:
+  - 0.3435024917125702
+  - 0.3089681565761566
+  - 0.3475293517112732
+  critic_value: 0.15551389753818512
+- state:
+    episodic:
+    - - room_008
+      - north
+      - room_004
+      - 43
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    - - room_004
+      - east
+      - wall
+      - 44
+    - - room_004
+      - west
+      - wall
+      - 44
+    - - agent
+      - atlocation
+      - room_004
+      - 44
+    - - room_001
+      - north
+      - wall
+      - 45
+    - - room_001
+      - north
+      - wall
+      - 46
+    - - room_001
+      - north
+      - wall
+      - 47
+    - - room_001
+      - north
+      - wall
+      - 48
+    - - room_001
+      - north
+      - wall
+      - 49
+    - - room_001
+      - north
+      - wall
+      - 50
+    - - room_001
+      - north
+      - wall
+      - 51
+    semantic: []
+    short:
+    - - room_001
+      - south
+      - room_004
+      - 51
+  action: 2
+  actor_probs:
+  - 0.2550639510154724
+  - 0.27853238582611084
+  - 0.46640363335609436
+  critic_value: 0.16319285333156586
+- state:
+    episodic:
+    - - room_008
+      - north
+      - room_004
+      - 43
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    - - room_004
+      - east
+      - wall
+      - 44
+    - - room_004
+      - west
+      - wall
+      - 44
+    - - agent
+      - atlocation
+      - room_004
+      - 44
+    - - room_001
+      - north
+      - wall
+      - 45
+    - - room_001
+      - north
+      - wall
+      - 46
+    - - room_001
+      - north
+      - wall
+      - 47
+    - - room_001
+      - north
+      - wall
+      - 48
+    - - room_001
+      - north
+      - wall
+      - 49
+    - - room_001
+      - north
+      - wall
+      - 50
+    - - room_001
+      - north
+      - wall
+      - 51
+    semantic: []
+    short:
+    - - room_001
+      - west
+      - room_000
+      - 51
+  action: 2
+  actor_probs:
+  - 0.3234008848667145
+  - 0.3031630516052246
+  - 0.3734361529350281
+  critic_value: 0.46294718980789185
+- state:
+    episodic:
+    - - room_008
+      - north
+      - room_004
+      - 43
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    - - room_004
+      - east
+      - wall
+      - 44
+    - - room_004
+      - west
+      - wall
+      - 44
+    - - agent
+      - atlocation
+      - room_004
+      - 44
+    - - room_001
+      - north
+      - wall
+      - 45
+    - - room_001
+      - north
+      - wall
+      - 46
+    - - room_001
+      - north
+      - wall
+      - 47
+    - - room_001
+      - north
+      - wall
+      - 48
+    - - room_001
+      - north
+      - wall
+      - 49
+    - - room_001
+      - north
+      - wall
+      - 50
+    - - room_001
+      - north
+      - wall
+      - 51
+    semantic: []
+    short:
+    - - agent
+      - atlocation
+      - room_001
+      - 51
+  action: 2
+  actor_probs:
+  - 0.23992393910884857
+  - 0.2793283760547638
+  - 0.48074764013290405
+  critic_value: 1.2349729537963867
+- state:
+    episodic:
+    - - room_008
+      - north
+      - room_004
+      - 43
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    - - room_004
+      - east
+      - wall
+      - 44
+    - - room_004
+      - west
+      - wall
+      - 44
+    - - agent
+      - atlocation
+      - room_004
+      - 44
+    - - room_001
+      - north
+      - wall
+      - 45
+    - - room_001
+      - north
+      - wall
+      - 46
+    - - room_001
+      - north
+      - wall
+      - 47
+    - - room_001
+      - north
+      - wall
+      - 48
+    - - room_001
+      - north
+      - wall
+      - 49
+    - - room_001
+      - north
+      - wall
+      - 50
+    - - room_001
+      - north
+      - wall
+      - 51
+    semantic: []
+    short:
+    - - dep_003
+      - atlocation
+      - room_001
+      - 51
+  action: 2
+  actor_probs:
+  - 0.2506326138973236
+  - 0.28397202491760254
+  - 0.46539536118507385
+  critic_value: 1.5299360752105713
+- state:
+    episodic:
+    - - room_008
+      - north
+      - room_004
+      - 43
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    - - room_004
+      - east
+      - wall
+      - 44
+    - - room_004
+      - west
+      - wall
+      - 44
+    - - agent
+      - atlocation
+      - room_004
+      - 44
+    - - room_001
+      - north
+      - wall
+      - 45
+    - - room_001
+      - north
+      - wall
+      - 46
+    - - room_001
+      - north
+      - wall
+      - 47
+    - - room_001
+      - north
+      - wall
+      - 48
+    - - room_001
+      - north
+      - wall
+      - 49
+    - - room_001
+      - north
+      - wall
+      - 50
+    - - room_001
+      - north
+      - wall
+      - 51
+    semantic: []
+    short:
+    - - room_001
+      - north
+      - wall
+      - 52
+  action: 0
+  actor_probs:
+  - 0.45443636178970337
+  - 0.30192652344703674
+  - 0.24363715946674347
+  critic_value: 0.14911392331123352
+- state:
+    episodic:
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    - - room_004
+      - east
+      - wall
+      - 44
+    - - room_004
+      - west
+      - wall
+      - 44
+    - - agent
+      - atlocation
+      - room_004
+      - 44
+    - - room_001
+      - north
+      - wall
+      - 45
+    - - room_001
+      - north
+      - wall
+      - 46
+    - - room_001
+      - north
+      - wall
+      - 47
+    - - room_001
+      - north
+      - wall
+      - 48
+    - - room_001
+      - north
+      - wall
+      - 49
+    - - room_001
+      - north
+      - wall
+      - 50
+    - - room_001
+      - north
+      - wall
+      - 51
+    - - room_001
+      - north
+      - wall
+      - 52
+    semantic: []
+    short:
+    - - room_001
+      - east
+      - room_002
+      - 52
+  action: 2
+  actor_probs:
+  - 0.3419278860092163
+  - 0.30885976552963257
+  - 0.3492123484611511
+  critic_value: 0.1443655788898468
+- state:
+    episodic:
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    - - room_004
+      - east
+      - wall
+      - 44
+    - - room_004
+      - west
+      - wall
+      - 44
+    - - agent
+      - atlocation
+      - room_004
+      - 44
+    - - room_001
+      - north
+      - wall
+      - 45
+    - - room_001
+      - north
+      - wall
+      - 46
+    - - room_001
+      - north
+      - wall
+      - 47
+    - - room_001
+      - north
+      - wall
+      - 48
+    - - room_001
+      - north
+      - wall
+      - 49
+    - - room_001
+      - north
+      - wall
+      - 50
+    - - room_001
+      - north
+      - wall
+      - 51
+    - - room_001
+      - north
+      - wall
+      - 52
+    semantic: []
+    short:
+    - - room_001
+      - south
+      - room_004
+      - 52
+  action: 2
+  actor_probs:
+  - 0.25341734290122986
+  - 0.27811071276664734
+  - 0.4684719145298004
+  critic_value: 0.14594979584217072
+- state:
+    episodic:
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    - - room_004
+      - east
+      - wall
+      - 44
+    - - room_004
+      - west
+      - wall
+      - 44
+    - - agent
+      - atlocation
+      - room_004
+      - 44
+    - - room_001
+      - north
+      - wall
+      - 45
+    - - room_001
+      - north
+      - wall
+      - 46
+    - - room_001
+      - north
+      - wall
+      - 47
+    - - room_001
+      - north
+      - wall
+      - 48
+    - - room_001
+      - north
+      - wall
+      - 49
+    - - room_001
+      - north
+      - wall
+      - 50
+    - - room_001
+      - north
+      - wall
+      - 51
+    - - room_001
+      - north
+      - wall
+      - 52
+    semantic: []
+    short:
+    - - room_001
+      - west
+      - room_000
+      - 52
+  action: 2
+  actor_probs:
+  - 0.32168564200401306
+  - 0.30288663506507874
+  - 0.3754277229309082
+  critic_value: 0.37475818395614624
+- state:
+    episodic:
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    - - room_004
+      - east
+      - wall
+      - 44
+    - - room_004
+      - west
+      - wall
+      - 44
+    - - agent
+      - atlocation
+      - room_004
+      - 44
+    - - room_001
+      - north
+      - wall
+      - 45
+    - - room_001
+      - north
+      - wall
+      - 46
+    - - room_001
+      - north
+      - wall
+      - 47
+    - - room_001
+      - north
+      - wall
+      - 48
+    - - room_001
+      - north
+      - wall
+      - 49
+    - - room_001
+      - north
+      - wall
+      - 50
+    - - room_001
+      - north
+      - wall
+      - 51
+    - - room_001
+      - north
+      - wall
+      - 52
+    semantic: []
+    short:
+    - - agent
+      - atlocation
+      - room_001
+      - 52
+  action: 2
+  actor_probs:
+  - 0.23847751319408417
+  - 0.2785613536834717
+  - 0.48296114802360535
+  critic_value: 1.1387038230895996
+- state:
+    episodic:
+    - - room_008
+      - east
+      - room_009
+      - 43
+    - - room_008
+      - south
+      - room_011
+      - 43
+    - - room_008
+      - west
+      - room_007
+      - 43
+    - - agent
+      - atlocation
+      - room_008
+      - 43
+    - - room_004
+      - north
+      - room_001
+      - 44
+    - - room_004
+      - east
+      - wall
+      - 44
+    - - room_004
+      - west
+      - wall
+      - 44
+    - - agent
+      - atlocation
+      - room_004
+      - 44
+    - - room_001
+      - north
+      - wall
+      - 45
+    - - room_001
+      - north
+      - wall
+      - 46
+    - - room_001
+      - north
+      - wall
+      - 47
+    - - room_001
+      - north
+      - wall
+      - 48
+    - - room_001
+      - north
+      - wall
+      - 49
+    - - room_001
+      - north
+      - wall
+      - 50
+    - - room_001
+      - north
+      - wall
+      - 51
+    - - room_001
+      - north
+      - wall
+      - 52
+    semantic: []
+    short:
+    - - dep_003
+      - atlocation
+      - room_001
+      - 52
+  action: 2
+  actor_probs:
+  - 0.2481001615524292
+  - 0.28313758969306946
+  - 0.46876227855682373
+  critic_value: 1.3917179107666016

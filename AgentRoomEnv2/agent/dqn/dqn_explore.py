@@ -92,61 +92,49 @@ class DQNExploreAgent(DQNAgent):
         ddqn: bool = True,
         dueling_dqn: bool = True,
         default_root_dir: str = "./training_results/DQN/LSTM/explore",
-        run_handcrafted_baselines: dict | None = [
-            {
-                "mm": mm,
-                "qa": qa,
-                "explore": explore,
-                "pretrain_semantic": pretrain_semantic,
-            }
-            for mm in ["random", "episodic", "semantic"]
-            for qa in ["episodic_semantic"]
-            for explore in ["random", "avoid_walls"]
-            for pretrain_semantic in [False, "exclude_walls"]
-        ],
+        run_handcrafted_baselines: bool = False,
+        run_neural_baseline: bool = False,
     ) -> None:
         """Initialization.
 
         Args:
-            env_str: This has to be "room_env:RoomEnv-v2"
-            num_iterations: The number of iterations to train the agent.
-            replay_buffer_size: The size of the replay buffer.
-            warm_start: The number of samples to fill the replay buffer with, before
-                starting
-            batch_size: The batch size for training This is the amount of samples sampled
-                from the replay buffer.
-            target_update_interval: The rate to update the target network.
-            epsilon_decay_until: The iteration index until which to decay epsilon.
-            max_epsilon: The maximum epsilon.
-            min_epsilon: The minimum epsilon.
-            gamma: The discount factor.
-            capacity: The capacity of each human-like memory systems.
-            pretrain_semantic: Whether or not to pretrain the semantic memory system.
-            nn_params: The parameters for the DQN (function approximator).
-            run_test: Whether or not to run test.
+            env_str: environment string. This has to be "room_env:RoomEnv-v2"
+            num_iterations: number of iterations to train
+            replay_buffer_size: size of replay buffer
+            warm_start: number of steps to fill the replay buffer, before training
+            batch_size: This is the amount of samples sampled from the replay buffer.
+            target_update_interval: interval to update target network
+            epsilon_decay_until: until which iteration to decay epsilon
+            max_epsilon: maximum epsilon
+            min_epsilon: minimum epsilon
+            gamma: discount factor
+            capacity: The capacity of each human-like memory systems
+            pretrain_semantic: whether to pretrain the semantic memory system.
+            nn_params: parameters for the neural network (DQN)
+            run_test: whether to run test
             num_samples_for_results: The number of samples to validate / test the agent.
-            plotting_interval: The interval to plot the results.
-            train_seed: The random seed for train.
-            test_seed: The random seed for test.
-            device: The device to run the agent on. This is either "cpu" or "cuda".
-            mm_policy: Memory management policy. Choose one of "generalize",
-                "random", "rl", or "neural"
-            mm_agent_path: The path to the memory management agent. This is only used
-                when mm_policy == "rl".
+            plotting_interval: interval to plot results
+            train_seed: seed for training
+            test_seed: seed for testing
+            device: This is either "cpu" or "cuda".
+            mm_policy: memory management policy. Choose one of "generalize", "random",
+                "rl", or "neural"
+            mm_agent_path: memory management agent path
             qa_policy: question answering policy Choose one of "episodic_semantic",
-                "random", or "neural". qa_policy shouldn't be trained with RL. There is no
-                sequence of states / actions to learn from.
+                "random", or "neural". qa_policy shouldn't be trained with RL. There is
+                no sequence of states / actions to learn from.
             env_config: The configuration of the environment.
                 question_prob: The probability of a question being asked at every
                     observation.
                 terminates_at: The maximum number of steps to take in an episode.
                 seed: seed for env
-                room_size: The room configuration to use. Choose one of "dev", "xxs", "xs",
-                    "s", "m", or "l".
-            ddqn: wehther to use double dqn
-            dueling_dqn: whether to use dueling dqn
-            default_root_dir: default root directory to store the results.
-            run_handcrafted_baselines: Whether or not to run handcrafted baselines.
+                room_size: The room configuration to use. Choose one of "dev", "xxs",
+                    "xs", "s", "m", or "l".
+            ddqn: whether to use double DQN
+            dueling_dqn: whether to use dueling DQN
+            default_root_dir: default root directory to save results
+            run_handcrafted_baselines: whether to run handcrafted baselines
+            run_neural_baseline: whether to run neural baseline
 
         """
         all_params = deepcopy(locals())
@@ -154,6 +142,7 @@ class DQNExploreAgent(DQNAgent):
         del all_params["__class__"]
         self.all_params = deepcopy(all_params)
         del all_params["mm_agent_path"]
+        del all_params["run_neural_baseline"]
 
         self.action2str = {0: "north", 1: "east", 2: "south", 3: "west", 4: "stay"}
         self.action_space = gym.spaces.Discrete(len(self.action2str))
@@ -170,26 +159,32 @@ class DQNExploreAgent(DQNAgent):
         else:
             self.mm_policy_model = None
 
-        with torch.no_grad():
-            test_mean, test_std = self.run_neural_baseline()
+        if run_neural_baseline:
+            with torch.no_grad():
+                test_mean, test_std = self.run_neural_baseline()
 
-        handcrafted = read_yaml(os.path.join(self.default_root_dir, "handcrafted.yaml"))
-        handcrafted[
-            "{"
-            "mm"
-            ": "
-            "neural"
-            ", "
-            "qa"
-            ": "
-            "episodic_semantic"
-            ", "
-            "explore"
-            ": "
-            "avoid_walls"
-            "}"
-        ] = {"mean": test_mean, "std": test_std}
-        write_yaml(handcrafted, os.path.join(self.default_root_dir, "handcrafted.yaml"))
+            handcrafted = read_yaml(
+                os.path.join(self.default_root_dir, "handcrafted.yaml")
+            )
+            handcrafted[
+                "{"
+                "mm"
+                ": "
+                "neural"
+                ", "
+                "qa"
+                ": "
+                "episodic_semantic"
+                ", "
+                "explore"
+                ": "
+                "avoid_walls"
+                "}"
+            ] = {"mean": test_mean, "std": test_std}
+            write_yaml(
+                handcrafted, os.path.join(self.default_root_dir, "handcrafted.yaml")
+            )
+
         self.env_config["seed"] = self.train_seed
         self.env = gym.make(self.env_str, **self.env_config)
 
@@ -205,16 +200,15 @@ class DQNExploreAgent(DQNAgent):
             self.init_memory_systems()
             observations, info = self.env.reset()
 
-            observations["room"] = self.manage_agent_and_map_memory(
-                observations["room"]
-            )
+            observations_ = self.manage_agent_and_map_memory(observations["room"])
 
-            for obs in observations["room"]:
+            for obs in observations_:
                 encode_observation(self.memory_systems, obs)
                 manage_memory(
-                    self.memory_systems,
-                    self.mm_policy,
-                    self.mm_policy_model,
+                    memory_systems=self.memory_systems,
+                    policy=self.mm_policy,
+                    mm_policy_model=self.mm_policy_model,
+                    mm_policy_model_type="q_function",
                     split_possessive=False,
                 )
 
@@ -248,9 +242,10 @@ class DQNExploreAgent(DQNAgent):
                 for obs in observations["room"]:
                     encode_observation(self.memory_systems, obs)
                     manage_memory(
-                        self.memory_systems,
-                        self.mm_policy,
-                        self.mm_policy_model,
+                        memory_systems=self.memory_systems,
+                        policy=self.mm_policy,
+                        mm_policy_model=self.mm_policy_model,
+                        mm_policy_model_type="q_function",
                         split_possessive=False,
                     )
 
@@ -279,9 +274,10 @@ class DQNExploreAgent(DQNAgent):
             for obs in observations["room"]:
                 encode_observation(self.memory_systems, obs)
                 manage_memory(
-                    self.memory_systems,
-                    self.mm_policy,
-                    self.mm_policy_model,
+                    memory_systems=self.memory_systems,
+                    policy=self.mm_policy,
+                    mm_policy_model=self.mm_policy_model,
+                    mm_policy_model_type="q_function",
                     split_possessive=False,
                 )
 
@@ -320,9 +316,10 @@ class DQNExploreAgent(DQNAgent):
                 for obs in observations["room"]:
                     encode_observation(self.memory_systems, obs)
                     manage_memory(
-                        self.memory_systems,
-                        self.mm_policy,
-                        self.mm_policy_model,
+                        memory_systems=self.memory_systems,
+                        policy=self.mm_policy,
+                        mm_policy_model=self.mm_policy_model,
+                        mm_policy_model_type="q_function",
                         split_possessive=False,
                     )
 
@@ -361,9 +358,10 @@ class DQNExploreAgent(DQNAgent):
                 for obs in observations["room"]:
                     encode_observation(self.memory_systems, obs)
                     manage_memory(
-                        self.memory_systems,
-                        self.mm_policy,
-                        self.mm_policy_model,
+                        memory_systems=self.memory_systems,
+                        policy=self.mm_policy,
+                        mm_policy_model=self.mm_policy_model,
+                        mm_policy_model_type="q_function",
                         split_possessive=False,
                     )
 
@@ -406,9 +404,10 @@ class DQNExploreAgent(DQNAgent):
                 for obs in observations["room"]:
                     encode_observation(self.memory_systems, obs)
                     manage_memory(
-                        self.memory_systems,
-                        self.mm_policy,
-                        self.mm_policy_model,
+                        memory_systems=self.memory_systems,
+                        policy=self.mm_policy,
+                        mm_policy_model=self.mm_policy_model,
+                        mm_policy_model_type="q_function",
                         split_possessive=False,
                     )
                 next_state = self.memory_systems.return_as_a_dict_list()
@@ -495,9 +494,10 @@ class DQNExploreAgent(DQNAgent):
             for obs in observations["room"]:
                 encode_observation(self.memory_systems, obs)
                 manage_memory(
-                    self.memory_systems,
-                    self.mm_policy,
-                    self.mm_policy_model,
+                    memory_systems=self.memory_systems,
+                    policy=self.mm_policy,
+                    mm_policy_model=self.mm_policy_model,
+                    mm_policy_model_type="q_function",
                     split_possessive=False,
                 )
 
@@ -548,11 +548,13 @@ class DQNExploreAgent(DQNAgent):
                 for obs in observations["room"]:
                     encode_observation(self.memory_systems, obs)
                     manage_memory(
-                        self.memory_systems,
-                        self.mm_policy,
-                        self.mm_policy_model,
+                        memory_systems=self.memory_systems,
+                        policy=self.mm_policy,
+                        mm_policy_model=self.mm_policy_model,
+                        mm_policy_model_type="q_function",
                         split_possessive=False,
                     )
+
             scores_temp.append(score)
 
         return scores_temp, states, q_values, actions

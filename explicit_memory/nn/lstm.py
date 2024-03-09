@@ -83,6 +83,11 @@ class LSTM(nn.Module):
                 `include_positional_encoding` is True.
             max_strength: maximum strength. This is only used when
                 `include_positional_encoding` is True.
+            is_actor: whether this is an actor or not. This is only used when
+                `is_dqn_or_ppo` is "ppo".
+            is_critic: whether this is a critic or not. This is only used when
+                `is_dqn_or_ppo` is "ppo".
+
         """
         super().__init__()
         self.is_dqn_or_ppo = is_dqn_or_ppo
@@ -218,11 +223,7 @@ class LSTM(nn.Module):
                 ),
             )
             if self.is_dqn_or_ppo == "ppo":
-                # Apply the init_layer_uniform function to the last linear layer
-                # Assuming the last layer is always a Linear layer following your
-                # pattern
-                if isinstance(self.advantage_layer[-1], nn.Linear):
-                    init_layer_uniform(self.advantage_layer[-1], 3e-3)
+                init_layer_uniform(self.advantage_layer[-1], 3e-3)
 
         if (self.is_dqn_or_ppo == "dqn" and self.dueling_dqn) or (
             self.is_dqn_or_ppo == "ppo" and self.is_critic
@@ -241,8 +242,7 @@ class LSTM(nn.Module):
                 ),
             )
             if self.is_dqn_or_ppo == "ppo":
-                if isinstance(self.value_layer[-1], nn.Linear):
-                    init_layer_uniform(self.value_layer[-1], 3e-3)
+                init_layer_uniform(self.value_layer[-1], 3e-3)
 
         self.relu = nn.ReLU()
 
@@ -344,7 +344,6 @@ class LSTM(nn.Module):
                 padding_embedding = self.embeddings(
                     torch.tensor(self.word2idx["<PAD>"], device=self.device)
                 )
-                # print(f"padding_embedding: {padding_embedding}")
                 return padding_embedding
             else:
                 final_embedding = torch.concat(
@@ -373,8 +372,6 @@ class LSTM(nn.Module):
         object_location_embedding = self.embeddings(
             torch.tensor(self.word2idx[obj_loc], device=self.device)
         )
-        # print(f"object_embedding: {object_embedding}")
-        # print(f"object_location_embedding: {object_location_embedding}")
 
         if memory_type == "semantic":
             if self.fuse_information == "concat":
@@ -393,7 +390,6 @@ class LSTM(nn.Module):
             human_embedding = self.embeddings(
                 torch.tensor(self.word2idx[human], device=self.device)
             )
-            # print(f"human_embedding: {human_embedding}")
 
             if self.v1_params["include_human"] is None:
                 if self.fuse_information == "concat":
@@ -427,11 +423,9 @@ class LSTM(nn.Module):
         else:
             raise ValueError
 
-        # print(f"final_embedding (before adding positional): {final_embedding}")
         if self.include_positional_encoding:
             final_embedding += self.positional_encoding[mem[3]]
 
-        # print(f"final_embedding (after adding positional): {final_embedding}")
         return final_embedding
 
     def make_embedding_v2(self, mem: list[str], *args) -> torch.Tensor:
@@ -535,7 +529,7 @@ class LSTM(nn.Module):
             memories. x being a np.ndarray speeds up the process.
 
         Returns:
-            Q-values, action distribution, or value.
+            Q-values, (action, distribution), or value.
 
         """
         x = deepcopy(x_)

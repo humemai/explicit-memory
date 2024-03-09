@@ -17,6 +17,7 @@ from tqdm.auto import trange
 from explicit_memory.utils import is_running_notebook, positional_encoding, write_yaml
 
 from explicit_memory.utils.dqn import (
+    ReplayBuffer,
     target_hard_update,
     plot_results,
     save_final_results,
@@ -49,6 +50,26 @@ class LSTM(torch.nn.Module):
         max_timesteps: int | None = None,
         max_strength: int | None = None,
     ) -> None:
+        """Initialize the LSTM.
+
+        Args:
+            entities: List of entities.
+            relations: List of relations.
+            n_actions: Number of actions.
+            max_step_reward: Maximum reward per step.
+            hidden_size: Hidden size of the LSTM.
+            num_layers: Number of layers in the LSTM.
+            embedding_dim: Dimension of the embeddings.
+            make_categorical_embeddings: Whether to make categorical embeddings.
+            batch_first: Whether batch is first.
+            device: Device to use.
+            dueling_dqn: Whether to use dueling DQN.
+            fuse_information: How to fuse information.
+            include_positional_encoding: Whether to include positional encoding.
+            max_timesteps: Maximum timesteps.
+            max_strength: Maximum strength.
+
+        """
         super().__init__()
         self.entities = entities
         self.relations = relations
@@ -172,7 +193,15 @@ class LSTM(torch.nn.Module):
             )
 
     def make_embedding(self, obs: list[str]) -> torch.Tensor:
-        """Create one embedding vector with summation or concatenation."""
+        """Create one embedding vector with summation or concatenation.
+
+        Args:
+            obs: Observation.
+
+        Returns:
+            final_embedding: Final embedding.
+
+        """
         if obs == ["<PAD>", "<PAD>", "<PAD>", "<PAD>"]:
             if self.fuse_information == "sum":
                 return self.embeddings(
@@ -221,6 +250,15 @@ class LSTM(torch.nn.Module):
         return final_embedding
 
     def forward(self, x: np.ndarray) -> torch.Tensor:
+        """Forward pass.
+
+        Args:
+            x: Input.
+
+        Returns:
+            q: Q-values.
+
+        """
         obs_pad = ["<PAD>", "<PAD>", "<PAD>", "<PAD>"]
         batch = [sample["data"] for sample in x]
         max_len = 0
@@ -262,6 +300,13 @@ class History:
         block_size: int = 6,
         action2str: dict = {0: "north", 1: "east", 2: "south", 3: "west", 4: "stay"},
     ) -> None:
+        """Initialize the history.
+
+        Args:
+            block_size: Block size.
+            action2str: Action number to action string.
+
+        """
         self.block_size = block_size
         self.blocks = [[]] * self.block_size
 
@@ -270,9 +315,11 @@ class History:
         self.actions_int = list(self.action2str.keys())
 
     def to_list(self) -> list:
+        """Convert the history to a list."""
         return [element for block in self.blocks for element in block]
 
     def add_block(self, block: list) -> None:
+        """Add a block to the history."""
         self.blocks = self.blocks[1:] + [block]
 
     def __repr__(self) -> str:
@@ -299,6 +346,16 @@ class History:
         return None
 
     def explore(self, explore_policy: str) -> str:
+        """Explore the environment. The agent can either explore randomly or avoid 
+        walls. This is not reinforcement learning, but a simple heuristic.
+
+        Args:
+            explore_policy: Explore policy.
+
+        Returns:
+            action_explore: Action to explore.
+
+        """
         if explore_policy not in ["random", "avoid_walls"]:
             raise ValueError(f"Unknown explore policy: {explore_policy}")
 
@@ -395,9 +452,37 @@ class DQNLSTMBaselineAgent:
         },
         ddqn: bool = True,
         dueling_dqn: bool = True,
-        default_root_dir: str = "./training_results/DQN/LSTM/baselines",
+        default_root_dir: str = "./training_results/DQN/baselines/LSTM/",
         run_handcrafted_baselines: bool = True,
     ) -> None:
+        """Initialize the DQN LSTM Baseline Agent.
+
+        Args:
+            env_str: Environment string.
+            num_iterations: Number of iterations.
+            replay_buffer_size: Size of the replay buffer.
+            warm_start: Warm start size.
+            batch_size: Batch size.
+            target_update_interval: Target update interval.
+            epsilon_decay_until: Epsilon decay until.
+            max_epsilon: Maximum epsilon.
+            min_epsilon: Minimum epsilon.
+            gamma: discount factor.
+            history_block_size: History block size.
+            nn_params: Neural network parameters.
+            run_test: Whether to run test.
+            num_samples_for_results: Number of samples to use for results.
+            plotting_interval: Plotting interval.
+            train_seed: Train seed.
+            test_seed: Test seed.
+            device: "cpu" or "cuda".
+            env_config: Environment configuration.
+            ddqn: Whether to use DDQN.
+            dueling_dqn: Whether to use dueling DQN.
+            default_root_dir: Default root directory to save training results
+            run_handcrafted_baselines: Whether to run handcrafted baselines.
+
+        """
         params_to_save = deepcopy(locals())
         del params_to_save["self"]
 
@@ -479,7 +564,6 @@ class DQNLSTMBaselineAgent:
 
     def _run_explore_baselines(self) -> None:
         """Run the explore baselines."""
-
         env = RoomEnv2(**self.env_config)
         observations, info = env.reset()
         env.render("image", save_fig_dir=self.default_root_dir)
@@ -532,7 +616,12 @@ class DQNLSTMBaselineAgent:
         write_yaml(results, os.path.join(self.default_root_dir, "handcrafted.yaml"))
 
     def _create_directory(self, params_to_save: dict) -> None:
-        """Create the directory to store the results."""
+        """Create the directory to store the results.
+
+        Args:
+            params_to_save: (hyper) parameters to save.
+
+        """
         os.makedirs(self.default_root_dir, exist_ok=True)
         write_yaml(params_to_save, os.path.join(self.default_root_dir, "train.yaml"))
 
@@ -688,6 +777,18 @@ class DQNLSTMBaselineAgent:
         self.env.close()
 
     def validate_test_middle(self, val_or_test: str) -> tuple[list[float], dict]:
+        """Validate or test the agent.
+
+        Args:
+            val_or_test: "val" or "test".
+
+        Returns:
+            scores_temp: Scores.
+            states: States.
+            q_values: Q-values.
+            actions: Actions.
+
+        """
         scores_temp = []
         states = []
         q_values = []
@@ -744,6 +845,7 @@ class DQNLSTMBaselineAgent:
         return scores_temp, states, q_values, actions
 
     def validate(self) -> None:
+        """Validate the agent."""
         self.dqn.eval()
         scores_temp, states, q_values, actions = self.validate_test_middle("val")
 
@@ -763,6 +865,13 @@ class DQNLSTMBaselineAgent:
         self.dqn.train()
 
     def test(self, checkpoint: str = None) -> None:
+        """Test the agent.
+
+        Args:
+            checkpoint: Checkpoint to load. If None, the highest validation checkpoint
+                is loaded.
+
+        """
         self.dqn.eval()
         self.env_config["seed"] = self.test_seed
         self.env = gym.make(self.env_str, **self.env_config)
@@ -810,8 +919,6 @@ class DQNLSTMBaselineAgent:
             self.action_space.n.item(),
             self.num_iterations,
             self.env.unwrapped.total_maximum_episode_rewards,
-            self.num_validation,
-            self.num_samples_for_results,
             self.default_root_dir,
             to_plot,
             save_fig,

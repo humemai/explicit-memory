@@ -89,45 +89,45 @@ class PPOExploreAgent(PPOAgent):
             "include_walls_in_observations": True,
         },
         default_root_dir: str = "./training_results/PPO/LSTM/explore",
-        run_handcrafted_baselines: dict | None = [
-            {
-                "mm": mm,
-                "qa": qa,
-                "explore": explore,
-                "pretrain_semantic": pretrain_semantic,
-            }
-            for mm in ["random", "episodic", "semantic"]
-            for qa in ["episodic_semantic"]
-            for explore in ["random", "avoid_walls"]
-            for pretrain_semantic in [False, "exclude_walls"]
-        ],
+        run_handcrafted_baselines: bool = False,
+        run_neural_baseline: bool = False,
     ) -> None:
         """Initialization.
 
         Args:
-            env_str: The environment string.
-            num_episodes: The number of episodes.
-            num_rollouts: The number of rollouts.
-            epoch_per_rollout: The number of epochs per rollout.
-            batch_size: The batch size.
-            gamma: The discount factor.
-            tau: The tau value.
-            epsilon: The epsilon value.
-            entropy_weight: The entropy weight.
-            capacity: The capacity of the memory systems.
-            pretrain_semantic: Whether to pretrain the semantic memory.
-            nn_params: The neural network parameters.
-            run_test: Whether to run the test.
-            num_samples_for_results: The number of samples for results.
-            train_seed: The training seed.
-            test_seed: The test seed.
-            device: The device.
-            qa_policy: The QA policy.
-            explore_policy: The explore policy.
-            env_config: The environment configuration.
-            split_reward_training: Whether to split the reward during training.
-            default_root_dir: The default root directory.
-            run_handcrafted_baselines: The handcrafted baselines to run.
+            env_str: environment string. This has to be "room_env:RoomEnv-v2"
+            num_episodes: number of episodes
+            num_rollouts: number of rollouts
+            epoch_per_rollout: number of epochs per rollout
+            batch_size: batch size
+            gamma: discount factor
+            tau: GAE parameter
+            epsilon: PPO clip parameter
+            entropy_weight: entropy weight
+            capacity: The capacity of each human-like memory systems
+            pretrain_semantic: whether to pretrain the semantic memory system.
+            nn_params: neural network parameters
+            run_test: whether to run test
+            num_samples_for_results: The number of samples to validate / test the agent.
+            train_seed: seed for training
+            test_seed: seed for testing
+            device: This is either "cpu" or "cuda".
+            mm_policy: memory management policy. Choose one of "generalize", "random",
+                "rl", or "neural"
+            mm_agent_path: The memory management agent path.
+            qa_policy: question answering policy Choose one of "episodic_semantic",
+                "random", or "neural". qa_policy shouldn't be trained with RL. There is
+                no sequence of states / actions to learn from.
+            env_config: The configuration of the environment.
+                question_prob: The probability of a question being asked at every
+                    observation.
+                terminates_at: The maximum number of steps to take in an episode.
+                seed: seed for env
+                room_size: The room configuration to use. Choose one of "dev", "xxs",
+                    "xs", "s", "m", or "l".
+            default_root_dir: default root directory to save results
+            run_handcrafted_baselines: whether to run handcrafted baselines
+            run_neural_baseline: whether to run neural baseline
 
         """
         all_params = deepcopy(locals())
@@ -135,6 +135,7 @@ class PPOExploreAgent(PPOAgent):
         del all_params["__class__"]
         self.all_params = deepcopy(all_params)
         del all_params["mm_agent_path"]
+        del all_params["run_neural_baseline"]
 
         self.action2str = {0: "north", 1: "east", 2: "south", 3: "west", 4: "stay"}
         self.action_space = gym.spaces.Discrete(len(self.action2str))
@@ -152,26 +153,32 @@ class PPOExploreAgent(PPOAgent):
         else:
             self.mm_policy_model = None
 
-        with torch.no_grad():
-            test_mean, test_std = self.run_neural_baseline()
+        if run_neural_baseline:
+            with torch.no_grad():
+                test_mean, test_std = self.run_neural_baseline()
 
-        handcrafted = read_yaml(os.path.join(self.default_root_dir, "handcrafted.yaml"))
-        handcrafted[
-            "{"
-            "mm"
-            ": "
-            "neural"
-            ", "
-            "qa"
-            ": "
-            "episodic_semantic"
-            ", "
-            "explore"
-            ": "
-            "avoid_walls"
-            "}"
-        ] = {"mean": test_mean, "std": test_std}
-        write_yaml(handcrafted, os.path.join(self.default_root_dir, "handcrafted.yaml"))
+            handcrafted = read_yaml(
+                os.path.join(self.default_root_dir, "handcrafted.yaml")
+            )
+            handcrafted[
+                "{"
+                "mm"
+                ": "
+                "neural"
+                ", "
+                "qa"
+                ": "
+                "episodic_semantic"
+                ", "
+                "explore"
+                ": "
+                "avoid_walls"
+                "}"
+            ] = {"mean": test_mean, "std": test_std}
+            write_yaml(
+                handcrafted, os.path.join(self.default_root_dir, "handcrafted.yaml")
+            )
+
         self.env_config["seed"] = self.train_seed
         self.env = gym.make(self.env_str, **self.env_config)
 
@@ -187,16 +194,14 @@ class PPOExploreAgent(PPOAgent):
             observations, info = self.env.reset()
 
             while True:
-                observations["room"] = self.manage_agent_and_map_memory(
-                    observations["room"]
-                )
+                observations_ = self.manage_agent_and_map_memory(observations["room"])
 
-                for obs in observations["room"]:
+                for obs in observations_:
                     encode_observation(self.memory_systems, obs)
                     manage_memory(
-                        self.memory_systems,
-                        self.mm_policy,
-                        self.mm_policy_model,
+                        memory_systems=self.memory_systems,
+                        policy=self.mm_policy,
+                        mm_policy_model=self.mm_policy_model,
                         mm_policy_model_type="actor",
                         split_possessive=False,
                     )
@@ -240,14 +245,28 @@ class PPOExploreAgent(PPOAgent):
         log_probs_buffer: list | None = None,
         append_states_actions_probs_values: bool = False,
         append_states: bool = False,
-    ) -> tuple[int, bool, list, list]:
+    ) -> tuple[int, bool, dict]:
+        """Take a step in the environment.
 
-        for obs in self.manage_agent_and_map_memory(observations["room"]):
+        Args:
+            observations: observations
+            is_train_val_test: "train", "val", or "test"
+            states_buffer: states buffer
+            actions_buffer: actions buffer
+            values_buffer: values buffer
+            log_probs_buffer: log probs buffer
+            append_states_actions_probs_values: whether to append states, actions,
+                probs, and values, to save them later
+            append_states: whether to append states, to save them later
+
+        """
+        observations_ = self.manage_agent_and_map_memory(observations["room"])
+        for obs in observations_:
             encode_observation(self.memory_systems, obs)
             manage_memory(
-                self.memory_systems,
-                self.mm_policy,
-                self.mm_policy_model,
+                memory_systems=self.memory_systems,
+                policy=self.mm_policy,
+                mm_policy_model=self.mm_policy_model,
                 mm_policy_model_type="actor",
                 split_possessive=False,
             )
@@ -300,6 +319,9 @@ class PPOExploreAgent(PPOAgent):
         new_episode_starts = True
         score = 0
 
+        self.actor.train()
+        self.critic.train()
+
         for _ in tqdm(range(self.num_rollouts)):
             (
                 states_buffer,
@@ -325,7 +347,6 @@ class PPOExploreAgent(PPOAgent):
                     append_states_actions_probs_values=True,
                     append_states=False,
                 )
-
                 score += reward
 
                 reward = np.reshape(reward, (1, -1)).astype(np.float64)
@@ -346,7 +367,19 @@ class PPOExploreAgent(PPOAgent):
                 else:
                     new_episode_starts = False
 
+            # this block is important. We have to get the next_state
+            observations_ = self.manage_agent_and_map_memory(observations["room"])
+            for obs in observations_:
+                encode_observation(self.memory_systems, obs)
+                manage_memory(
+                    memory_systems=self.memory_systems,
+                    policy=self.mm_policy,
+                    mm_policy_model=self.mm_policy_model,
+                    mm_policy_model_type="actor",
+                    split_possessive=False,
+                )
             next_state = self.memory_systems.return_as_a_dict_list()
+
             actor_loss, critic_loss = update_model(
                 next_state,
                 states_buffer,
@@ -393,7 +426,7 @@ class PPOExploreAgent(PPOAgent):
 
 
         Returns:
-            scores: list[float]
+            scores: Episode rewards. The number of elements is num_samples_for_results.
 
         """
         scores = []

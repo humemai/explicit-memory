@@ -85,23 +85,44 @@ class PPOAgent(HandcraftedAgent):
             "include_walls_in_observations": True,
         },
         default_root_dir: str = "./training_results/PPO/",
-        run_handcrafted_baselines: dict | None = [
-            {
-                "mm": mm,
-                "qa": qa,
-                "explore": explore,
-                "pretrain_semantic": pretrain_semantic,
-            }
-            for mm in ["random", "episodic", "semantic"]
-            for qa in ["episodic_semantic"]
-            for explore in ["random", "avoid_walls"]
-            for pretrain_semantic in [False, "exclude_walls"]
-        ],
+        run_handcrafted_baselines: bool = False,
     ) -> None:
         """Initialization.
 
         Args:
-
+            env_str: environment string. This has to be "room_env:RoomEnv-v2"
+            num_episodes: number of episodes
+            num_rollouts: number of rollouts
+            epoch_per_rollout: number of epochs per rollout
+            batch_size: batch size
+            gamma: discount factor
+            tau: GAE parameter
+            epsilon: PPO clip parameter
+            entropy_weight: entropy weight
+            capacity: The capacity of each human-like memory systems
+            pretrain_semantic: whether to pretrain the semantic memory system.
+            nn_params: neural network parameters
+            run_test: whether to run test
+            num_samples_for_results: The number of samples to validate / test the agent.
+            train_seed: seed for training
+            test_seed: seed for testing
+            device: This is either "cpu" or "cuda".
+            mm_policy: memory management policy. Choose one of "generalize", "random",
+                "rl", or "neural"
+            qa_policy: question answering policy Choose one of "episodic_semantic",
+                "random", or "neural". qa_policy shouldn't be trained with RL. There is
+                no sequence of states / actions to learn from.
+            explore_policy: The room exploration policy. Choose one of "random",
+                "avoid_walls", "rl", or "neural"
+            env_config: The configuration of the environment.
+                question_prob: The probability of a question being asked at every
+                    observation.
+                terminates_at: The maximum number of steps to take in an episode.
+                seed: seed for env
+                room_size: The room configuration to use. Choose one of "dev", "xxs",
+                    "xs", "s", "m", or "l".
+            default_root_dir: default root directory to save results
+            run_handcrafted_baselines: whether to run handcrafted baselines
 
         """
         self.train_seed = train_seed
@@ -145,7 +166,6 @@ class PPOAgent(HandcraftedAgent):
         self.entropy_weight = entropy_weight
 
         self.run_test = run_test
-        self.run_handcrafted_baselines = run_handcrafted_baselines
 
         assert (self.num_rollouts % self.num_episodes) == 0 or (
             self.num_episodes % self.num_rollouts
@@ -180,20 +200,32 @@ class PPOAgent(HandcraftedAgent):
         self.actor_probs_all = {"train": [], "val": [], "test": []}
         self.critic_values_all = {"train": [], "val": [], "test": []}
 
-        if self.run_handcrafted_baselines is not None:
-            self.run_and_save_handcrafted_baselines()
+        if run_handcrafted_baselines:
+            self.run_handcrafted_baselines()
 
-    def run_and_save_handcrafted_baselines(self) -> None:
+    def run_handcrafted_baselines(self) -> None:
         """Run and save the handcrafted baselines."""
 
         env = RoomEnv2(**self.env_config)
         observations, info = env.reset()
         env.render("image", save_fig_dir=self.default_root_dir)
-
         del env
 
+        policies = [
+            {
+                "mm": mm,
+                "qa": qa,
+                "explore": explore,
+                "pretrain_semantic": pretrain_semantic,
+            }
+            for mm in ["random", "episodic", "semantic"]
+            for qa in ["episodic_semantic"]
+            for explore in ["random", "avoid_walls"]
+            for pretrain_semantic in [False, "exclude_walls"]
+        ]
+
         results = {}
-        for policy in self.run_handcrafted_baselines:
+        for policy in policies:
             results[str(policy)] = []
             for test_seed in [0, 1, 2, 3, 4]:
                 agent_handcrafted = HandcraftedAgent(
@@ -221,7 +253,7 @@ class PPOAgent(HandcraftedAgent):
     def create_empty_rollout_buffer(self) -> tuple[list, list, list, list, list, list]:
         """Create empty buffer for training.
 
-        Make sure to call this before and after each rollout.
+        Make sure to call this before each rollout.
 
         Returns:
             states_buffer: The states.
@@ -230,6 +262,7 @@ class PPOAgent(HandcraftedAgent):
             values_buffer: The values.
             masks_buffer: The masks.
             log_probs_buffer: The log probabilities.
+
         """
         # memory for training
         states_buffer: list[dict] = []  # this has to be a list of dictionaries

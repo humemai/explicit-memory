@@ -239,8 +239,8 @@ def manage_memory(
         split_possessive: whether to split the possessive, i.e., 's, or not.
 
     """
-    if mm_policy_model is None:
-        assert mm_policy_model_type is None
+    if mm_policy_model is not None:
+        assert mm_policy_model_type is not None
 
     def action_number_0():
         if hasattr(memory_systems, "episodic"):
@@ -358,8 +358,6 @@ def manage_memory(
             elif mm_policy_model_type == "actor":
                 action, dist = mm_policy_model(np.array([state]))
                 selected_action = dist.probs.argmax().detach().cpu().item()
-
-                pass
             else:
                 raise ValueError
 

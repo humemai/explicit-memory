@@ -1,4 +1,4 @@
-"""DQN LSTM Baseline Agent for the RoomEnv2 environment."""
+"""PPO LSTM Baseline Agent for the RoomEnv2 environment."""
 
 import datetime
 import os
@@ -10,25 +10,39 @@ from typing import Literal
 import gymnasium as gym
 import numpy as np
 import torch
+from torch import nn
 import torch.optim as optim
 from room_env.envs.room2 import RoomEnv2
-from tqdm.auto import trange
+from tqdm.auto import tqdm
+from torch.distributions import Categorical
 
 from explicit_memory.utils import is_running_notebook, positional_encoding, write_yaml
 
-from explicit_memory.utils.dqn import (
-    target_hard_update,
+from explicit_memory.utils.ppo import (
     plot_results,
     save_final_results,
     save_validation,
-    save_states_q_values_actions,
     select_action,
     update_model,
+    save_states_actions_probs_values,
+)
+
+from explicit_memory.policy import (
+    answer_question,
+    encode_observation,
+    explore,
+    manage_memory,
 )
 
 
+def init_layer_uniform(layer: nn.Linear, init_w: float = 3e-3) -> None:
+    """Init uniform parameters on the single layer."""
+    layer.weight.data.uniform_(-init_w, init_w)
+    layer.bias.data.uniform_(-init_w, init_w)
+
+
 class LSTM(torch.nn.Module):
-    """LSTM for the DQN baseline. This is different from the LSTM used for the memory-
+    """LSTM for the PPO baseline. This is different from the LSTM used for the memory-
     based agents."""
 
     def __init__(
@@ -43,12 +57,34 @@ class LSTM(torch.nn.Module):
         make_categorical_embeddings: bool = False,
         batch_first: bool = True,
         device: str = "cpu",
-        dueling_dqn: bool = True,
         fuse_information: Literal["concat", "sum"] = "sum",
         include_positional_encoding: bool = True,
         max_timesteps: int | None = None,
         max_strength: int | None = None,
+        is_actor: bool = False,
+        is_critic: bool = False,
     ) -> None:
+        """Initialize the LSTM.
+
+        Args:
+            entities: List of entities.
+            relations: List of relations.
+            n_actions: Number of actions.
+            max_step_reward: Maximum reward per step.
+            hidden_size: Hidden size of the LSTM.
+            num_layers: Number of layers in the LSTM.
+            embedding_dim: Dimension of the embeddings.
+            make_categorical_embeddings: Whether to make categorical embeddings.
+            batch_first: Whether batch is first.
+            device: Device to use.
+            fuse_information: How to fuse information.
+            include_positional_encoding: Whether to include positional encoding.
+            max_timesteps: Maximum timesteps.
+            max_strength: Maximum strength.
+            is_actor: whether this is an actor or not.
+            is_critic: whether this is a critic or not.
+
+        """
         super().__init__()
         self.entities = entities
         self.relations = relations
@@ -60,11 +96,12 @@ class LSTM(torch.nn.Module):
         self.make_categorical_embeddings = make_categorical_embeddings
         self.batch_first = batch_first
         self.device = device
-        self.dueling_dqn = dueling_dqn
         self.fuse_information = fuse_information
         self.include_positional_encoding = include_positional_encoding
         self.max_timesteps = max_timesteps
         self.max_strength = max_strength
+        self.is_actor = is_actor
+        self.is_critic = is_critic
 
         self.create_embeddings()
         if self.include_positional_encoding:
@@ -85,22 +122,8 @@ class LSTM(torch.nn.Module):
             device=self.device,
         )
 
-        self.advantage_layer = torch.nn.Sequential(
-            torch.nn.Linear(
-                self.hidden_size,
-                self.hidden_size,
-                device=self.device,
-            ),
-            torch.nn.ReLU(),
-            torch.nn.Linear(
-                self.hidden_size,
-                n_actions,
-                device=self.device,
-            ),
-        )
-
-        if self.dueling_dqn:
-            self.value_layer = torch.nn.Sequential(
+        if self.is_actor:
+            self.advantage_layer = torch.nn.Sequential(
                 torch.nn.Linear(
                     self.hidden_size,
                     self.hidden_size,
@@ -109,10 +132,27 @@ class LSTM(torch.nn.Module):
                 torch.nn.ReLU(),
                 torch.nn.Linear(
                     self.hidden_size,
+                    n_actions,
+                    device=self.device,
+                ),
+            )
+            init_layer_uniform(self.advantage_layer[-1], 3e-3)
+
+        if self.is_critic:
+            self.value_layer = nn.Sequential(
+                nn.Linear(
+                    self.hidden_size,
+                    self.hidden_size,
+                    device=self.device,
+                ),
+                nn.ReLU(),
+                nn.Linear(
+                    self.hidden_size,
                     1,
                     device=self.device,
                 ),
             )
+            init_layer_uniform(self.value_layer[-1], 3e-3)
 
         self.relu = torch.nn.ReLU()
 
@@ -172,7 +212,15 @@ class LSTM(torch.nn.Module):
             )
 
     def make_embedding(self, obs: list[str]) -> torch.Tensor:
-        """Create one embedding vector with summation or concatenation."""
+        """Create one embedding vector with summation or concatenation.
+
+        Args:
+            obs: Observation.
+
+        Returns:
+            final_embedding: Final embedding.
+
+        """
         if obs == ["<PAD>", "<PAD>", "<PAD>", "<PAD>"]:
             if self.fuse_information == "sum":
                 return self.embeddings(
@@ -221,6 +269,15 @@ class LSTM(torch.nn.Module):
         return final_embedding
 
     def forward(self, x: np.ndarray) -> torch.Tensor:
+        """Forward pass.
+
+        Args:
+            x: Input.
+
+        Returns:
+            (action, distribution), or value
+
+        """
         obs_pad = ["<PAD>", "<PAD>", "<PAD>", "<PAD>"]
         batch = [sample["data"] for sample in x]
         max_len = 0
@@ -246,14 +303,17 @@ class LSTM(torch.nn.Module):
         lstm_out, _ = self.lstm(batch_embeddings)
         lstm_out = lstm_out[:, -1, :]
 
-        if self.dueling_dqn:
-            value = self.value_layer(lstm_out)
-            advantage = self.advantage_layer(lstm_out)
-            q = value + advantage - advantage.mean(dim=-1, keepdim=True)
-        else:
-            q = self.advantage_layer(lstm_out)
+        if self.is_actor:
+            logits = self.advantage_layer(lstm_out)
+            dist = Categorical(logits=logits)
+            action = dist.sample()
 
-        return q
+            return action, dist
+
+        if self.is_critic:
+            value = self.value_layer(lstm_out)
+
+            return value
 
 
 class History:
@@ -262,6 +322,13 @@ class History:
         block_size: int = 6,
         action2str: dict = {0: "north", 1: "east", 2: "south", 3: "west", 4: "stay"},
     ) -> None:
+        """Initialize the history.
+
+        Args:
+            block_size: Block size.
+            action2str: Action number to action string.
+
+        """
         self.block_size = block_size
         self.blocks = [[]] * self.block_size
 
@@ -270,9 +337,11 @@ class History:
         self.actions_int = list(self.action2str.keys())
 
     def to_list(self) -> list:
+        """Convert the history to a list."""
         return [element for block in self.blocks for element in block]
 
     def add_block(self, block: list) -> None:
+        """Add a block to the history."""
         self.blocks = self.blocks[1:] + [block]
 
     def __repr__(self) -> str:
@@ -299,6 +368,16 @@ class History:
         return None
 
     def explore(self, explore_policy: str) -> str:
+        """Explore the environment. The agent can either explore randomly or avoid
+        walls. This is not reinforcement learning, but a simple heuristic.
+
+        Args:
+            explore_policy: Explore policy.
+
+        Returns:
+            action_explore: Action to explore.
+
+        """
         if explore_policy not in ["random", "avoid_walls"]:
             raise ValueError(f"Unknown explore policy: {explore_policy}")
 
@@ -348,7 +427,7 @@ class History:
 
 
 class PPOLSTMBaselineAgent:
-    """DQN LSTM Baseline Agent interacting with environment.
+    """PPO LSTM Baseline Agent interacting with environment.
 
     Based on https://github.com/Curt-Park/rainbow-is-all-you-need/
     """
@@ -356,15 +435,14 @@ class PPOLSTMBaselineAgent:
     def __init__(
         self,
         env_str: str = "room_env:RoomEnv-v2",
-        num_iterations: int = 10000,
-        replay_buffer_size: int = 10000,
-        warm_start: int = 1000,
-        batch_size: int = 32,
-        target_update_interval: int = 10,
-        epsilon_decay_until: float = 10000,
-        max_epsilon: float = 1.0,
-        min_epsilon: float = 0.1,
+        num_episodes: int = 10,
+        num_rollouts: int = 2,
+        epoch_per_rollout: int = 64,
+        batch_size: int = 128,
         gamma: float = 0.9,
+        tau: float = 0.8,
+        epsilon: float = 0.2,
+        entropy_weight: float = 0.005,
         history_block_size: int = 6,
         nn_params: dict = {
             "architecture": "lstm",
@@ -378,7 +456,6 @@ class PPOLSTMBaselineAgent:
         },
         run_test: bool = True,
         num_samples_for_results: int = 10,
-        plotting_interval: int = 10,
         train_seed: int = 5,
         test_seed: int = 0,
         device: str = "cpu",
@@ -393,11 +470,33 @@ class PPOLSTMBaselineAgent:
             "question_interval": 1,
             "include_walls_in_observations": True,
         },
-        ddqn: bool = True,
-        dueling_dqn: bool = True,
-        default_root_dir: str = "./training_results/",
-        run_handcrafted_baselines: bool = True,
+        default_root_dir: str = "./training_results/PPO/baselines/",
+        run_handcrafted_baselines: bool = False,
     ) -> None:
+        """Initialize the PPO LSTM Baseline Agent.
+
+        Args:
+            env_str: Environment string.
+            num_episodes: Number of episodes.
+            num_rollouts: Number of rollouts.
+            epoch_per_rollout: Epochs per rollout.
+            batch_size: Batch size.
+            gamma: Gamma. Discount factor.
+            tau: Tau. GAE parameter.
+            epsilon: Epsilon. Clipping parameter.
+            entropy_weight: Entropy weight.
+            history_block_size: The number of blocks for history
+            nn_params: Neural network parameters.
+            run_test: Whether to run test.
+            num_samples_for_results: Number of samples for results.
+            train_seed: Train seed.
+            test_seed: Test seed.
+            device: Device. "cpu" or "cuda".
+            env_config: Environment configuration.
+            default_root_dir: Default root directory.
+            run_handcrafted_baselines: Whether to run handcrafted baselines.
+
+        """
         params_to_save = deepcopy(locals())
         del params_to_save["self"]
 
@@ -421,9 +520,6 @@ class PPOLSTMBaselineAgent:
         self.device = torch.device(device)
         print(f"Running on {self.device}")
 
-        self.ddqn = ddqn
-        self.dueling_dqn = dueling_dqn
-
         self.action2str = {0: "north", 1: "east", 2: "south", 3: "west", 4: "stay"}
         self.str2action = {v: k for k, v in self.action2str.items()}
         self.action_space = gym.spaces.Discrete(len(self.action2str))
@@ -432,26 +528,35 @@ class PPOLSTMBaselineAgent:
         self.nn_params["device"] = self.device
         self.nn_params["entities"] = self.env.unwrapped.entities
         self.nn_params["relations"] = self.env.unwrapped.relations
-        self.nn_params["dueling_dqn"] = self.dueling_dqn
         self.nn_params["n_actions"] = len(self.action2str)
         self.nn_params["max_step_reward"] = self.env.unwrapped.num_questions_step
 
         self.val_filenames = []
         self.is_notebook = is_running_notebook()
-        self.num_iterations = num_iterations
-        self.plotting_interval = plotting_interval
+
+        self.num_episodes = num_episodes
+        self.num_rollouts = num_rollouts
+        self.epoch_per_rollout = epoch_per_rollout
+        self.batch_size = batch_size
+        self.gamma = gamma
+        self.tau = tau
+        self.epsilon = epsilon
+        self.entropy_weight = entropy_weight
+
         self.run_test = run_test
 
-        self.replay_buffer_size = replay_buffer_size
-        self.batch_size = batch_size
-        self.epsilon = max_epsilon
-        self.max_epsilon = max_epsilon
-        self.min_epsilon = min_epsilon
-        self.epsilon_decay_until = epsilon_decay_until
-        self.target_update_interval = target_update_interval
-        self.gamma = gamma
-        self.warm_start = warm_start
-        assert self.batch_size <= self.warm_start <= self.replay_buffer_size
+        self.num_steps_in_episode = self.env.unwrapped.terminates_at + 1
+        self.total_maximum_episode_rewards = (
+            self.env.unwrapped.total_maximum_episode_rewards
+        )
+
+        assert (self.num_rollouts % self.num_episodes) == 0 or (
+            self.num_episodes % self.num_rollouts
+        ) == 0
+
+        self.num_steps_per_rollout = int(
+            self.num_episodes / self.num_rollouts * self.num_steps_in_episode
+        )
 
         # networks: dqn, dqn_target
         if self.nn_params["architecture"].lower() == "lstm":
@@ -460,26 +565,30 @@ class PPOLSTMBaselineAgent:
         elif self.nn_params["architecture"].lower() == "stare":
             raise NotImplementedError
 
-        self.dqn = function_approximator(**self.nn_params)
-        self.dqn_target = function_approximator(**self.nn_params)
-        self.dqn_target.load_state_dict(self.dqn.state_dict())
-        self.dqn_target.eval()
-
-        self.replay_buffer = ReplayBuffer(
-            observation_type="dict", size=replay_buffer_size, batch_size=batch_size
+        self.actor = function_approximator(
+            **self.nn_params, is_actor=True, is_critic=False
+        )
+        self.critic = function_approximator(
+            **self.nn_params, is_actor=False, is_critic=True
         )
 
         # optimizer
-        self.optimizer = optim.Adam(self.dqn.parameters())
+        self.actor_optimizer = optim.Adam(self.actor.parameters())
+        self.critic_optimizer = optim.Adam(self.critic.parameters())
 
-        self.q_values = {"train": [], "val": [], "test": []}
+        # global stats to save
+        self.actor_losses, self.critic_losses = [], []  # training loss
+        self.states_all = {"train": [], "val": [], "test": []}
+        self.scores_all = {"train": [], "val": [], "test": None}
+        self.actions_all = {"train": [], "val": [], "test": []}
+        self.actor_probs_all = {"train": [], "val": [], "test": []}
+        self.critic_values_all = {"train": [], "val": [], "test": []}
 
         if self.run_handcrafted_baselines:
             self._run_explore_baselines()
 
     def _run_explore_baselines(self) -> None:
         """Run the explore baselines."""
-
         env = RoomEnv2(**self.env_config)
         observations, info = env.reset()
         env.render("image", save_fig_dir=self.default_root_dir)
@@ -532,7 +641,12 @@ class PPOLSTMBaselineAgent:
         write_yaml(results, os.path.join(self.default_root_dir, "handcrafted.yaml"))
 
     def _create_directory(self, params_to_save: dict) -> None:
-        """Create the directory to store the results."""
+        """Create the directory to store the results.
+
+        Args:
+            params_to_save: (hyper) parameters to save.
+
+        """
         os.makedirs(self.default_root_dir, exist_ok=True)
         write_yaml(params_to_save, os.path.join(self.default_root_dir, "train.yaml"))
 
@@ -540,278 +654,350 @@ class PPOLSTMBaselineAgent:
         """Remove the results from the disk."""
         shutil.rmtree(self.default_root_dir)
 
-    def fill_replay_buffer(self) -> None:
-        """Make the replay buffer full in the beginning with the uniformly-sampled
-        actions. The filling continues until it reaches the warm start size.
+    def create_empty_rollout_buffer(self) -> tuple[list, list, list, list, list, list]:
+        """Create empty buffer for training.
+
+        Make sure to call this before each rollout.
+
+        Returns:
+            states_buffer: The states.
+            actions_buffer: The actions.
+            rewards_buffer: The rewards.
+            values_buffer: The values.
+            masks_buffer: The masks.
+            log_probs_buffer: The log probabilities.
 
         """
-        while len(self.replay_buffer) < self.warm_start:
-            observations, info = self.env.reset()
-            self.history = History(self.history_block_size)
-            self.history.add_block(observations["room"])
+        # memory for training
+        states_buffer: list[dict] = []  # this has to be a list of dictionaries
+        actions_buffer: list[torch.Tensor] = []
+        rewards_buffer: list[torch.Tensor] = []
+        values_buffer: list[torch.Tensor] = []
+        masks_buffer: list[torch.Tensor] = []
+        log_probs_buffer: list[torch.Tensor] = []
 
-            while True:
-                actions_qa = self.history.answer_questions(observations["questions"])
-                state = {"data": self.history.to_list()}
-                # action_explore = self.str2action[self.history.explore("avoid_walls")]
-                action_explore, q_values_ = select_action(
-                    state=state,
-                    greedy=False,
-                    dqn=self.dqn,
-                    epsilon=self.epsilon,
-                    action_space=self.action_space,
-                )
-                action_pair = (actions_qa, self.action2str[action_explore])
-                (
-                    observations,
-                    reward,
-                    done,
-                    truncated,
-                    info,
-                ) = self.env.step(action_pair)
-                done = done or truncated
+        return (
+            states_buffer,
+            actions_buffer,
+            rewards_buffer,
+            values_buffer,
+            masks_buffer,
+            log_probs_buffer,
+        )
 
-                self.history.add_block(observations["room"])
+    def step(
+        self,
+        observations: dict,
+        is_train_val_test: str,
+        states_buffer: list | None = None,
+        actions_buffer: list | None = None,
+        values_buffer: list | None = None,
+        log_probs_buffer: list | None = None,
+        append_states_actions_probs_values: bool = False,
+        append_states: bool = False,
+    ) -> tuple[int, bool, dict]:
+        """Take a step in the environment.
 
-                next_state = {"data": self.history.to_list()}
-                transition = [
-                    deepcopy(state),
-                    action_explore,
-                    reward,
-                    deepcopy(next_state),
-                    done,
-                ]
-                self.replay_buffer.store(*transition)
+        Args:
+            observations: observations
+            is_train_val_test: "train", "val", or "test"
+            states_buffer: states buffer
+            actions_buffer: actions buffer
+            values_buffer: values buffer
+            log_probs_buffer: log probs buffer
+            append_states_actions_probs_values: whether to append states, actions,
+                probs, and values, to save them later
+            append_states: whether to append states, to save them later
 
-                if done or len(self.replay_buffer) >= self.warm_start:
-                    break
+        """
+        self.history.add_block(observations["room"])
+        state = {"data": self.history.to_list()}
+
+        action_explore, actor_probs, critic_value = select_action(
+            actor=self.actor,
+            critic=self.critic,
+            state=state,
+            is_test=(is_train_val_test in ["val", "test"]),
+            states=states_buffer,
+            actions=actions_buffer,
+            values=values_buffer,
+            log_probs=log_probs_buffer,
+        )
+
+        if append_states_actions_probs_values:
+            if append_states:
+                # state is a list, which is a mutable object. So, we need to
+                # deepcopy it.
+                self.states_all[is_train_val_test].append(deepcopy(state))
+            else:
+                self.states_all[is_train_val_test].append(None)
+
+            self.actions_all[is_train_val_test].append(action_explore)
+            self.actor_probs_all[is_train_val_test].append(actor_probs)
+            self.critic_values_all[is_train_val_test].append(critic_value)
+
+        actions_qa = self.history.answer_questions(observations["questions"])
+        action_pair = (actions_qa, self.action2str[action_explore])
+        (
+            observations,
+            reward,
+            done,
+            truncated,
+            info,
+        ) = self.env.step(action_pair)
+        done = done or truncated
+
+        return reward, done, observations
 
     def train(self) -> None:
-        """Train the explore agent."""
-        self.fill_replay_buffer()  # fill up the buffer till warm start size
+        """Train the agent."""
+
         self.num_validation = 0
-
-        self.epsilons = []
-        self.training_loss = []
-        self.scores = {"train": [], "val": [], "test": None}
-
-        self.dqn.train()
-
-        training_episode_begins = True
-
+        new_episode_starts = True
         score = 0
-        bar = trange(1, self.num_iterations + 1)
-        for self.iteration_idx in bar:
-            if training_episode_begins:
-                observations, info = self.env.reset()
-                self.history = History(self.history_block_size)
-                self.history.add_block(observations["room"])
 
-            actions_qa = self.history.answer_questions(observations["questions"])
-            state = {"data": self.history.to_list()}
+        self.actor.train()
+        self.critic.train()
 
-            action_explore, q_values_ = select_action(
-                state=state,
-                greedy=False,
-                dqn=self.dqn,
-                epsilon=self.epsilon,
-                action_space=self.action_space,
-            )
-            self.q_values["train"].append(q_values_)
-
-            action_pair = (actions_qa, self.action2str[action_explore])
+        for _ in tqdm(range(self.num_rollouts)):
             (
-                observations,
-                reward,
-                done,
-                truncated,
-                info,
-            ) = self.env.step(action_pair)
-            score += reward
-            done = done or truncated
+                states_buffer,
+                actions_buffer,
+                rewards_buffer,
+                values_buffer,
+                masks_buffer,
+                log_probs_buffer,
+            ) = self.create_empty_rollout_buffer()
 
-            if not done:
-                self.history.add_block(observations["room"])
-                next_state = {"data": self.history.to_list()}
-                transition = [
-                    deepcopy(state),
-                    action_explore,
-                    reward,
-                    deepcopy(next_state),
-                    done,
-                ]
-                self.replay_buffer.store(*transition)
+            for _ in range(self.num_steps_per_rollout):
+                if new_episode_starts:
+                    observations, info = self.env.reset()
+                    self.history = History(self.history_block_size)
 
-                training_episode_begins = False
+                reward, done, observations = self.step(
+                    observations=observations,
+                    is_train_val_test="train",
+                    states_buffer=states_buffer,
+                    actions_buffer=actions_buffer,
+                    values_buffer=values_buffer,
+                    log_probs_buffer=log_probs_buffer,
+                    append_states_actions_probs_values=True,
+                    append_states=False,
+                )
+                score += reward
 
-            else:  # if episode ends
-                self.scores["train"].append(score)
-                score = 0
-                with torch.no_grad():
-                    self.validate()
+                reward = np.reshape(reward, (1, -1)).astype(np.float64)
+                rewards_buffer.append(torch.FloatTensor(reward).to(self.device))
 
-                training_episode_begins = True
+                done_ = np.reshape(done, (1, -1))
+                masks_buffer.append(torch.FloatTensor(1 - done_).to(self.device))
 
-            loss = update_model(
-                replay_buffer=self.replay_buffer,
-                optimizer=self.optimizer,
-                device=self.device,
-                dqn=self.dqn,
-                dqn_target=self.dqn_target,
-                ddqn=self.ddqn,
-                gamma=self.gamma,
+                # if episode ends
+                if done:
+                    self.scores_all["train"].append(score)
+                    with torch.no_grad():
+                        self.validate()
+
+                    score = 0
+                    new_episode_starts = True
+
+                else:
+                    new_episode_starts = False
+
+            # this block is important. We have to get the next_state
+            self.history.add_block(observations["room"])
+            next_state = {"data": self.history.to_list()}
+
+            actor_loss, critic_loss = update_model(
+                next_state,
+                states_buffer,
+                actions_buffer,
+                rewards_buffer,
+                values_buffer,
+                masks_buffer,
+                log_probs_buffer,
+                self.gamma,
+                self.tau,
+                self.epoch_per_rollout,
+                self.batch_size,
+                self.epsilon,
+                self.entropy_weight,
+                self.actor,
+                self.critic,
+                self.actor_optimizer,
+                self.critic_optimizer,
             )
-            self.training_loss.append(loss)
 
-            # linearly decrease epsilon
-            self.epsilon = max(
-                self.min_epsilon,
-                self.epsilon
-                - (self.max_epsilon - self.min_epsilon) / self.epsilon_decay_until,
-            )
-            self.epsilons.append(self.epsilon)
+            self.actor_losses.append(actor_loss)
+            self.critic_losses.append(critic_loss)
 
-            # if hard update is needed
-            if self.iteration_idx % self.target_update_interval == 0:
-                target_hard_update(dqn=self.dqn, dqn_target=self.dqn_target)
-
-            # plotting & show training results
-            if (
-                self.iteration_idx == self.num_iterations
-                or self.iteration_idx % self.plotting_interval == 0
-            ):
-                self.plot_results("all", save_fig=True)
+            self.plot_results("all", True)
 
         with torch.no_grad():
             self.test()
 
         self.env.close()
+        save_states_actions_probs_values(
+            self.states_all["train"],
+            self.actions_all["train"],
+            self.actor_probs_all["train"],
+            self.critic_values_all["train"],
+            self.default_root_dir,
+            "train",
+        )
 
-    def validate_test_middle(self, val_or_test: str) -> tuple[list[float], dict]:
-        scores_temp = []
-        states = []
-        q_values = []
-        actions = []
+    def validate_test_middle(self, val_or_test: str) -> list[float]:
+        """A function shared by validation and test in the middle.
+
+        Args:
+            val_or_test: "val" or "test"
+
+
+        Returns:
+            scores: Episode rewards. The number of elements is num_samples_for_results.
+
+        """
+        scores = []
 
         for idx in range(self.num_samples_for_results):
             if idx == self.num_samples_for_results - 1:
                 save_results = True
             else:
                 save_results = False
+
             score = 0
 
             observations, info = self.env.reset()
             self.history = History(self.history_block_size)
-            self.history.add_block(observations["room"])
 
             while True:
-                actions_qa = self.history.answer_questions(observations["questions"])
-                state = {"data": self.history.to_list()}
-
-                if save_results:
-                    states.append(deepcopy(state))
-
-                action_explore, q_values_ = select_action(
-                    state=state,
-                    greedy=True,
-                    dqn=self.dqn,
-                    epsilon=self.epsilon,
-                    action_space=self.action_space,
+                reward, done, observations = self.step(
+                    observations=observations,
+                    is_train_val_test=val_or_test,
+                    states_buffer=None,
+                    actions_buffer=None,
+                    values_buffer=None,
+                    log_probs_buffer=None,
+                    append_states_actions_probs_values=save_results,
+                    append_states=save_results,
                 )
-                if save_results:
-                    q_values.append(q_values_)
-                    actions.append(action_explore)
-                    self.q_values[val_or_test].append(q_values_)
 
-                action_pair = (actions_qa, self.action2str[action_explore])
-                (
-                    observations,
-                    reward,
-                    done,
-                    truncated,
-                    info,
-                ) = self.env.step(action_pair)
                 score += reward
-                done = done or truncated
 
                 if done:
                     break
 
-                self.history.add_block(observations["room"])
+            scores.append(score)
 
-            scores_temp.append(score)
-
-        return scores_temp, states, q_values, actions
+        return scores
 
     def validate(self) -> None:
-        self.dqn.eval()
-        scores_temp, states, q_values, actions = self.validate_test_middle("val")
+        """Validate the agent."""
+        self.actor.eval()
+        self.critic.eval()
+
+        scores = self.validate_test_middle("val")
 
         save_validation(
-            scores_temp=scores_temp,
-            scores=self.scores,
+            scores=scores,
+            scores_all_val=self.scores_all["val"],
             default_root_dir=self.default_root_dir,
             num_validation=self.num_validation,
             val_filenames=self.val_filenames,
-            dqn=self.dqn,
+            actor=self.actor,
+            critic=self.critic,
         )
-        save_states_q_values_actions(
-            states, q_values, actions, self.default_root_dir, "val", self.num_validation
+
+        start = self.num_validation * self.num_steps_in_episode
+        end = (self.num_validation + 1) * self.num_steps_in_episode
+
+        save_states_actions_probs_values(
+            self.states_all["val"][start:end],
+            self.actions_all["val"][start:end],
+            self.actor_probs_all["val"][start:end],
+            self.critic_values_all["val"][start:end],
+            self.default_root_dir,
+            "val",
+            self.num_validation,
         )
+
         self.env.close()
         self.num_validation += 1
-        self.dqn.train()
+        self.actor.train()
+        self.critic.train()
 
     def test(self, checkpoint: str = None) -> None:
-        self.dqn.eval()
         self.env_config["seed"] = self.test_seed
         self.env = gym.make(self.env_str, **self.env_config)
+        self.actor.eval()
+        self.critic.eval()
 
         assert len(self.val_filenames) == 1
-        self.dqn.load_state_dict(torch.load(self.val_filenames[0]))
+        self.actor.load_state_dict(
+            torch.load(os.path.join(self.val_filenames[0], "actor.pt"))
+        )
+        self.critic.load_state_dict(
+            torch.load(os.path.join(self.val_filenames[0], "critic.pt"))
+        )
         if checkpoint is not None:
-            self.dqn.load_state_dict(torch.load(checkpoint))
+            self.actor.load_state_dict(os.path.join(torch.load(checkpoint), "actor.pt"))
+            self.critic.load_state_dict(
+                os.path.join(torch.load(checkpoint), "critic.pt")
+            )
 
-        scores, states, q_values, actions = self.validate_test_middle("test")
-        self.scores["test"] = scores
+        scores = self.validate_test_middle("test")
+
+        self.scores_all["test"] = scores
+
+        save_states_actions_probs_values(
+            self.states_all["test"],
+            self.actions_all["test"],
+            self.actor_probs_all["test"],
+            self.critic_values_all["test"],
+            self.default_root_dir,
+            "test",
+        )
 
         save_final_results(
-            self.scores, self.training_loss, self.default_root_dir, self.q_values, self
-        )
-        save_states_q_values_actions(
-            states, q_values, actions, self.default_root_dir, "test"
+            self.scores_all,
+            self.actor_losses,
+            self.critic_losses,
+            self.default_root_dir,
+            self,
         )
 
-        self.plot_results("all", save_fig=True)
+        self.plot_results("all", True)
         self.env.close()
-        self.dqn.train()
+        self.actor.train()
+        self.critic.train()
 
     def plot_results(self, to_plot: str = "all", save_fig: bool = False) -> None:
-        """Plot things for DQN training.
+        """Plot things for ppo training.
 
         Args:
             to_plot: what to plot:
-                training_td_loss
-                epsilons
-                training_score
-                validation_score
-                test_score
-                q_values_train
-                q_values_val
-                q_values_test
+                all: everything
+                actor_loss: actor loss
+                critic_loss: critic loss
+                scores: train, val, and test scores
+                actor_probs_train: actor probabilities for training
+                actor_probs_val: actor probabilities for validation
+                actor_probs_test: actor probabilities for test
+                critic_values_train: critic values for training
+                critic_values_val: critic values for validation
+                critic_values_test: critic values for test
 
         """
         plot_results(
-            self.scores,
-            self.training_loss,
-            self.epsilons,
-            self.q_values,
-            self.iteration_idx,
-            self.action_space.n.item(),
-            self.num_iterations,
-            self.env.unwrapped.total_maximum_episode_rewards,
+            self.scores_all,
+            self.actor_losses,
+            self.critic_losses,
+            self.actor_probs_all,
+            self.critic_values_all,
             self.num_validation,
-            self.num_samples_for_results,
+            self.action_space.n.item(),
+            self.num_episodes,
+            self.total_maximum_episode_rewards,
             self.default_root_dir,
             to_plot,
             save_fig,

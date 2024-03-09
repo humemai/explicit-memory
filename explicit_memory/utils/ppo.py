@@ -73,8 +73,8 @@ def select_action(
 
     Returns:
         selected_action: the action to take.
-        actor_probs: the actor probabilities.
-        critic_value: the critic values.
+        actor_probs: the actor probabilities over actions.
+        critic_value: the critic value
 
     """
     action, dist = actor(np.array([state]))  # [state] is to add a dummy batch dimension
@@ -90,6 +90,7 @@ def select_action(
 
     value = critic(np.array([state]))
 
+    # Save the states, actions, values, and log_probs in buffer for training
     if not is_test:
         states.append(deepcopy(state))
         actions.append(selected_action)
@@ -106,7 +107,30 @@ def select_action(
 def compute_gae(
     next_value: list, rewards: list, masks: list, values: list, gamma: float, tau: float
 ) -> list:
-    """Compute gae."""
+    """Compute GAE.
+
+    High gamma: Places more emphasis on future rewards, making the agent more
+        far-sighted.
+    Low gamma: Prioritizes immediate rewards, making the agent more short-sighted.
+    High tau (lambda in the original paper): Produces smoother, more stable advantage
+        estimates but with potentially higher bias. It might integrate the advantage
+        over many future steps more strongly.
+    Low tau (lambda in the original paper): Results in advantage estimates that are
+        less smoothed, potentially higher variance but lower bias, focusing more on
+        immediate temporal difference errors.
+
+    Args:
+        next_value: the next value.
+        rewards: a list of rewards.
+        masks: a list of masks.
+        values: a list of values.
+        gamma: the discount factor.
+        tau: the GAE parameter.
+
+    Returns:
+        returns: a list of adjusted returns.
+
+    """
     values = values + [next_value]
     gae = 0
     returns: deque[float] = deque()
@@ -115,6 +139,7 @@ def compute_gae(
         delta = rewards[step] + gamma * values[step + 1] * masks[step] - values[step]
         gae = delta + gamma * tau * masks[step] * gae
         returns.appendleft(gae + values[step])
+
     return list(returns)
 
 
@@ -244,7 +269,6 @@ def update_model(
 
         # actor_loss
         surr_loss = ratio * adv
-        # print(f"surr_loss={surr_loss}")
         clipped_surr_loss = torch.clamp(ratio, 1.0 - epsilon, 1.0 + epsilon) * adv
 
         # entropy
@@ -421,18 +445,19 @@ def plot_results(
         plt.subplot(331)
         plt.title("Actor losses")
         plt.plot(actor_losses)
-        plt.xlabel("update counts")
+        plt.xlabel("number of rollouts")
 
         plt.subplot(332)
         plt.title("Critic losses")
         plt.plot(critic_losses)
-        plt.xlabel("update counts")
+        plt.xlabel("number of rollouts")
 
         plt.subplot(333)
         if scores_all["train"]:
             plt.title(
                 f"episode {num_validation} out of {num_episodes} episodes. "
-                f"training score: {scores_all['train'][-1]} out of {total_maximum_episode_rewards}"
+                f"training score: {scores_all['train'][-1]} out of "
+                f"{total_maximum_episode_rewards}"
             )
             plt.plot(scores_all["train"], label="Training score")
             plt.xlabel("episode num")
@@ -440,14 +465,16 @@ def plot_results(
         if scores_all["val"]:
             val_means = [round(np.mean(scores).item()) for scores in scores_all["val"]]
             plt.title(
-                f"validation score: {val_means[-1]} out of {total_maximum_episode_rewards}"
+                f"validation score: {val_means[-1]} out of "
+                f"{total_maximum_episode_rewards}"
             )
             plt.plot(val_means, label="Validation score")
             plt.xlabel("episode num")
 
         if scores_all["test"]:
             plt.title(
-                f"test score: {np.mean(scores_all['test'])} out of {total_maximum_episode_rewards}"
+                f"test score: {np.mean(scores_all['test'])} out of "
+                f"{total_maximum_episode_rewards}"
             )
             plt.plot(
                 [round(np.mean(scores_all["test"]).item(), 2)]
@@ -516,13 +543,13 @@ def plot_results(
         plt.figure()
         plt.title("Actor losses")
         plt.plot(actor_losses)
-        plt.xlabel("update counts")
+        plt.xlabel("number of rollouts")
 
     elif to_plot == "critic_loss":
         plt.figure()
         plt.title("Critic losses")
         plt.plot(critic_losses)
-        plt.xlabel("update counts")
+        plt.xlabel("number of rollouts")
 
     elif to_plot == "scores":
         plt.figure()
@@ -530,7 +557,8 @@ def plot_results(
         if scores_all["train"]:
             plt.title(
                 f"episode {num_validation} out of {num_episodes}. "
-                f"training score: {scores_all['train'][-1]} out of {total_maximum_episode_rewards}"
+                f"training score: {scores_all['train'][-1]} out of "
+                f"{total_maximum_episode_rewards}"
             )
             plt.plot(scores_all["train"], label="Training score")
             plt.xlabel("episode num")
@@ -538,14 +566,16 @@ def plot_results(
         if scores_all["val"]:
             val_means = [round(np.mean(scores).item()) for scores in scores_all["val"]]
             plt.title(
-                f"validation score: {val_means[-1]} out of {total_maximum_episode_rewards}"
+                f"validation score: {val_means[-1]} out of "
+                f"{total_maximum_episode_rewards}"
             )
             plt.plot(val_means, label="Validation score")
             plt.xlabel("episode num")
 
         if scores_all["test"]:
             plt.title(
-                f"test score: {np.mean(scores_all['test'])} out of {total_maximum_episode_rewards}"
+                f"test score: {np.mean(scores_all['test'])} out of "
+                f"{total_maximum_episode_rewards}"
             )
             plt.plot(
                 [round(np.mean(scores_all["test"]).item(), 2)]
@@ -635,7 +665,8 @@ def console(
 
     if scores_all["test"]:
         tqdm.write(
-            f"test score: {np.mean(scores_all['test'])} out of {total_maximum_episode_rewards}"
+            f"test score: {np.mean(scores_all['test'])} out of "
+            f"{total_maximum_episode_rewards}"
         )
     if actor_losses:
         tqdm.write(f"actor training loss: {actor_losses[-1]}")

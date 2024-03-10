@@ -38,7 +38,7 @@ class PPOAgent(HandcraftedAgent):
         epoch_per_rollout: int = 64,
         batch_size: int = 128,
         gamma: float = 0.9,
-        tau: float = 0.8,
+        lam: float = 0.8,
         epsilon: float = 0.2,
         entropy_weight: float = 0.005,
         capacity: dict = {
@@ -96,7 +96,7 @@ class PPOAgent(HandcraftedAgent):
             epoch_per_rollout: number of epochs per rollout
             batch_size: batch size
             gamma: discount factor
-            tau: GAE parameter
+            lam: GAE lambda parameter
             epsilon: PPO clip parameter
             entropy_weight: entropy weight
             capacity: The capacity of each human-like memory systems
@@ -161,7 +161,7 @@ class PPOAgent(HandcraftedAgent):
         self.epoch_per_rollout = epoch_per_rollout
         self.batch_size = batch_size
         self.gamma = gamma
-        self.tau = tau
+        self.lam = lam
         self.epsilon = epsilon
         self.entropy_weight = entropy_weight
 

@@ -1,4 +1,5 @@
 """Handcrafted Agent for the RoomEnv2 environment."""
+
 import datetime
 import os
 import shutil
@@ -9,10 +10,18 @@ import numpy as np
 from IPython.display import clear_output
 from tqdm.auto import tqdm, trange
 
-from explicit_memory.memory import (EpisodicMemory, MemorySystems,
-                                    SemanticMemory, ShortMemory)
-from explicit_memory.policy import (answer_question, encode_observation,
-                                    explore, manage_memory)
+from explicit_memory.memory import (
+    EpisodicMemory,
+    MemorySystems,
+    SemanticMemory,
+    ShortMemory,
+)
+from explicit_memory.policy import (
+    answer_question,
+    encode_observation,
+    explore,
+    manage_memory,
+)
 from explicit_memory.utils import write_yaml
 
 
@@ -124,15 +133,17 @@ class HandcraftedAgent:
             observations: The observations["room"] from the environment.
 
         Returns:
-            observations_others: The observations["room"] - (episodic_agent and semantic_map
-                memories) from the environment.
+            observations_others: The observations["room"] - (episodic_agent and
+                semantic_map memories) from the environment.
 
         """
         if hasattr(self.memory_systems, "episodic_agent"):
             observations_agent = [obs for obs in observations if obs[0] == "agent"]
             for obs in observations_agent:
                 encode_observation(self.memory_systems, obs)
-                manage_memory(self.memory_systems, "episodic_agent", False)
+                manage_memory(
+                    self.memory_systems, "episodic_agent", split_possessive=False
+                )
 
         else:
             observations_agent = []
@@ -146,7 +157,9 @@ class HandcraftedAgent:
 
             for obs in observations_map:
                 encode_observation(self.memory_systems, obs)
-                manage_memory(self.memory_systems, "semantic_map", True)
+                manage_memory(
+                    self.memory_systems, "semantic_map", split_possessive=True
+                )
 
         else:
             observations_map = []

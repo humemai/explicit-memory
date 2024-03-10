@@ -27,13 +27,6 @@ from explicit_memory.utils.ppo import (
     save_states_actions_probs_values,
 )
 
-from explicit_memory.policy import (
-    answer_question,
-    encode_observation,
-    explore,
-    manage_memory,
-)
-
 
 def init_layer_uniform(layer: nn.Linear, init_w: float = 3e-3) -> None:
     """Init uniform parameters on the single layer."""
@@ -440,7 +433,7 @@ class PPOLSTMBaselineAgent:
         epoch_per_rollout: int = 64,
         batch_size: int = 128,
         gamma: float = 0.9,
-        tau: float = 0.8,
+        lam: float = 0.8,
         epsilon: float = 0.2,
         entropy_weight: float = 0.005,
         history_block_size: int = 6,
@@ -482,7 +475,7 @@ class PPOLSTMBaselineAgent:
             epoch_per_rollout: Epochs per rollout.
             batch_size: Batch size.
             gamma: Gamma. Discount factor.
-            tau: Tau. GAE parameter.
+            lam: GAE lambda parameter.
             epsilon: Epsilon. Clipping parameter.
             entropy_weight: Entropy weight.
             history_block_size: The number of blocks for history
@@ -539,7 +532,7 @@ class PPOLSTMBaselineAgent:
         self.epoch_per_rollout = epoch_per_rollout
         self.batch_size = batch_size
         self.gamma = gamma
-        self.tau = tau
+        self.lam = lam
         self.epsilon = epsilon
         self.entropy_weight = entropy_weight
 
@@ -805,8 +798,13 @@ class PPOLSTMBaselineAgent:
                     new_episode_starts = False
 
             # this block is important. We have to get the next_state
+            history_original = deepcopy(self.history)
             self.history.add_block(observations["room"])
             next_state = {"data": self.history.to_list()}
+
+            # we have to reset the history to the original one after next_state is
+            # computed
+            self.history = history_original
 
             actor_loss, critic_loss = update_model(
                 next_state,
@@ -817,7 +815,7 @@ class PPOLSTMBaselineAgent:
                 masks_buffer,
                 log_probs_buffer,
                 self.gamma,
-                self.tau,
+                self.lam,
                 self.epoch_per_rollout,
                 self.batch_size,
                 self.epsilon,

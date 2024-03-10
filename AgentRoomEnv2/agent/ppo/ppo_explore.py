@@ -38,7 +38,7 @@ class PPOExploreAgent(PPOAgent):
         epoch_per_rollout: int = 64,
         batch_size: int = 128,
         gamma: float = 0.9,
-        tau: float = 0.8,
+        lam: float = 0.8,
         epsilon: float = 0.2,
         entropy_weight: float = 0.005,
         capacity: dict = {
@@ -101,7 +101,7 @@ class PPOExploreAgent(PPOAgent):
             epoch_per_rollout: number of epochs per rollout
             batch_size: batch size
             gamma: discount factor
-            tau: GAE parameter
+            lam: GAE lambda parameter
             epsilon: PPO clip parameter
             entropy_weight: entropy weight
             capacity: The capacity of each human-like memory systems
@@ -235,6 +235,24 @@ class PPOExploreAgent(PPOAgent):
 
         return np.mean(scores).item(), np.std(scores).item()
 
+    def encode_all_observations(self, observations_room: list) -> None:
+        """Encode all observations.
+
+        Args:
+            observations_room: observations in the room
+
+        """
+        observations_ = self.manage_agent_and_map_memory(observations_room)
+        for obs in observations_:
+            encode_observation(self.memory_systems, obs)
+            manage_memory(
+                memory_systems=self.memory_systems,
+                policy=self.mm_policy,
+                mm_policy_model=self.mm_policy_model,
+                mm_policy_model_type="actor",
+                split_possessive=False,
+            )
+
     def step(
         self,
         observations: dict,
@@ -260,16 +278,7 @@ class PPOExploreAgent(PPOAgent):
             append_states: whether to append states, to save them later
 
         """
-        observations_ = self.manage_agent_and_map_memory(observations["room"])
-        for obs in observations_:
-            encode_observation(self.memory_systems, obs)
-            manage_memory(
-                memory_systems=self.memory_systems,
-                policy=self.mm_policy,
-                mm_policy_model=self.mm_policy_model,
-                mm_policy_model_type="actor",
-                split_possessive=False,
-            )
+        self.encode_all_observations(observations["room"])
 
         state = self.memory_systems.return_as_a_dict_list()
 
@@ -368,17 +377,13 @@ class PPOExploreAgent(PPOAgent):
                     new_episode_starts = False
 
             # this block is important. We have to get the next_state
-            observations_ = self.manage_agent_and_map_memory(observations["room"])
-            for obs in observations_:
-                encode_observation(self.memory_systems, obs)
-                manage_memory(
-                    memory_systems=self.memory_systems,
-                    policy=self.mm_policy,
-                    mm_policy_model=self.mm_policy_model,
-                    mm_policy_model_type="actor",
-                    split_possessive=False,
-                )
+            memory_systems_original = deepcopy(self.memory_systems)
+            self.encode_all_observations(observations["room"])
             next_state = self.memory_systems.return_as_a_dict_list()
+
+            # we have to restore the memory systems to the original state after
+            # next_state is calculated.
+            self.memory_systems = memory_systems_original
 
             actor_loss, critic_loss = update_model(
                 next_state,
@@ -389,7 +394,7 @@ class PPOExploreAgent(PPOAgent):
                 masks_buffer,
                 log_probs_buffer,
                 self.gamma,
-                self.tau,
+                self.lam,
                 self.epoch_per_rollout,
                 self.batch_size,
                 self.epsilon,

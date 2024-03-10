@@ -4,7 +4,7 @@ num_rollouts: 50
 epoch_per_rollout: 32
 batch_size: 64
 gamma: 0.698904384296727
-tau: 0.928046136392738
+lam: 0.928046136392738
 epsilon: 0.24570973765644039
 entropy_weight: 0.06654810999562656
 capacity:

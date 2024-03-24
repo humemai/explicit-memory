@@ -21,7 +21,7 @@ This agent was featured in the paper ["Capturing Dynamic Knowledge Graphs with H
 
 ## pdoc documentation
 
-https://tae898.github.io/explicit-memory-private
+https://humemai.github.io/explicit-memory
 
 ## Contributing
 

@@ -1,2 +1,0 @@
-room-env==1.0.2
-pytorch-lightning==1.7.7

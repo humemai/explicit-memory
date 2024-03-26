@@ -35,10 +35,10 @@ jobs:
       - name: Upgrade pip and build dependencies
         run: |
           python -m pip install --upgrade pip setuptools wheel gymnasium pdoc matplotlib IPython pandas scikit-learn
-      - name: install room-env
-        run: |
-          python -m pip install git+https://github.com/tae898/room-env-private@main
-      - name: Install explicit-memory
+      # - name: install room-env
+      #   run: |
+      #     python -m pip install git+https://github.com/tae898/room-env-private@main
+      - name: Install humemai
         run: |
           python -m pip install -e .
       - name: Create output dir
@@ -47,7 +47,7 @@ jobs:
           mkdir _docs
       - name: Build documentation
         run: |
-          python -m pdoc -d google -o _docs/ humemai AgentRoomEnv0/agent.py AgentRoomEnv1/agent AgentRoomEnv2/agent
+          python -m pdoc -d google -o _docs/ humemai
       - uses: actions/upload-pages-artifact@v2
         with:
           path: "./_docs/"

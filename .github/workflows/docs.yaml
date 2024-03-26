@@ -37,7 +37,7 @@ jobs:
           python -m pip install --upgrade pip setuptools wheel gymnasium pdoc matplotlib IPython pandas scikit-learn
       - name: Install humemai
         run: |
-          python -m pip install git+https://github.com/humemai/room-env@main
+          python -m pip install git+https://github.com/humemai/humemai@main
       - name: Create output dir
         run: |
           rm -rf _docs 

@@ -619,7 +619,7 @@ class EpisodicMemoryRemoveDuplicatesTest(unittest.TestCase):
 
         latest = self.memory.get_latest_memory()
         self.assertEqual(latest, ["foo", "bar", "baz", 4])
-        # latest[-1] = 1234 
+        # latest[-1] = 1234
         self.assertEqual(
             self.memory.entries,
             [

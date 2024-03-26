@@ -12,14 +12,17 @@ papers](#list-of-academic-papers-that-use-humemai) and
 ## List of academic papers that use HumemAI
 
 - ["A Machine With Human-Like Memory Systems"](https://arxiv.org/abs/2204.01611).
-- ["A Machine with Short-Term, Episodic, and Semantic Memory Systems"](https://doi.org/10.1609/aaai.v37i1.25075).
-- ["Capturing Dynamic Knowledge Graphs with Human-like Memory Systems by Reinforcement Learning"]().
+- ["A Machine with Short-Term, Episodic, and Semantic Memory
+  Systems"](https://doi.org/10.1609/aaai.v37i1.25075).
+- ["Capturing Dynamic Knowledge Graphs with Human-like Memory Systems by Reinforcement
+  Learning"]().
 
 ## List of applications that use HumemAI
 
 ## pdoc documentation
 
-Click on [this link](https://humemai.github.io/humemai) to the thorough documentation of this package.
+Click on [this link](https://humemai.github.io/humemai) to see the HTML rendered
+docstrings
 
 ## Contributing
 

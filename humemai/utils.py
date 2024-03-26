@@ -213,7 +213,7 @@ def list_duplicates_of(seq, item) -> list:
     return locs
 
 
-def rename_training_dirs(root_dir: str = "./training_results/"):
+def rename_training_dirs(root_dir: str = "./training-results/"):
     old_dirs = []
     new_dirs = []
     for foo in glob(os.path.join(root_dir, "*")):
@@ -235,7 +235,7 @@ def rename_training_dirs(root_dir: str = "./training_results/"):
         seed = hparams["seed"]
 
         new_dir = (
-            f"training_results/"
+            f"training-results/"
             f"allow_random_human={allow_random_human}_"
             f"allow_random_question={allow_random_question}_"
             f"pretrain_semantic={pretrain_semantic}_"

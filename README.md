@@ -1,35 +1,35 @@
-# explicit-memory
+# humemai
 
-[![DOI](https://zenodo.org/badge/411241603.svg)](https://zenodo.org/badge/latestdoi/411241603)
+[![DOI](https://zenodo.org/badge/614376180.svg)](https://zenodo.org/doi/10.5281/zenodo.10876440)
 
-This repo hosts several (RL) agents that learn their policies by interacting with the
-[gymnasium](https://gymnasium.farama.org/) environments.
+This repo hosts a package `humemai`, a human-like memory systems that are modeled with
+knowledge knoweldge graphs (KGs). At the moment they are nothing but a Python list of
+quadruples, but soon it'll be a better object type so that they can be compatible with
+graph databases, e.g., GraphDB, Neo4j, etc. There have been both [academic
+papers](#list-of-academic-papers-that-use-humemai) and
+[applications](#list-of-applications-that-use-humemai) that have used this package.
 
-These agents all take advantage of have human-like external memory systems that are modeled with knowledge graphs.
+## List of academic papers that use HumemAI
 
-## [Click here for the agent for RoomEnv-v0](./AgentRoomEnv0/README.md)
+- ["A Machine With Human-Like Memory Systems"](https://arxiv.org/abs/2204.01611).
+- ["A Machine with Short-Term, Episodic, and Semantic Memory Systems"](https://doi.org/10.1609/aaai.v37i1.25075).
+- ["Capturing Dynamic Knowledge Graphs with Human-like Memory Systems by Reinforcement Learning"]().
 
-This agent was featured in the paper ["A Machine With Human-Like Memory Systems"](https://arxiv.org/abs/2204.01611).
-
-## [Click here for the agent for RoomEnv-v1](./AgentRoomEnv1/README.md)
-
-This agent was featured in the paper ["A Machine with Short-Term, Episodic, and Semantic Memory Systems"](https://doi.org/10.1609/aaai.v37i1.25075).
-
-## [Click here for the agent for RoomEnv-v2](./AgentRoomEnv2/README.md)
-
-This agent was featured in the paper ["Capturing Dynamic Knowledge Graphs with Human-like Memory Systems by Reinforcement Learning"]().
+## List of applications that use HumemAI
 
 ## pdoc documentation
 
-https://humemai.github.io/explicit-memory
+Click on [this link](https://humemai.github.io/humemai) to the thorough documentation of this package.
 
 ## Contributing
 
-Contributions are what make the open source community such an amazing place to be learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+Contributions are what make the open source community such an amazing place to be learn,
+inspire, and create. Any contributions you make are **greatly appreciated**.
 
 1. Fork the Project
 1. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-1. Run `make test && make style && make quality` in the root repo directory, to ensure code quality.
+1. Run `make test && make style && make quality` in the root repo directory, to ensure
+   code quality.
 1. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
 1. Push to the Branch (`git push origin feature/AmazingFeature`)
 1. Open a Pull Request

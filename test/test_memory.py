@@ -2,9 +2,7 @@ import itertools
 import random
 import unittest
 
-import numpy as np
-
-from explicit_memory.memory import *
+from humemai.memory import *
 
 
 class MemoryTest(unittest.TestCase):

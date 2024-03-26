@@ -21,9 +21,6 @@ jobs:
       - name: Upgrade pip and build dependencies
         run: |
           python -m pip install --upgrade pip setuptools wheel pytest
-      # - name: install room-env
-      #   run: |
-      #     python -m pip install git+https://github.com/humemai/room-env@main
       - name: Install humemai
         run: |
           python -m pip install git+https://github.com/humemai/humemai@main

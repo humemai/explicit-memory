@@ -909,7 +909,12 @@ class MemorySystems:
             self.short = short
 
     def return_as_a_dict_list(self) -> dict[str, list[list[str]]]:
-        """Return memory systems as a dictionary of lists."""
+        """Return memory systems as a dictionary of lists.
+
+        Returns:
+            to_return: a dictionary of lists. This is a  state is a list, which is a
+                mutable object. So, deepcopy it, if you want to keep the original state.
+        """
         to_return = {}
         if hasattr(self, "episodic"):
             to_return["episodic"] = self.episodic.return_as_list()

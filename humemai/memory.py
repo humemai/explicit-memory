@@ -17,28 +17,41 @@ logging.basicConfig(
 
 
 class Memory:
-    """Memory (episodic, semantic, or short) class"""
+    """Memory class.
 
-    def __init__(self, memory_type: str, capacity: int) -> None:
+    At the moment, the memory system is a simple Python list of memories. In the future,
+    a more suitable python object will be used to represent the graph structure of the
+    memories.
+
+    Attributes:
+        type: episodic, semantic, short, or working
+        entries: list of memories
+        capacity: memory capacity
+        _frozen: whether the memory system is frozen or not
+
+    """
+
+    def __init__(self, capacity: int, memories: list | None = None) -> None:
         """
 
         Args:
-            memory_type: episodic, semantic, or short
             capacity: memory capacity
+            memories: memories that can already be added from the beginning, if None,
+                then it's an empty memory system.
 
         """
-        logging.debug(
-            f"instantiating a {memory_type} memory object with size {capacity} ..."
-        )
+        logging.debug(f"instantiating a memory object with size {capacity} ...")
 
-        assert memory_type in ["episodic", "semantic", "short"]
-        self.type = memory_type
         self.entries = []
         self.capacity = capacity
         assert self.capacity >= 0
         self._frozen = False
 
-        logging.debug(f"{memory_type} memory object with size {capacity} instantiated!")
+        logging.debug(f"Memory systrem with size {capacity} instantiated!")
+
+        if memories is not None:
+            for mem in memories:
+                self.add(mem)
 
     def __repr__(self):
         return pformat(vars(self), indent=4, width=1)
@@ -64,6 +77,10 @@ class Memory:
             return False, "The memory system is full!"
 
         return True, ""
+
+    def __add__(self, other):
+        entries = self.entries + other.entries
+        return Memory(self.capacity + other.capacity, entries)
 
     def add(self, mem: list[str]) -> None:
         """Add memory to the memory system.
@@ -353,16 +370,24 @@ class Memory:
 class EpisodicMemory(Memory):
     """Episodic memory class."""
 
-    def __init__(self, capacity: int, remove_duplicates: bool = False) -> None:
+    def __init__(
+        self,
+        capacity: int,
+        memories: list | None = None,
+        remove_duplicates: bool = False,
+    ) -> None:
         """Init an episodic memory system.
 
         Args:
             capacity: capacity of the memory system (i.e., number of entries)
+            memories: memories that can already be added from the beginning, if None,
+                then it's an empty memory system.
             remove_duplicates: if True, it'll remove the same memories with the older
                 timestamps.
 
         """
-        super().__init__("episodic", capacity)
+        super().__init__(capacity, memories)
+        self.type = "episodic"
         self.remove_duplicates = remove_duplicates
 
     def add(self, mem: list[str]) -> None:
@@ -557,8 +582,9 @@ class EpisodicMemory(Memory):
 class ShortMemory(Memory):
     """Short-term memory class."""
 
-    def __init__(self, capacity: int) -> None:
-        super().__init__("short", capacity)
+    def __init__(self, capacity: int, memories: list | None = None) -> None:
+        super().__init__(capacity, memories)
+        self.type = "short"
 
     def get_oldest_memory(self) -> list:
         return self.get_first_memory()
@@ -635,7 +661,8 @@ class ShortMemory(Memory):
             split_possessive: whether to split the possessive, i.e., 's, or not.
 
         Returns:
-            sem: A semantic memory as a quadruple: [head, relation, tail, NUM_GENERALIZED]
+            sem: A semantic memory as a quadruple: [head, relation, tail,
+                NUM_GENERALIZED]
 
         """
         sem = short[:-1]
@@ -651,23 +678,24 @@ class ShortMemory(Memory):
 class SemanticMemory(Memory):
     """Semantic memory class."""
 
-    def __init__(
-        self,
-        capacity: int,
-    ) -> None:
+    def __init__(self, capacity: int, memories: list | None = None) -> None:
         """Init a semantic memory system.
 
         Args:
             capacity: capacity of the memory system (i.e., number of entries)
+            memories: memories that can already be added from the beginning, if None,
+                then it's an empty memory system.
 
         """
-        super().__init__("semantic", capacity)
+        super().__init__(capacity, memories)
+        self.type = "semantic"
 
     def can_be_added(self, mem: list[str]) -> bool:
         """Checks if a memory can be added to the system or not.
 
         Args:
-            mem: A semantic memory as a quadraple: [head, relation, tail, num_generalized]
+            mem: A semantic memory as a quadraple: [head, relation, tail,
+                num_generalized]
 
         Returns:
             True or False
@@ -876,6 +904,14 @@ class SemanticMemory(Memory):
         logging.debug(f"There are {len(self.entries)} episodic memories after cleaning")
 
 
+class WorkingMemory(Memory):
+    """Working memory class."""
+
+    def __init__(self, capacity: int, memories: list | None = None) -> None:
+        super().__init__(capacity)
+        self.type = "working"
+
+
 class MemorySystems:
     """Multiple memory systems class."""
 
@@ -908,12 +944,36 @@ class MemorySystems:
         if short is not None and short.capacity > 0:
             self.short = short
 
+    def get_working_memory(self, num_hops: int | str = "all") -> Memory:
+        """Get the working memory system.
+
+        The working memory system is defined as short-term memory + partial long-term
+            memory (episodic and semantic).
+
+        Args:
+            num_hops: number of hops to consider when fetching long-term memories
+            (episodic and semantic). If "all", then basically it's infinity, which
+            means all long-term memories will be considered.
+
+        Returns:
+            working_memory: the working memory system
+
+        """
+        if num_hops == "all":
+            return self.short + self.episodic + self.semantic
+        else:
+            raise NotImplementedError("Not implemented yet!")
+
     def return_as_a_dict_list(self) -> dict[str, list[list[str]]]:
         """Return memory systems as a dictionary of lists.
 
         Returns:
-            to_return: a dictionary of lists. This is a  state is a list, which is a
-                mutable object. So, deepcopy it, if you want to keep the original state.
+            to_return: a dictionary of lists. At the moment, memories are nothing but
+                python lists (lists of quadruples), which is a mutable object. So,
+                deepcopy it, if you want to keep the original state. In the future, a
+                more suitable python object will be used to represent the graph
+                structure of the memories.
+
         """
         to_return = {}
         if hasattr(self, "episodic"):

@@ -13,12 +13,12 @@ from .memory import EpisodicMemory, MemorySystems, SemanticMemory, ShortMemory
 from .utils import argmax
 
 
-def encode_observation(memory_systems: MemorySystems, obs: list[list]) -> None:
+def encode_observation(memory_systems: MemorySystems, obs: list[str | int]) -> None:
     """Non RL policy of encoding an observation into a short-term memory.
 
     At the moment, observation is the same as short-term memory. However, in the future
     we may want to encode the observation into a different format, e.g., when
-    observatio is in the pixel space.
+    observation is in the pixel space.
 
     Args:
         MemorySystems
@@ -27,6 +27,21 @@ def encode_observation(memory_systems: MemorySystems, obs: list[list]) -> None:
     """
     mem_short = ShortMemory.ob2short(obs)
     memory_systems.short.add(mem_short)
+
+
+def encode_all_observations(
+    memory_systems: MemorySystems, obs_multiple: list[list[str | int]]
+) -> None:
+    """Non RL policy of encoding all observations into short-term memories.
+
+    Args:
+        MemorySystems
+        obs_multiple: a list of observations
+
+    """
+    for obs in obs_multiple:
+        mem_short = ShortMemory.ob2short(obs)
+        memory_systems.short.add(mem_short)
 
 
 def find_agent_current_location(memory_systems: MemorySystems) -> str:

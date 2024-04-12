@@ -7,22 +7,18 @@ from humemai.memory import *
 
 class MemoryTest(unittest.TestCase):
     def setUp(self) -> None:
-        self.memory = Memory(memory_type="episodic", capacity=8)
-
-    def test_init(self):
-        with self.assertRaises(AssertionError):
-            foo = Memory(memory_type="foo", capacity=0)
+        self.memory = Memory(capacity=8)
 
     def test_can_be_added(self):
-        memory = Memory(memory_type="episodic", capacity=0)
+        memory = Memory(capacity=0)
         self.assertFalse(memory.can_be_added(["foo", "bar", "baz", 1])[0])
 
-        memory = Memory(memory_type="semantic", capacity=4)
+        memory = Memory(capacity=4)
         memory.freeze()
         self.assertFalse(memory.can_be_added(["foo", "bar", "baz", 1])[0])
 
         memory.unfreeze()
-        memory = Memory(memory_type="short", capacity=1)
+        memory = Memory(capacity=1)
         memory.add(["foo", "bar", "baz", 1])
         self.assertFalse(memory.can_be_added(["foo", "bar", "baz", 1])[0])
 
@@ -54,20 +50,20 @@ class MemoryTest(unittest.TestCase):
             self.memory.add(["foo", "bar", "baz", 9])
 
     def test_can_be_forgotten(self):
-        memory = Memory(memory_type="short", capacity=0)
+        memory = Memory(capacity=0)
         check, error_msg = memory.can_be_forgotten(["foo", "bar", "baz", 1])
         self.assertFalse(check)
 
-        memory = Memory(memory_type="semantic", capacity=4)
+        memory = Memory(capacity=4)
         check, error_msg = memory.can_be_forgotten(["foo", "bar", "baz", 1])
         self.assertFalse(check)
 
-        memory = Memory(memory_type="episodic", capacity=4)
+        memory = Memory(capacity=4)
         memory.freeze()
         check, error_msg = memory.can_be_forgotten(["foo", "bar", "baz", 1])
         self.assertFalse(check)
 
-        memory = Memory(memory_type="short", capacity=2)
+        memory = Memory(capacity=2)
         memory.add(["foo", "bar", "baz", 1])
         check, error_msg = memory.can_be_forgotten(["foo", "bar", "qux", 1])
         self.assertFalse(check)
@@ -102,7 +98,7 @@ class MemoryTest(unittest.TestCase):
         self.assertEqual(self.memory.size, 0)
         self.assertTrue(self.memory.is_empty)
 
-        memory = Memory("short", 0)
+        memory = Memory(0)
         with self.assertRaises(ValueError):
             memory.forget_all()
 

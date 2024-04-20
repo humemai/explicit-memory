@@ -1,11 +1,13 @@
 # humemai
 
 [![DOI](https://zenodo.org/badge/614376180.svg)](https://zenodo.org/doi/10.5281/zenodo.10876440)
+[![PyPI
+version](https://badge.fury.io/py/humemai.svg)](https://badge.fury.io/py/humemai)
 
 This repo hosts a package `humemai`, a human-like memory systems that are modeled with
 knowledge knoweldge graphs (KGs). At the moment they are nothing but a Python list of
 quadruples, but soon it'll be a better object type so that they can be compatible with
-graph databases, e.g., GraphDB, Neo4j, etc. There have been both [academic
+graph databases, e.g., RDFLib, GraphDB, Neo4j, etc. There have been both [academic
 papers](#list-of-academic-papers-that-use-humemai) and
 [applications](#list-of-applications-that-use-humemai) that have used this package.
 

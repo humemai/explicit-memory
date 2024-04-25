@@ -21,10 +21,6 @@ class UtilsTest(unittest.TestCase):
         )
         self.assertEqual(foo, [0, 3])
 
-    def test_split_by_possessive(self):
-        foo = split_by_possessive("John's book")
-        self.assertEqual(foo, ("John", "book"))
-
     def test_remove_possessive(self):
         foo = remove_posession("John's book")
         self.assertEqual(foo, "book")

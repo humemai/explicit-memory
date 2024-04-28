@@ -193,47 +193,6 @@ def list_duplicates_of(seq, item) -> list:
     return locs
 
 
-def rename_training_dirs(root_dir: str = "./training-results/"):
-    old_dirs = []
-    new_dirs = []
-    for foo in glob(os.path.join(root_dir, "*")):
-        bar = glob(os.path.join(foo, "*/*/*test*"))
-        if len(bar) == 0:
-            continue
-        bar = bar[0]
-        old_dir = "/".join(bar.split("/")[:-1])
-        old_dirs.append(old_dir)
-        hparams = read_yaml(os.path.join(old_dir, "hparams.yaml"))
-
-        allow_random_human = hparams["allow_random_human"]
-        allow_random_question = hparams["allow_random_question"]
-        pretrain_semantic = hparams["pretrain_semantic"]
-        varying_rewards = hparams["varying_rewards"]
-        capacity = hparams["capacity"]["episodic"] + hparams["capacity"]["semantic"]
-        question_prob = hparams["question_prob"]
-        des_size = hparams["des_size"]
-        seed = hparams["seed"]
-
-        new_dir = (
-            f"training-results/"
-            f"allow_random_human={allow_random_human}_"
-            f"allow_random_question={allow_random_question}_"
-            f"pretrain_semantic={pretrain_semantic}_"
-            f"varying_rewards={varying_rewards}_"
-            f"des_size={des_size}_"
-            f"capacity={capacity}_"
-            f"question_prob={question_prob}_"
-            f"seed={seed}"
-        )
-        new_dirs.append(new_dir)
-        os.rename(old_dir, new_dir)
-
-    for foo in glob(os.path.join(root_dir, "*/lightning_logs")):
-        if len(os.listdir(foo)) == 0:
-            dir_to_delete = os.path.dirname(foo)
-            shutil.rmtree(dir_to_delete)
-
-
 def is_running_notebook() -> bool:
     """See if the code is running in a notebook or not."""
     try:
@@ -246,42 +205,3 @@ def is_running_notebook() -> bool:
             return False  # Other type (?)
     except NameError:
         return False  # Probably standard Python interpreter
-
-
-def positional_encoding(
-    positions: int,
-    dimensions: int,
-    scaling_factor: float = 10000.0,
-    return_tensor: bool = False,
-) -> Union[np.ndarray, torch.Tensor]:
-    """
-    Generate sinusoidal positional encoding.
-
-    Parameters:
-    positions (int): The number of positions in the sequence.
-    dimensions (int): The dimension of the embedding vectors.
-    scaling_factor (float): The scaling factor used in the sinusoidal functions.
-    return_tensor (bool): If True, return a PyTorch tensor; otherwise, return a NumPy array.
-
-    Returns:
-    Union[np.ndarray, torch.Tensor]: A positional encoding in the form of either a NumPy array or a PyTorch tensor.
-    """
-    # Ensure the number of dimensions is even
-    assert dimensions % 2 == 0, "The dimension must be even."
-
-    # Initialize a matrix of position encodings with zeros
-    pos_enc = np.zeros((positions, dimensions))
-
-    # Compute the positional encodings
-    for pos in range(positions):
-        for i in range(0, dimensions, 2):
-            pos_enc[pos, i] = np.sin(pos / (scaling_factor ** ((2 * i) / dimensions)))
-            pos_enc[pos, i + 1] = np.cos(
-                pos / (scaling_factor ** ((2 * (i + 1)) / dimensions))
-            )
-
-    # Return as PyTorch tensor if requested
-    if return_tensor:
-        return torch.from_numpy(pos_enc)
-
-    return pos_enc

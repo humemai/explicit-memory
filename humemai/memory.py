@@ -7,7 +7,7 @@ from pprint import pformat
 
 import numpy as np
 
-from .utils import list_duplicates_of, remove_posession, remove_timestamp
+from .utils import list_duplicates_of, remove_timestamp
 
 logging.basicConfig(
     level=os.environ.get("LOGLEVEL", "INFO").upper(),
@@ -55,6 +55,9 @@ class Memory:
 
     def __repr__(self):
         return pformat(vars(self), indent=4, width=1)
+
+    def __iter__(self):
+        return iter(self.entries)
 
     def can_be_added(self, mem: list[str]) -> tuple[bool, str]:
         """Check if a memory can be added to the system or not.
@@ -507,15 +510,12 @@ class EpisodicMemory(Memory):
 
         logging.debug(f"There are {len(self.entries)} episodic memories after cleaning")
 
-    def find_similar_memories(self, split_possessive: bool = True) -> list:
+    def find_similar_memories(self) -> list:
         """Find N episodic memories that can be compressed into one semantic.
 
         At the moment, this is simply done by matching string values. If there are more
         than one group of similar episodic memories, it'll return the one with the
         largest number of memories.
-
-        Args:
-            split_possessive: whether to split the possessive, i.e., 's, or not.
 
         Returns:
             episodic_memories: similar episodic memories
@@ -529,11 +529,6 @@ class EpisodicMemory(Memory):
         semantic_possibles = [
             [e for e in remove_timestamp(entry)] for entry in self.entries
         ]
-
-        if split_possessive:
-            semantic_possibles = [
-                [remove_posession(e) for e in entry] for entry in semantic_possibles
-            ]
 
         semantic_possibles = [MARKER.join(elem) for elem in semantic_possibles]
 
@@ -653,12 +648,11 @@ class ShortMemory(Memory):
         return epi
 
     @staticmethod
-    def short2sem(short: list, split_possessive: bool = True) -> list:
+    def short2sem(short: list) -> list:
         """Turn a short memory into a semantic memory.
 
         Args:
             short: A short memory as a quadruple: [head, relation, tail, timestamp]
-            split_possessive: whether to split the possessive, i.e., 's, or not.
 
         Returns:
             sem: A semantic memory as a quadruple: [head, relation, tail,
@@ -666,10 +660,6 @@ class ShortMemory(Memory):
 
         """
         sem = short[:-1]
-
-        if split_possessive:
-            sem = [remove_posession(elem) for elem in sem]
-
         sem += [1]
 
         return sem
@@ -797,9 +787,7 @@ class SemanticMemory(Memory):
         self.forget(mem)
         logging.info(f"{mem} is forgotten!")
 
-    def answer_weakest(
-        self, query: list, split_possessive: bool = True
-    ) -> tuple[str, int]:
+    def answer_weakest(self, query: list) -> tuple[str, int]:
         """Answer the question with the strongest relevant memory.
 
         Args:
@@ -812,15 +800,10 @@ class SemanticMemory(Memory):
 
         """
         logging.debug("answering a question with the answer_strongest policy ...")
-
-        if split_possessive:
-            query = [remove_posession(e) for e in query[:-1]] + [query[-1]]
 
         return self.answer_with_smallest_num(query)
 
-    def answer_strongest(
-        self, query: list, split_possessive: bool = True
-    ) -> tuple[str, int]:
+    def answer_strongest(self, query: list) -> tuple[str, int]:
         """Answer the question with the strongest relevant memory.
 
         Args:
@@ -833,14 +816,11 @@ class SemanticMemory(Memory):
 
         """
         logging.debug("answering a question with the answer_strongest policy ...")
-
-        if split_possessive:
-            query = [remove_posession(e) for e in query[:-1]] + [query[-1]]
 
         return self.answer_with_largest_num(query)
 
     @staticmethod
-    def ob2sem(ob: list, split_possessive: bool = True) -> dict:
+    def ob2sem(ob: list) -> dict:
         """Turn an observation into a semantic memory.
 
         At the moment, this is simply done by removing the names from the head and the
@@ -848,7 +828,6 @@ class SemanticMemory(Memory):
 
         Args:
             ob: An observation as a quadruple: [head, relation, tail, timestamp]
-            split_possessive: whether to split the possessive, i.e., 's, or not.
 
         Returns:
             mem: A semantic memory as a quadruple: [head, relation, tail, timestamp]
@@ -857,15 +836,7 @@ class SemanticMemory(Memory):
 
         assert len(ob) == 4
         logging.debug(f"Turning an observation {ob} into a semantic memory ...")
-        # split to remove the name
-        if split_possessive:
-            head, relation, tail = (
-                remove_posession(ob[0]),
-                remove_posession(ob[1]),
-                remove_posession(ob[2]),
-            )
-        else:
-            head, relation, tail = ob[0], ob[1], ob[2]
+        head, relation, tail = ob[0], ob[1], ob[2]
 
         # 1 stands for the 1 generalized.
         mem = [head, relation, tail, 1]

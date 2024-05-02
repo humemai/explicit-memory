@@ -6,9 +6,6 @@ import logging
 import os
 import pickle
 import random
-import shutil
-from glob import glob
-from typing import Union
 
 import numpy as np
 import torch
@@ -38,19 +35,6 @@ def remove_timestamp(entry: list[str]) -> list:
     logging.info(f"Timestamp is removed from {entry}: {entry_without_timestamp}")
 
     return entry_without_timestamp
-
-
-def remove_posession(entity: str) -> str:
-    """Remove name from the entity.
-
-    Args:
-        entity: e.g., bob's laptop
-
-    Returns:
-        e.g., laptop
-
-    """
-    return entity.split("'s ")[-1]
 
 
 def seed_everything(seed: int) -> None:

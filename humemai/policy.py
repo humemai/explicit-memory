@@ -65,7 +65,7 @@ def find_agent_current_location(memory_systems: MemorySystems) -> str:
     if hasattr(memory_systems, "episodic"):
         mems = [
             mem
-            for mem in memory_systems.episodic.entries
+            for mem in memory_systems.episodic
             if mem[0] == "agent" and mem[1] == "atlocation"
         ]
         if len(mems) > 0:
@@ -75,7 +75,7 @@ def find_agent_current_location(memory_systems: MemorySystems) -> str:
     if hasattr(memory_systems, "semantic"):
         mems = [
             mem
-            for mem in memory_systems.semantic.entries
+            for mem in memory_systems.semantic
             if mem[0] == "agent" and mem[1] == "atlocation"
         ]
         if len(mems) > 0:
@@ -101,12 +101,12 @@ def find_visited_locations(
     if hasattr(memory_systems, "episodic_agent"):
         pair = [
             [mem[2], mem[3]]
-            for mem in memory_systems.episodic_agent.entries
+            for mem in memory_systems.episodic_agent
             if mem[1] == "atlocation"
         ]
         visited_locations["episodic"].append(pair)
 
-    for mem in memory_systems.episodic.entries:
+    for mem in memory_systems.episodic:
         if mem[0] == "agent" and mem[1] == "atlocation":
             pair = [mem[2], mem[3]]
             visited_locations["episodic"].append(pair)
@@ -114,7 +114,7 @@ def find_visited_locations(
     # ascending order
     sorted(visited_locations["episodic"], key=lambda x: x[1])
 
-    for mem in memory_systems.semantic.entries:
+    for mem in memory_systems.semantic:
         if mem[0] == "agent" and mem[1] == "atlocation":
             pair = [mem[2], mem[3]]
             visited_locations["semantic"].append(pair)
@@ -158,7 +158,7 @@ def explore(
         if hasattr(memory_systems, "semantic_map"):
             mems += [
                 mem
-                for mem in memory_systems.semantic_map.entries
+                for mem in memory_systems.semantic_map
                 if mem[0] == agent_current_location
                 and mem[1] in ["north", "east", "south", "west"]
             ]
@@ -167,7 +167,7 @@ def explore(
         if hasattr(memory_systems, "semantic"):
             mems += [
                 mem
-                for mem in memory_systems.semantic.entries
+                for mem in memory_systems.semantic
                 if mem[0] == agent_current_location
                 and mem[1] in ["north", "east", "south", "west"]
             ]
@@ -176,7 +176,7 @@ def explore(
         if hasattr(memory_systems, "episodic"):
             mems += [
                 mem
-                for mem in memory_systems.episodic.entries
+                for mem in memory_systems.episodic
                 if mem[0] == agent_current_location
                 and mem[1] in ["north", "east", "south", "west"]
             ]
@@ -241,7 +241,6 @@ def manage_memory(
     policy: str,
     mm_policy_model: torch.nn.Module | None = None,
     mm_policy_model_type: Literal["actor", "q_function"] | None = None,
-    split_possessive: bool = True,
 ) -> None:
     """Non RL memory management policy.
 
@@ -251,7 +250,6 @@ def manage_memory(
             "episodic_agent", or "semantic_map",
         mm_policy_model: a neural network model for memory management policy.
         mm_policy_model_type: depends wheter your RL algorithm used.
-        split_possessive: whether to split the possessive, i.e., 's, or not.
 
     """
     if mm_policy_model is not None:
@@ -272,9 +270,7 @@ def manage_memory(
             if memory_systems.semantic.is_full:
                 memory_systems.semantic.forget_weakest()
             mem_short = memory_systems.short.get_oldest_memory()
-            mem_sem = ShortMemory.short2sem(
-                mem_short, split_possessive=split_possessive
-            )
+            mem_sem = ShortMemory.short2sem(mem_short)
             memory_systems.semantic.add(mem_sem)
 
     assert not memory_systems.short.is_empty
@@ -307,9 +303,7 @@ def manage_memory(
             assert memory_systems.semantic_map.capacity > 0
             if memory_systems.semantic_map.is_full:
                 memory_systems.semantic_map.forget_weakest()
-            mem_sem = ShortMemory.short2sem(
-                mem_short, split_possessive=split_possessive
-            )
+            mem_sem = ShortMemory.short2sem(mem_short)
             memory_systems.semantic_map.add(mem_sem)
 
     elif policy.lower() == "episodic":
@@ -327,9 +321,7 @@ def manage_memory(
             and memory_systems.semantic.capacity != 0
         )
         if memory_systems.episodic.is_full:
-            mems_epi, mem_sem = memory_systems.episodic.find_similar_memories(
-                split_possessive=split_possessive,
-            )
+            mems_epi, mem_sem = memory_systems.episodic.find_similar_memories()
             if mems_epi is None and mem_sem is None:
                 memory_systems.episodic.forget_oldest()
             else:
@@ -397,7 +389,6 @@ def answer_question(
     memory_systems: MemorySystems,
     policy: str,
     question: list[str],
-    split_possessive: bool = True,
 ) -> str:
     """Non RL question answering policy.
 
@@ -406,7 +397,6 @@ def answer_question(
         qa_policy: "episodic_semantic", "semantic_episodic", "episodic", "semantic",
                 "random", or "neural",
         question: e.g., [laptop, atlocation, ?, current_time]
-        split_possessive: whether to split the possessive, i.e., 's, or not.
 
     Returns:
         pred: prediction
@@ -434,9 +424,7 @@ def answer_question(
         pred_epi = None
 
     if hasattr(memory_systems, "semantic"):
-        pred_sem, _ = memory_systems.semantic.answer_strongest(
-            question, split_possessive
-        )
+        pred_sem, _ = memory_systems.semantic.answer_strongest(question)
     else:
         pred_sem = None
 

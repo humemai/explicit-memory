@@ -57,7 +57,10 @@ class Memory:
         return pformat(vars(self), indent=4, width=1)
 
     def __iter__(self):
-        return iter(self.entries)
+        return iter(self.entries[:])
+
+    def __len__(self):
+        return len(self.entries)
 
     def can_be_added(self, mem: list[str]) -> tuple[bool, str]:
         """Check if a memory can be added to the system or not.
@@ -88,6 +91,8 @@ class Memory:
     def add(self, mem: list[str]) -> None:
         """Add memory to the memory system.
 
+        There is no sorting done. It's just appended to the end.
+
         Args:
            mem: A memory as a quadraple: [head, relation, tail, num]
 
@@ -103,9 +108,6 @@ class Memory:
             f"memory entry {mem} added. Now there are in total of "
             f"{len(self.entries)} memories!"
         )
-
-        # sort ascending
-        self.entries.sort(key=lambda x: x[-1])
 
     def can_be_forgotten(self, mem: list[str]) -> tuple[bool, str]:
         """Check if a memory can be added to the system or not.
@@ -396,11 +398,17 @@ class EpisodicMemory(Memory):
     def add(self, mem: list[str]) -> None:
         """Append a memory to the episodic memory system.
 
+        After adding, it'll sort (ascending) the memories based on the timestamps.
+
         Args:
             mem: An episodic memory as a quadraple: [head, relation, tail, timestamp]
 
         """
         super().add(mem)
+
+        # sort ascending
+        self.entries.sort(key=lambda x: x[-1])
+
         if self.remove_duplicates:
             self.clean_old_memories()
 
@@ -708,11 +716,18 @@ class SemanticMemory(Memory):
     def add(self, mem: dict):
         """Append a memory to the semantic memory system.
 
+        After adding, it'll sort (ascending) the memories based on the number of
+        generalized samples.
+
         Args:
             mem: A memory as a quadruple: [head, relation, tail, num_generalized]
 
         """
         super().add(mem)
+
+        # sort ascending
+        self.entries.sort(key=lambda x: x[-1])
+
         self.clean_same_memories()
 
     def pretrain_semantic(

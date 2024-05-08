@@ -39,6 +39,7 @@ def encode_all_observations(
         obs_multiple: a list of observations
 
     """
+    assert isinstance(obs_multiple, list), "obs_multiple should be a list."
     for obs in obs_multiple:
         mem_short = ShortMemory.ob2short(obs)
         memory_systems.short.add(mem_short)
@@ -239,6 +240,7 @@ def explore(
 def manage_memory(
     memory_systems: MemorySystems,
     policy: str,
+    mem_short: list | None = None,
     mm_policy_model: torch.nn.Module | None = None,
     mm_policy_model_type: Literal["actor", "q_function"] | None = None,
 ) -> None:
@@ -248,6 +250,8 @@ def manage_memory(
         MemorySystems
         policy: "episodic", "semantic", "generalize", "forget", "random", "neural",
             "episodic_agent", or "semantic_map",
+        mem_short: a short-term memory to be moved into a long-term memory. If None,
+            then the first element is used.
         mm_policy_model: a neural network model for memory management policy.
         mm_policy_model_type: depends wheter your RL algorithm used.
 
@@ -255,12 +259,13 @@ def manage_memory(
     if mm_policy_model is not None:
         assert mm_policy_model_type is not None
 
+    mem_short = memory_systems.short.entries[0] if mem_short is None else mem_short
+
     def action_number_0():
         if hasattr(memory_systems, "episodic"):
             assert memory_systems.episodic.capacity != 0
             if memory_systems.episodic.is_full:
                 memory_systems.episodic.forget_oldest()
-            mem_short = memory_systems.short.get_oldest_memory()
             mem_epi = ShortMemory.short2epi(mem_short)
             memory_systems.episodic.add(mem_epi)
 
@@ -269,7 +274,6 @@ def manage_memory(
             assert memory_systems.semantic.capacity != 0
             if memory_systems.semantic.is_full:
                 memory_systems.semantic.forget_weakest()
-            mem_short = memory_systems.short.get_oldest_memory()
             mem_sem = ShortMemory.short2sem(mem_short)
             memory_systems.semantic.add(mem_sem)
 
@@ -286,7 +290,6 @@ def manage_memory(
     ]
     if policy.lower() == "episodic_agent":
         if hasattr(memory_systems, "episodic_agent"):
-            mem_short = memory_systems.short.get_oldest_memory()
             if "agent" != mem_short[0]:
                 raise ValueError("This is not an agent location related memory!")
             assert memory_systems.episodic_agent.capacity > 0
@@ -297,7 +300,6 @@ def manage_memory(
 
     elif policy.lower() == "semantic_map":
         if hasattr(memory_systems, "semantic_map"):
-            mem_short = memory_systems.short.get_oldest_memory()
             if mem_short[1] not in ["north", "east", "south", "west"]:
                 raise ValueError("This is not a room-map-related memory.")
             assert memory_systems.semantic_map.capacity > 0
@@ -339,7 +341,6 @@ def manage_memory(
                         else:
                             pass
 
-        mem_short = memory_systems.short.get_oldest_memory()
         mem_epi = ShortMemory.short2epi(mem_short)
         memory_systems.episodic.add(mem_epi)
 
@@ -382,7 +383,7 @@ def manage_memory(
     else:
         raise ValueError
 
-    memory_systems.short.forget_oldest()
+    memory_systems.short.forget(mem_short)
 
 
 def answer_question(

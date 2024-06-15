@@ -1,17 +1,9 @@
 """Memory system classes."""
 
-import logging
-import os
 import random
 from pprint import pformat
 
 from .utils import merge_lists
-
-logging.basicConfig(
-    level=os.environ.get("LOGLEVEL", "INFO").upper(),
-    format="%(asctime)s.%(msecs)03d %(levelname)s %(module)s - %(funcName)s: %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-)
 
 
 class Memory:
@@ -38,20 +30,15 @@ class Memory:
                 then it's an empty memory system.
 
         """
-        logging.debug(f"instantiating a memory object with size {capacity} ...")
-
         self.entries = []
         self.capacity = capacity
         assert self.capacity >= 0
         self._frozen = False
 
-        logging.debug(f"Memory systrem with size {capacity} instantiated!")
-
         if memories is not None:
             for mem in memories:
                 check, error_msg = self.can_be_added(mem)
                 if not check:
-                    logging.warning(error_msg)
                     raise ValueError(error_msg)
                 else:
                     self.add(mem)
@@ -97,12 +84,7 @@ class Memory:
            mem: A memory as a quadraple: [head, relation, tail, num]
 
         """
-        logging.debug(f"Adding a new memory entry {mem} ...")
         self.entries.append(mem)
-        logging.info(
-            f"memory entry {mem} added. Now there are in total of "
-            f"{len(self.entries)} memories!"
-        )
 
     def can_be_forgotten(self, mem: list) -> tuple[bool, str]:
         """Check if a memory can be added to the system or not.
@@ -137,24 +119,19 @@ class Memory:
                 either a list of an int.
 
         """
-        logging.debug(f"Forgetting {mem} ...")
         self.entries.remove(mem)
-        logging.info(f"{mem} forgotten!")
 
     def forget_all(self) -> None:
         """Forget everything in the memory system!"""
         if self.capacity == 0:
             error_msg = "The memory system capacity is 0. Can't forget all."
-            logging.warning(error_msg)
             raise ValueError(error_msg)
 
         if self.is_frozen:
             error_msg = "The memory system is frozen. Can't forget all. Unfreeze first."
-            logging.warning(error_msg)
             raise ValueError(error_msg)
 
         else:
-            logging.warning("EVERYTHING IN THE MEMORY SYSTEM WILL BE FORGOTTEN!")
             self.entries = []
 
     def get_first_memory(self) -> None:
@@ -217,7 +194,6 @@ class Memory:
 
     def forget_random(self) -> None:
         """Forget a memory in the memory system in a uniform-randomly."""
-        logging.warning("forgetting a memory uniformly at random ...")
         mem = random.choice(self.entries)
         self.forget(mem)
 
@@ -229,12 +205,7 @@ class Memory:
 
         """
         assert isinstance(increase, int) and (not self.is_frozen)
-        logging.debug(f"Increasing the memory capacity by {increase} ...")
         self.capacity += increase
-        logging.info(
-            f"The memory capacity has been increased by {increase} and now it's "
-            f"{self.capacity}!"
-        )
 
     def decrease_capacity(self, decrease: int) -> None:
         """decrease the capacity.
@@ -248,12 +219,7 @@ class Memory:
             and (self.capacity - decrease >= 0)
             and (not self.is_frozen)
         )
-        logging.debug(f"Decreasing the memory capacity by {decrease} ...")
         self.capacity -= decrease
-        logging.info(
-            f"The memory capacity has been decreased by {decrease} and now it's "
-            f"{self.capacity}!"
-        )
 
     def return_as_list(self) -> list[list]:
         """Return the memories as a list of lists.
@@ -289,120 +255,6 @@ class Memory:
         return mems_found
 
 
-class EpisodicMemory(Memory):
-    """Episodic memory class.
-
-
-    Attributes:
-        type (str): episodic
-        entries (list): list of memories. Every memory is a quadruple: [head, relation,
-            tail, {"timestamp": []}]
-    """
-
-    def __init__(
-        self,
-        capacity: int,
-        memories: list[list] | None = None,
-    ) -> None:
-        """Init an episodic memory system.
-
-        Args:
-            capacity: capacity of the memory system (i.e., number of entries)
-            memories: memories that can already be added from the beginning, if None,
-                then it's an empty memory system.
-
-        """
-        super().__init__(capacity, memories)
-        self.type = "episodic"
-
-    def can_be_added(self, mem: list) -> tuple[bool, str | None]:
-        """Check if an episodic memory can be added to the system or not.
-
-        Args:
-            mem: A memory as a quadraple: [head, relation, tail, {"timestamp": []}]
-
-        Returns:
-            True or False error_msg
-
-        """
-        check, error_msg = super().can_be_added(mem)
-        if not check:
-            return check, error_msg
-
-        if list(mem[-1].keys())[0] != "timestamp":
-            return False, "The memory should have timestamp!"
-
-        if self.is_full:
-            for entry in self.entries:
-                if entry[:-1] == mem[:-1]:
-                    return True, None
-
-            return False, "The memory system is full!"
-
-        else:
-            return True, None
-
-    def add(self, mem: list) -> None:
-        """Append a memory to the episodic memory system.
-
-        After adding, it'll sort (ascending) the memories based on the timestamps.
-
-        Args:
-            mem: An episodic memory as a quadraple: [head, relation, tail, {"timestamp":
-            []}]
-
-        """
-        added = False
-        # Check if a list with the same first three elements exists
-        for mem_ in self.entries:
-            if mem_[:3] == mem[:3]:
-                # Merge the timestamp lists
-                mem_[3]["timestamp"] = sorted(
-                    set(mem_[3]["timestamp"] + mem[3]["timestamp"])
-                )
-                added = True
-
-        if not added:
-            super().add(mem)
-
-        # Define a helper function to get the max timestamp from the dict
-        def max_timestamp(sublist):
-            return max(sublist[3]["timestamp"])
-
-        # Sort the list based on the max timestamp, in ascending order
-        self.entries.sort(key=max_timestamp)
-
-    def get_oldest_memory(self) -> list:
-        return self.get_first_memory()
-
-    def get_latest_memory(self) -> list:
-        return self.get_last_memory()
-
-    def forget_oldest(self) -> None:
-        """Forget the oldest entry in the memory system.
-
-        At the moment, this is simply done by looking up the timestamps and comparing
-        them.
-
-        """
-        logging.debug("forgetting the oldest memory (FIFO)...")
-
-        mem = self.get_oldest_memory()
-        self.forget(mem)
-
-    def forget_latest(self) -> None:
-        """Forget the oldest entry in the memory system.
-
-        At the moment, this is simply done by looking up the timestamps and comparing
-        them.
-
-        """
-        logging.debug("forgetting the oldest memory (FIFO)...")
-
-        mem = self.get_latest_memory()
-        self.forget(mem)
-
-
 class ShortMemory(Memory):
     """Short-term memory class."""
 
@@ -424,11 +276,7 @@ class ShortMemory(Memory):
                 {"current_time": int}]
 
         """
-        logging.debug(f"Turning an observation {ob} into a short memory ...")
-
         mem = ob[:-1] + [{"current_time": ob[-1]}]
-
-        logging.info(f"Observation {ob} is now a short-term memory {mem}")
 
         return mem
 
@@ -448,7 +296,6 @@ class ShortMemory(Memory):
             [int]}]
 
         """
-        logging.debug(f"Turning a short memory {short} into an episodic memory ...")
         epi = short[:-1] + [{"timestamp": [short[-1]["current_time"]]}]
 
         return epi
@@ -466,10 +313,109 @@ class ShortMemory(Memory):
                 {"strength": int}]
 
         """
-        logging.debug(f"Turning a short memory {short} into a semantic memory ...")
         sem = short[:-1] + [{"strength": 1}]
 
         return sem
+
+
+class LongMemory(Memory):
+    """Long-term memory class."""
+
+    def __init__(self, capacity: int, memories: list[list] | None = None) -> None:
+        super().__init__(capacity, memories)
+        self.type = "long"
+
+    def can_be_added_as_episodic(self, mem: list) -> tuple[bool, str | None]:
+        """Check if a memory can be added as an episodic memory to the long-term
+        memory system.
+
+        Args:
+            mem: An episodic memory as a quadraple: [head, relation, tail, {"timestamp":
+            []}]
+
+        Returns:
+            True or False, error_msg
+
+        """
+        check, error_msg = super().can_be_added(mem)
+        if not check:
+            return check, error_msg
+
+        if list(mem[-1].keys())[0] != "timestamp":
+            return False, "The memory should have timestamp!"
+
+        if self.is_full:
+            for entry in self.entries:
+                if entry[:-1] == mem[:-1]:
+                    return True, None
+
+            return False, "The memory system is full!"
+
+        else:
+            return True, None
+
+    def add_as_episodic(self, mem: list) -> None:
+        """Append a memory as an episodic memory to the long-term memory system.
+
+        After adding, it'll sort (ascending) the memories based on the timestamps.
+
+        Args:
+            mem: An episodic memory as a quadraple: [head, relation, tail, {"timestamp":
+            []}]
+
+        """
+        assert self.can_be_added_as_episodic(mem)[0]
+        added = False
+        # Check if a list with the same first three elements exists
+        for entry in self.entries:
+            if entry[:-1] == mem[:-1] and "timestamp" in entry[-1]:
+                # Merge the timestamp lists
+                entry[-1]["timestamp"] = sorted(
+                    set(entry[-1]["timestamp"] + mem[-1]["timestamp"])
+                )
+                added = True
+
+        if not added:
+            super().add(mem)
+
+        # Define a helper function to get the max timestamp from the dict
+        def max_timestamp(sublist):
+            return max(sublist[-1]["timestamp"])
+
+        # Sort the list based on the max timestamp, in ascending order
+        self.entries.sort(key=max_timestamp)
+
+    def get_oldest_memory(self) -> list:
+        """Get the oldest memory in the memory system.
+
+        Returns:
+            mem: the oldest memory as a quadraple
+        """
+
+        return self.get_first_memory()
+
+    def get_latest_memory(self) -> list:
+        return self.get_last_memory()
+
+    def forget_oldest(self) -> None:
+        """Forget the oldest entry in the memory system.
+
+        At the moment, this is simply done by looking up the timestamps and comparing
+        them.
+
+        """
+        mem = self.get_oldest_memory()
+        self.forget(mem)
+
+    def forget_latest(self) -> None:
+        """Forget the oldest entry in the memory system.
+
+        At the moment, this is simply done by looking up the timestamps and comparing
+        them.
+
+        """
+        mem = self.get_latest_memory()
+        self.forget(mem)
 
 
 class SemanticMemory(Memory):
@@ -570,23 +516,17 @@ class SemanticMemory(Memory):
             if self.is_full:
                 break
             mem = [*triple, {"strength": 1}]  # num_generalized = 1
-            logging.debug(f"adding a pretrained semantic knowledge {mem}")
             self.add(mem)
 
         if return_remaining_space:
             free_space = self.capacity - len(self.entries)
             self.decrease_capacity(free_space)
-            logging.info(
-                f"The remaining space {free_space} will be returned. Now "
-                f"the capacity of the semantic memory system is {self.capacity}"
-            )
 
         else:
             free_space = None
 
         if freeze:
             self.freeze()
-            logging.info("The semantic memory system is frozen!")
 
         return free_space
 
@@ -603,17 +543,13 @@ class SemanticMemory(Memory):
         memories and comparing them.
 
         """
-        logging.debug("forgetting the weakest memory ...")
         mem = self.get_weakest_memory()
         self.forget(mem)
-        logging.info(f"{mem} is forgotten!")
 
     def forget_strongest(self) -> None:
         """Forget the strongest entry in the semantic memory system."""
-        logging.debug("forgetting the strongest memory ...")
         mem = self.get_strongest_memory()
         self.forget(mem)
-        logging.info(f"{mem} is forgotten!")
 
 
 class WorkingMemory:

@@ -1,5 +1,6 @@
 """Memory system classes."""
 
+from typing import Literal
 import random
 from pprint import pformat
 
@@ -230,30 +231,6 @@ class Memory:
         """
         return self.entries
 
-    def query_memory(self, mem_query: list) -> list[list]:
-        """Query memory.
-
-        Args:
-            mem_query: a quadruple, where each element can be "?". e.g.,
-                ["bob", "atlocation", "?", 42], ["?", "atlocation", "officeroom", 42]
-                "?" is used to match any value.
-
-        Returns:
-            mems_found: a list of memories that match the query
-
-
-        """
-        assert len(mem_query) == 4
-        mems_found = []
-        for mem in self.entries:
-            if (mem_query[0] == mem[0]) or (mem_query[0] == "?"):
-                if (mem_query[1] == mem[1]) or (mem_query[1] == "?"):
-                    if (mem_query[2] == mem[2]) or (mem_query[2] == "?"):
-                        if (mem_query[3] == mem[3]) or (mem_query[3] == "?"):
-                            mems_found.append(mem)
-
-        return mems_found
-
 
 class ShortMemory(Memory):
     """Short-term memory class."""
@@ -325,113 +302,92 @@ class LongMemory(Memory):
         super().__init__(capacity, memories)
         self.type = "long"
 
-    def can_be_added_as_episodic(self, mem: list) -> tuple[bool, str | None]:
-        """Check if a memory can be added as an episodic memory to the long-term
-        memory system.
+    # def sort_by_timestamp(self) -> None:
+    #     """Sort the memories based on the timestamps."""
 
-        Args:
-            mem: An episodic memory as a quadraple: [head, relation, tail, {"timestamp":
-            []}]
+    #     # Define a helper function to get the max timestamp from the dict
+    #     def max_timestamp(sublist):
+    #         return max(sublist[-1]["timestamp"])
 
-        Returns:
-            True or False, error_msg
+    #     # Sort the list based on the max timestamp, in ascending order
+    #     self.entries.sort(key=max_timestamp)
 
-        """
-        check, error_msg = super().can_be_added(mem)
-        if not check:
-            return check, error_msg
+    # def sort_by_strength(self) -> None:
+    #     """Sort the memories based on the strength."""
 
-        if list(mem[-1].keys())[0] != "timestamp":
-            return False, "The memory should have timestamp!"
+    #     # Define a helper function to get the max strength from the dict
+    #     def get_strength(sublist):
+    #         return sublist[-1]["strength"]
 
-        if self.is_full:
-            for entry in self.entries:
-                if entry[:-1] == mem[:-1]:
-                    return True, None
+    #     # Sort the list based on the strength, in ascending order
+    #     self.entries.sort(key=get_strength)
 
-            return False, "The memory system is full!"
+    # def get_oldest_memory(self) -> list:
+    #     """Get the oldest memory in the memory system.
 
-        else:
-            return True, None
+    #     Returns:
+    #         mem: the oldest memory as a quadraple
+    #     """
+    #     self.sort_by_timestamp()
 
-    def add_as_episodic(self, mem: list) -> None:
-        """Append a memory as an episodic memory to the long-term memory system.
+    #     return self.get_first_memory()
 
-        After adding, it'll sort (ascending) the memories based on the timestamps.
+    # def get_latest_memory(self) -> list:
+    #     """Get the latest memory in the memory system."""
+    #     self.sort_by_timestamp()
 
-        Args:
-            mem: An episodic memory as a quadraple: [head, relation, tail, {"timestamp":
-            []}]
+    #     return self.get_last_memory()
 
-        """
-        assert self.can_be_added_as_episodic(mem)[0]
-        added = False
-        # Check if a list with the same first three elements exists
-        for entry in self.entries:
-            if entry[:-1] == mem[:-1] and "timestamp" in entry[-1]:
-                # Merge the timestamp lists
-                entry[-1]["timestamp"] = sorted(
-                    set(entry[-1]["timestamp"] + mem[-1]["timestamp"])
-                )
-                added = True
+    # def get_weakest_memory(self) -> list:
+    #     """Get the weakest memory in the memory system."""
+    #     self.sort_by_strength()
 
-        if not added:
-            super().add(mem)
+    #     return self.get_first_memory()
 
-        # Define a helper function to get the max timestamp from the dict
-        def max_timestamp(sublist):
-            return max(sublist[-1]["timestamp"])
+    # def get_strongest_memory(self) -> list:
+    #     """Get the strongest memory in the memory system."""
+    #     self.sort_by_strength()
 
-        # Sort the list based on the max timestamp, in ascending order
-        self.entries.sort(key=max_timestamp)
+    #     return self.get_last_memory()
 
-    def get_oldest_memory(self) -> list:
-        """Get the oldest memory in the memory system.
+    # def forget_oldest(self) -> None:
+    #     """Forget the oldest entry in the memory system.
 
-        Returns:
-            mem: the oldest memory as a quadraple
-        """
+    #     At the moment, this is simply done by looking up the timestamps and comparing
+    #     them.
 
-        return self.get_first_memory()
+    #     """
+    #     mem = self.get_oldest_memory()
+    #     self.forget(mem)
 
-    def get_latest_memory(self) -> list:
-        return self.get_last_memory()
+    # def forget_latest(self) -> None:
+    #     """Forget the oldest entry in the memory system.
 
-    def forget_oldest(self) -> None:
-        """Forget the oldest entry in the memory system.
+    #     At the moment, this is simply done by looking up the timestamps and comparing
+    #     them.
 
-        At the moment, this is simply done by looking up the timestamps and comparing
-        them.
+    #     """
+    #     mem = self.get_latest_memory()
+    #     self.forget(mem)
 
-        """
-        mem = self.get_oldest_memory()
-        self.forget(mem)
+    # def forget_weakest(self) -> None:
+    #     """Forget the weakest entry in the memory system.
 
-    def forget_latest(self) -> None:
-        """Forget the oldest entry in the memory system.
+    #     At the moment, this is simply done by looking up the number of generalized
+    #     memories and comparing them.
 
-        At the moment, this is simply done by looking up the timestamps and comparing
-        them.
+    #     """
+    #     mem = self.get_weakest_memory()
+    #     self.forget(mem)
 
-        """
-        mem = self.get_latest_memory()
-        self.forget(mem)
+    # def forget_strongest(self) -> None:
+    #     """Forget the strongest entry in the memory system.
 
+    #     At the moment, this is simply done by looking up the number of generalized
 
-class SemanticMemory(Memory):
-    """Semantic memory class."""
-
-    def __init__(self, capacity: int, memories: list[list] | None = None) -> None:
-        """Init a semantic memory system.
-
-        Args:
-            capacity: capacity of the memory system (i.e., number of entries)
-            memories: memories that can already be added from the beginning, if None,
-                then it's an empty memory system.
-
-        """
-        super().__init__(capacity, memories)
-        self.type = "semantic"
+    #     """
+    #     mem = self.get_strongest_memory()
+    #     self.forget(mem)
 
     def can_be_added(self, mem: list) -> bool:
         """Checks if a memory can be added to the system or not.
@@ -461,53 +417,117 @@ class SemanticMemory(Memory):
         else:
             return True, None
 
-    def add(self, mem: list) -> None:
-        """Append a memory to the semantic memory system.
-
-        After adding, it'll sort (ascending) the memories based on the number of
-        generalized samples.
+    def can_be_added_as_episodic(self, mem: list) -> tuple[bool, str | None]:
+        """Check if a memory can be added as an episodic memory to the long-term
+        memory system.
 
         Args:
-            mem: A memory as a quadruple: [head, relation, tail, {"strength": int}]
+            mem: An episodic memory as a quadraple: [head, relation, tail, {"timestamp":
+            []}]
+
+        Returns:
+            True or False, error_msg
 
         """
+        check, error_msg = super().can_be_added(mem)
+        if not check:
+            return check, error_msg
+
+        if list(mem[-1].keys())[0] != "timestamp":
+            return False, "The memory should have timestamp!"
+
+        if self.is_full:
+            for entry in self.entries:
+                if entry[:-1] == mem[:-1]:
+                    return True, None
+
+            return False, "The memory system is full!"
+
+        else:
+            return True, None
+
+    def can_be_added_as_semantic(self, mem: list) -> tuple[bool, str | None]:
+        """Check if a memory can be added as a semantic memory to the long-term memory
+        system.
+
+        Args:
+            mem: A semantic memory as a quadraple: [head, relation, tail,
+                {"strength": int}]
+
+        Returns:
+            True or False, error_msg
+
+        """
+        check, error_msg = super().can_be_added(mem)
+        if not check:
+            return check, error_msg
+
+        if list(mem[-1].keys())[0] != "strength":
+            return False, "The memory should have strength!"
+
+        if self.is_full:
+            for entry in self.entries:
+                if entry[:-1] == mem[:-1]:
+                    return True, None
+
+            return False, "The memory system is full!"
+
+        else:
+            return True, None
+
+    def add_as_episodic(self, mem: list) -> None:
+        """Append a memory as an episodic memory to the long-term memory system.
+
+        Args:
+            mem: An episodic memory as a quadraple: [head, relation, tail, {"timestamp":
+            []}]
+
+        """
+        assert self.can_be_added_as_episodic(mem)[0]
         added = False
         # Check if a list with the same first three elements exists
-        for mem_ in self.entries:
-            if mem_[:3] == mem[:3]:
+        for entry in self.entries:
+            if entry[:-1] == mem[:-1] and "timestamp" in entry[-1]:
                 # Merge the timestamp lists
-                mem_[3]["strength"] = mem_[3]["strength"] + mem[3]["strength"]
+                entry[-1]["timestamp"] = sorted(
+                    set(entry[-1]["timestamp"] + mem[-1]["timestamp"])
+                )
                 added = True
 
         if not added:
             super().add(mem)
 
-        # Define a helper function to get the max strength from the dict
-        def get_strength(sublist):
-            return sublist[3]["strength"]
+    def add_as_semantic(self, mem: list) -> None:
+        """Append a memory as a semantic memory to the long-term memory system.
 
-        # Sort the list based on the strength, in ascending order
-        self.entries.sort(key=get_strength)
+        Args:
+            mem: A semantic memory as a quadraple: [head, relation, tail,
+                {"strength": int}]
+
+        """
+        assert self.can_be_added_as_semantic(mem)[0]
+        added = False
+        # Check if a list with the same first three elements exists
+        for entry in self.entries:
+            if entry[:-1] == mem[:-1] and "strength" in entry[-1]:
+                # Merge the strength values
+                entry[-1]["strength"] += mem[-1]["strength"]
+
+                added = True
+
+        if not added:
+            super().add(mem)
 
     def pretrain_semantic(
         self,
         semantic_knowledge: list[list],
-        return_remaining_space: bool = True,
-        freeze: bool = True,
-    ) -> int:
+    ) -> None:
         """Pretrain (prepopulate) the semantic memory system.
 
         Args:
             semantic_knowledge: e.g., [["desk", "atlocation", "officeroom"],
                 ["chair", "atlocation", "officeroom",
                 ["officeroom", "north", "livingroom]]
-            return_remaining_space: whether or not to return the remaining space from the
-                semantic memory system.
-            freeze: whether or not to freeze the semantic memory system or not.
-
-        Returns:
-            free_space: free space that was not used, if any, so that it can be added to
-                the episodic memory system.
 
         """
         self.semantic_knowledge = semantic_knowledge
@@ -518,148 +538,14 @@ class SemanticMemory(Memory):
             mem = [*triple, {"strength": 1}]  # num_generalized = 1
             self.add(mem)
 
-        if return_remaining_space:
-            free_space = self.capacity - len(self.entries)
-            self.decrease_capacity(free_space)
-
-        else:
-            free_space = None
-
-        if freeze:
-            self.freeze()
-
-        return free_space
-
-    def get_weakest_memory(self) -> list:
-        return self.get_first_memory()
-
-    def get_strongest_memory(self) -> list:
-        return self.get_last_memory()
-
-    def forget_weakest(self) -> None:
-        """Forget the weakest entry in the semantic memory system.
-
-        At the moment, this is simply done by looking up the number of generalized
-        memories and comparing them.
-
-        """
-        mem = self.get_weakest_memory()
-        self.forget(mem)
-
-    def forget_strongest(self) -> None:
-        """Forget the strongest entry in the semantic memory system."""
-        mem = self.get_strongest_memory()
-        self.forget(mem)
-
-
-class WorkingMemory:
-    """Working memory class."""
-
-    def __init__(
-        self,
-        short: ShortMemory | None = None,
-        episodic: EpisodicMemory | None = None,
-        semantic: SemanticMemory | None = None,
-        working_num_hops: int | None = None,
-    ) -> None:
-        """Working memory system.
-
-        Args:
-            short: short-term memory system
-            episodic: episodic memory system
-            semantic: semantic memory system
-            working_num_hops: number of hops to consider when fetching long-term
-                memories.
-
-        """
-        self.short = short
-        self.episodic = episodic
-        self.semantic = semantic
-        self.working_num_hops = working_num_hops
-        self.update()
-
-    def __repr__(self):
-        self.update()
-        return pformat(self.entries, indent=4, width=1)
-
-    def __iter__(self):
-        self.update()
-        return iter(self.entries[:])
-
-    def __len__(self):
-        self.update()
-        return len(self.entries)
-
-    def query_memory(self, mem_query: list) -> list[list]:
-        """Query memory.
-
-        Args:
-            mem_query: a quadruple, where each element can be "?". e.g.,
-                ["bob", "atlocation", "?", 42], ["?", "atlocation", "officeroom", 42]
-                "?" is used to match any value.
-
-        Returns:
-            mems_found: a list of memories that match the query
-
-
-        """
-        self.update()
-        assert len(mem_query) == 4
-        mems_found = []
-        for mem in self.entries:
-            if (mem_query[0] == mem[0]) or (mem_query[0] == "?"):
-                if (mem_query[1] == mem[1]) or (mem_query[1] == "?"):
-                    if (mem_query[2] == mem[2]) or (mem_query[2] == "?"):
-                        if (mem_query[3] == mem[3]) or (mem_query[3] == "?"):
-                            mems_found.append(mem)
-
-        return mems_found
-
-    def update(self) -> None:
-        """Update the working memory system."""
-        self.entries = []
-
-        if self.short is not None:
-            self.entries += self.short.entries
-        if self.episodic is not None:
-            if self.working_num_hops is not None:
-                raise NotImplementedError(
-                    "Not implemented yet. Please set working_num_hops to None."
-                )
-            else:
-                self.entries += self.episodic.entries
-        if self.semantic is not None:
-            if self.working_num_hops is not None:
-                raise NotImplementedError(
-                    "Not implemented yet. Please set working_num_hops to None."
-                )
-            else:
-                self.entries += self.semantic.entries
-
-        self.entries = merge_lists(self.entries)
-
-    def to_list(self) -> list[list]:
-        """Return memory systems as a list of lists.
-
-        Returns:
-            A list of lists. To distinguish the memory types, the last element includes
-            a relation qualifier key-value pair. At the moment, memories are nothing but
-            python lists (lists of quadruples), which is a mutable object. So, deepcopy
-            it, if you want to keep the original state. In the future, a more suitable
-            python object will be used to represent the graph structure of the memories.
-
-        """
-        self.update()
-        return self.entries
-
 
 class MemorySystems:
     """Multiple memory systems class.
 
     Attributes:
-        episodic: episodic memory system
-        semantic: semantic memory system
         short: short-term memory system
+        long: long-term memory system
+        working: working memory system. This is short-term + partial long-term memory
         qualifier_relations: relations that can be used as qualifiers
         working_num_hops: number of hops to consider when fetching long-term memories
 
@@ -668,46 +554,80 @@ class MemorySystems:
     def __init__(
         self,
         short: ShortMemory = None,
-        episodic: EpisodicMemory = None,
-        semantic: SemanticMemory = None,
-        working_num_hops: int | None = None,
+        long: LongMemory = None,
     ) -> None:
         """Bundle memory systems.
 
         Args:
-            episodic: episodic memory system
-            semantic: semantic memory system
             short: short-term memory system
-            working_num_hops: number of hops to consider when fetching long-term
-                memories
+            long: long-term memory system
 
         """
-        self.qualifier_relations = []
-        self.working_num_hops = working_num_hops
-        kwargs = {}
-        if short is not None and short.capacity > 0:
-            self.short = short
-            self.qualifier_relations.append("current_time")
-            kwargs["short"] = self.short
-
-        if episodic is not None and episodic.capacity > 0:
-            self.episodic = episodic
-            self.qualifier_relations.append("timestamp")
-            kwargs["episodic"] = self.episodic
-
-        if semantic is not None and semantic.capacity > 0:
-            self.semantic = semantic
-            self.qualifier_relations.append("strength")
-            kwargs["semantic"] = self.semantic
-
-        kwargs["working_num_hops"] = self.working_num_hops
-        self.working = WorkingMemory(**kwargs)
+        self.qualifier_relations = ["current_time", "timestamp", "strength"]
 
     def forget_all(self) -> None:
         """Forget everything in the memory systems."""
-        if hasattr(self, "episodic"):
-            self.episodic.forget_all()
-        if hasattr(self, "semantic"):
-            self.semantic.forget_all()
-        if hasattr(self, "short"):
-            self.short.forget_all()
+        self.short.forget_all()
+        self.long.forget_all()
+
+    def get_working_memory(
+        self,
+        sort_by: Literal["current_time", "timestamp", "strength"] = "current_time",
+        working_num_hops: int | None = None,
+    ) -> list[list]:
+        """Get the working memory system.
+
+        Args:
+            sort_by: sort by "current_time", "timestamp", or "strength"
+            working_num_hops: number of hops to consider when fetching long-term
+                memories
+
+        Returns:
+            working: a list of memories
+
+        """
+        if working_num_hops is not None:
+            raise NotImplementedError(
+                "Not implemented yet. Please set working_num_hops to None."
+            )
+
+        working = []
+        working += self.short.entries
+        working += self.long.entries
+        working = merge_lists(self.entries)
+
+        if sort_by == "current_time":
+            return working
+        elif sort_by == "timestamp":
+            return sorted(working, key=lambda x: max(x[-1]["timestamp"]))
+        elif sort_by == "strength":
+            return sorted(working, key=lambda x: x[-1]["strength"])
+        else:
+            raise ValueError(
+                "sort_by should be 'current_time', 'timestamp', or 'strength'"
+            )
+
+    def query_working_memory(self, mem_query: list) -> list[list]:
+        """Query memory.
+
+        Args:
+            mem_query: a quadruple, where each element can be "?". e.g.,
+                ["bob", "atlocation", "?", "?], ["?", "atlocation", "officeroom", "?"]
+                "?" is used to match any value.
+
+        Returns:
+            mems_found: a list of memories that match the query
+
+
+        """
+        assert len(mem_query) == 4
+        mems_found = []
+
+        for mem in self.get_working_memory():
+            if (mem_query[0] == mem[0]) or (mem_query[0] == "?"):
+                if (mem_query[1] == mem[1]) or (mem_query[1] == "?"):
+                    if (mem_query[2] == mem[2]) or (mem_query[2] == "?"):
+                        if (mem_query[3] == mem[3]) or (mem_query[3] == "?"):
+                            mems_found.append(mem)
+
+        return mems_found

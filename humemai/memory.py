@@ -302,120 +302,41 @@ class LongMemory(Memory):
         super().__init__(capacity, memories)
         self.type = "long"
 
-    # def sort_by_timestamp(self) -> None:
-    #     """Sort the memories based on the timestamps."""
-
-    #     # Define a helper function to get the max timestamp from the dict
-    #     def max_timestamp(sublist):
-    #         return max(sublist[-1]["timestamp"])
-
-    #     # Sort the list based on the max timestamp, in ascending order
-    #     self.entries.sort(key=max_timestamp)
-
-    # def sort_by_strength(self) -> None:
-    #     """Sort the memories based on the strength."""
-
-    #     # Define a helper function to get the max strength from the dict
-    #     def get_strength(sublist):
-    #         return sublist[-1]["strength"]
-
-    #     # Sort the list based on the strength, in ascending order
-    #     self.entries.sort(key=get_strength)
-
-    # def get_oldest_memory(self) -> list:
-    #     """Get the oldest memory in the memory system.
-
-    #     Returns:
-    #         mem: the oldest memory as a quadraple
-    #     """
-    #     self.sort_by_timestamp()
-
-    #     return self.get_first_memory()
-
-    # def get_latest_memory(self) -> list:
-    #     """Get the latest memory in the memory system."""
-    #     self.sort_by_timestamp()
-
-    #     return self.get_last_memory()
-
-    # def get_weakest_memory(self) -> list:
-    #     """Get the weakest memory in the memory system."""
-    #     self.sort_by_strength()
-
-    #     return self.get_first_memory()
-
-    # def get_strongest_memory(self) -> list:
-    #     """Get the strongest memory in the memory system."""
-    #     self.sort_by_strength()
-
-    #     return self.get_last_memory()
-
-    # def forget_oldest(self) -> None:
-    #     """Forget the oldest entry in the memory system.
-
-    #     At the moment, this is simply done by looking up the timestamps and comparing
-    #     them.
-
-    #     """
-    #     mem = self.get_oldest_memory()
-    #     self.forget(mem)
-
-    # def forget_latest(self) -> None:
-    #     """Forget the oldest entry in the memory system.
-
-    #     At the moment, this is simply done by looking up the timestamps and comparing
-    #     them.
-
-    #     """
-    #     mem = self.get_latest_memory()
-    #     self.forget(mem)
-
-    # def forget_weakest(self) -> None:
-    #     """Forget the weakest entry in the memory system.
-
-    #     At the moment, this is simply done by looking up the number of generalized
-    #     memories and comparing them.
-
-    #     """
-    #     mem = self.get_weakest_memory()
-    #     self.forget(mem)
-
-    # def forget_strongest(self) -> None:
-    #     """Forget the strongest entry in the memory system.
-
-    #     At the moment, this is simply done by looking up the number of generalized
-
-    #     """
-    #     mem = self.get_strongest_memory()
-    #     self.forget(mem)
-
-    def can_be_added(self, mem: list) -> bool:
-        """Checks if a memory can be added to the system or not.
+    def fetch_by_selection(
+        self, selection: Literal["oldest", "latest", "weakest", "strongest"]
+    ) -> list:
+        """Fetch a memory based on the selection.
 
         Args:
-            mem: A semantic memory as a quadraple: [head, relation, tail,
-                {"strength": int}]
+            selection: "oldest", "latest", "weakest", or "strongest"
 
         Returns:
-            True or False, error_msg
+            mem: a memory as a quadraple
+        """
+        if selection == "oldest":
+            return sorted(self.entries, key=lambda x: max(x[-1]["timestamp"]))[0]
+        elif selection == "latest":
+            return sorted(self.entries, key=lambda x: max(x[-1]["timestamp"]))[-1]
+        elif selection == "weakest":
+            return sorted(self.entries, key=lambda x: x[-1]["strength"])[0]
+        elif selection == "strongest":
+            return sorted(self.entries, key=lambda x: x[-1]["strength"])[-1]
+        else:
+            raise ValueError(
+                "`selection` should be 'oldest', 'latest', 'weakest', or 'strongest'"
+            )
+
+    def forget_by_selection(
+        self, selection: Literal["oldest", "latest", "weakest", "strongest"]
+    ) -> None:
+        """Forget a memory based on the selection.
+
+        Args:
+            selection: "oldest", "latest", "weakest", or "strongest"
 
         """
-        check, error_msg = super().can_be_added(mem)
-        if not check:
-            return check, error_msg
-
-        if list(mem[-1].keys())[0] != "strength":
-            return False, "The memory should have strength!"
-
-        if self.is_full:
-            for entry in self.entries:
-                if entry[:-1] == mem[:-1]:
-                    return True, None
-
-            return False, "The memory system is full!"
-
-        else:
-            return True, None
+        mem = self.fetch_by_selection(selection)
+        self.forget(mem)
 
     def can_be_added_as_episodic(self, mem: list) -> tuple[bool, str | None]:
         """Check if a memory can be added as an episodic memory to the long-term
@@ -564,6 +485,8 @@ class MemorySystems:
 
         """
         self.qualifier_relations = ["current_time", "timestamp", "strength"]
+        self.short = short
+        self.long = long
 
     def forget_all(self) -> None:
         """Forget everything in the memory systems."""
@@ -575,7 +498,7 @@ class MemorySystems:
         sort_by: Literal["current_time", "timestamp", "strength"] = "current_time",
         working_num_hops: int | None = None,
     ) -> list[list]:
-        """Get the working memory system.
+        """Get the working memory system. This is short-term + partial long-term memory
 
         Args:
             sort_by: sort by "current_time", "timestamp", or "strength"
@@ -604,7 +527,7 @@ class MemorySystems:
             return sorted(working, key=lambda x: x[-1]["strength"])
         else:
             raise ValueError(
-                "sort_by should be 'current_time', 'timestamp', or 'strength'"
+                "`sort_by` should be 'current_time', 'timestamp', or 'strength'"
             )
 
     def query_working_memory(self, mem_query: list) -> list[list]:

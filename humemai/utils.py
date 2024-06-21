@@ -6,6 +6,7 @@ import os
 import pickle
 import random
 from collections import defaultdict
+from copy import deepcopy
 
 import numpy as np
 import torch
@@ -173,6 +174,8 @@ def is_running_notebook() -> bool:
 def merge_lists(lists) -> list:
     """Merge a list of lists of lists into a single list of lists.
 
+    Deepcopy is used to avoid modifying the original lists / dicts.
+
     Args:
         lists: A list of lists of lists. Each sublist should have the format
             [key, value], where key is a tuple of three elements and value is a
@@ -197,10 +200,11 @@ def merge_lists(lists) -> list:
                         # Handle non-list values
                         merged_dict[key][k] = max(merged_dict[key][k], v)
                 else:
-                    merged_dict[key][k] = v
+                    merged_dict[key][k] = deepcopy(v)
         else:
-            merged_dict[key] = sublist[3]
+            merged_dict[key] = deepcopy(sublist[3])
 
     # Convert back to the original list of lists format
     merged_list = [[*k, v] for k, v in merged_dict.items()]
+
     return merged_list

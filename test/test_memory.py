@@ -121,24 +121,24 @@ class MemoryTest(unittest.TestCase):
         self.memory.decrease_capacity(4)
         self.assertEqual(self.memory.capacity, 4)
 
-    def test_return_as_list(self):
+    def test_to_list(self):
         self.memory.add(["foo", "bar", "baz", 1])
         self.memory.add(["foo", "bar", "baz", 2])
         self.memory.add(["foo", "bar", "baz", 3])
 
-        returned = self.memory.return_as_list()
+        returned = self.memory.to_list()
         self.assertEqual(len(returned), 3)
         del returned
         self.assertEqual(self.memory.size, 3)
 
         self.memory.forget_all()
         self.memory.add(["foo", "bar", "baz", 1])
-        returned = self.memory.return_as_list()
+        returned = self.memory.to_list()
         self.assertEqual(returned, [["foo", "bar", "baz", 1]])
 
         self.memory.forget_all()
         self.memory.add(["foo", "bar", "baz", 1])
-        returned = self.memory.return_as_list()
+        returned = self.memory.to_list()
         returned[-1] = 2
         self.assertNotEqual(returned, [["foo", "bar", "baz", 1]])
 

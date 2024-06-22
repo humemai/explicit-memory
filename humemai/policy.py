@@ -239,8 +239,6 @@ def explore(
 def manage_memory(
     memory_systems: MemorySystems,
     policy: str,
-    mm_policy_model: torch.nn.Module | None = None,
-    mm_policy_model_type: Literal["actor", "q_function"] | None = None,
     split_possessive: bool = True,
 ) -> None:
     """Non RL memory management policy.
@@ -249,13 +247,9 @@ def manage_memory(
         MemorySystems
         policy: "episodic", "semantic", "generalize", "forget", "random", "neural",
             "episodic_agent", or "semantic_map",
-        mm_policy_model: a neural network model for memory management policy.
-        mm_policy_model_type: depends wheter your RL algorithm used.
         split_possessive: whether to split the possessive, i.e., 's, or not.
 
     """
-    if mm_policy_model is not None:
-        assert mm_policy_model_type is not None
 
     def action_number_0():
         if hasattr(memory_systems, "episodic"):
@@ -284,7 +278,6 @@ def manage_memory(
         "forget",
         "random",
         "generalize",
-        "neural",
         "episodic_agent",
         "semantic_map",
     ]
@@ -358,30 +351,6 @@ def manage_memory(
             action_number_0()
 
         elif action_number == 1:
-            action_number_1()
-
-        else:
-            pass
-
-    elif policy.lower() == "neural":
-        state = memory_systems.return_as_a_dict_list()
-        with torch.no_grad():
-            if mm_policy_model_type == "q_function":
-                q_values = mm_policy_model(np.array([state])).detach().cpu().tolist()[0]
-                selected_action = argmax(q_values)
-
-            elif mm_policy_model_type == "actor":
-                action, dist = mm_policy_model(np.array([state]))
-                selected_action = dist.probs.argmax().detach().cpu().item()
-            else:
-                raise ValueError
-
-        assert selected_action in [0, 1, 2]
-
-        if selected_action == 0:
-            action_number_0()
-
-        elif selected_action == 1:
             action_number_1()
 
         else:

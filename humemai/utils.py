@@ -171,7 +171,7 @@ def is_running_notebook() -> bool:
         return False  # Probably standard Python interpreter
 
 
-def merge_lists(lists) -> list:
+def merge_lists(lists: list[list]) -> list:
     """Merge a list of lists of lists into a single list of lists.
 
     Deepcopy is used to avoid modifying the original lists / dicts.

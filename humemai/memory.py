@@ -1,8 +1,9 @@
 """Memory system classes."""
 
 from __future__ import annotations  # remove this from python 3.11
-from typing import Literal
+
 import random
+from typing import Literal
 
 from .utils import merge_lists
 
@@ -19,6 +20,7 @@ class Memory:
         entries: list of memories
         capacity: memory capacity
         _frozen: whether the memory system is frozen or not
+
 
     """
 
@@ -79,6 +81,9 @@ class Memory:
            mem: A memory as a quadraple: [head, relation, tail, num]
 
         """
+        check, error_msg = self.can_be_added(mem)
+        if not check:
+            raise ValueError(error_msg)
         self.entries.append(mem)
 
         if self.size > self.capacity:

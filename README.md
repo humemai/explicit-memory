@@ -1,18 +1,30 @@
-# Agent for RoomEnv-v1
+# Explicit Memory
 
-[![DOI](https://zenodo.org/badge/776465276.svg)](https://zenodo.org/doi/10.5281/zenodo.10876427)
-[![DOI](https://img.shields.io/badge/Paper-PDF-red.svg)](https://arxiv.org/abs/2212.02098)
+**Authors:** [Taewoon Kim](https://taewoon.kim/), [Michael Cochez](https://www.cochez.nl/), [Vincent Francois-Lavet](http://vincent.francois-l.be/), [Mark Neerincx](https://ocw.tudelft.nl/teachers/m_a_neerincx/), and [Piek Vossen](https://vossen.info/).
 
-This repo is to train an agent that interacts with the [RoomEnv-v1](https://github.com/humemai/room-env).
-The agent is trained with DQN. See the paper ["A Machine with Short-Term, Episodic, and Semantic Memory Systems"](https://arxiv.org/abs/2212.02098) for more information.
+Code for a deep-Q-learning agent with explicit short-term, episodic, and semantic memory
+that operates in [RoomEnv-v1](https://github.com/humemai/room-env).
+
+For the research overview, see the [project page](https://humem.ai/projects/explicit-memory)
+or the paper on [arXiv](https://arxiv.org/abs/2212.02098).
+
+This README focuses on the code, setup, training flow, and results in this repository.
+
+## Repository layout
+
+- [`agent/`](./agent): agent implementation and memory-related components
+- [`train.py`](./train.py): runs training in RoomEnv-v1
+- [`train.yaml`](./train.yaml): configuration for training runs
+- [`models/`](./models): saved models and related outputs
+- [`figures/`](./figures): generated plots and analysis figures
+- [`paper/`](./paper): paper source and paper figures
+- [`test/`](./test): tests
 
 ## Prerequisites
 
-1. A unix or unix-like x86 machine
-1. python 3.10 or higher.
-1. Running in a virtual environment (e.g., conda, virtualenv, etc.) is highly
-   recommended so that you don't mess up with the system python.
-1. Install the requirements by running `pip install -r requirements.txt`
+1. Python 3.10 or higher
+1. A virtual environment is recommended
+1. Install the requirements with `pip install -r requirements.txt`
 
 ## Run training
 
@@ -20,8 +32,20 @@ The agent is trained with DQN. See the paper ["A Machine with Short-Term, Episod
 python train.py
 ```
 
-The hyperparameters can be configured in [`train.yaml`](./train.yaml). The training results with the
-checkpoints will be saved at [`./training-results/`](./training-results/).
+Configure the training run in [`train.yaml`](./train.yaml). Training outputs, checkpoints,
+and derived figures are written into the repository outputs used by the analysis scripts.
+
+## Training setup
+
+The project trains a DQN-based agent that decides what to do with the oldest short-term
+memory when the short-term buffer is full.
+
+- forget it
+- move it to episodic memory
+- move it to semantic memory
+
+The repository includes both a semantic-scratch variant and a semantic-pretrained variant
+that starts with ConceptNet-based world knowledge.
 
 ## Results
 
@@ -33,48 +57,28 @@ checkpoints will be saved at [`./training-results/`](./training-results/).
 | :------------------------------------------------------------------: |
 | ![](./figures/des_size=l-capacity=all-test_total_reward_mean-v1.png) |
 
-Also check out [`./models/`](./models) to see the saved training results.
+Also check [`models/`](./models) for saved training runs and [`paper/`](./paper) for the
+paper source and additional figure assets.
 
-## pdoc documentation
+## Further reading
 
-Click on [this link](https://humemai.github.io/agent-room-env-v1) to see the HTML rendered
-docstrings
+- [Project page](https://humem.ai/projects/explicit-memory)
+- [Paper on arXiv](https://arxiv.org/abs/2212.02098)
+- [RoomEnv-v1](https://github.com/humemai/room-env)
 
-## Contributing
-
-Contributions are what make the open source community such an amazing place to be learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-
-1. Fork the Project
-1. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-1. Run `make test && make style && make quality` in the root repo directory, to ensure code quality.
-1. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-1. Push to the Branch (`git push origin feature/AmazingFeature`)
-1. Open a Pull Request
-
-## [Cite our paper](https://arxiv.org/abs/2212.02098)
+## Cite our paper
 
 ```bibtex
 @article{Kim_Cochez_Francois-Lavet_Neerincx_Vossen_2023,
-  title={A Machine with Short-Term, Episodic, and Semantic Memory Systems}, volume={37},
+  title={A Machine with Short-Term, Episodic, and Semantic Memory Systems},
+  volume={37},
   url={https://ojs.aaai.org/index.php/AAAI/article/view/25075},
   DOI={10.1609/aaai.v37i1.25075},
-  abstractNote={Inspired by the cognitive science theory of the explicit human memory systems, we have modeled an agent with short-term, episodic, and semantic memory systems, each of which is modeled with a knowledge graph. To evaluate this system and analyze the behavior of this agent, we designed and released our own reinforcement learning agent environment, “the Room”, where an agent has to learn how to encode, store, and retrieve memories to maximize its return by answering questions. We show that our deep Q-learning based agent successfully learns whether a short-term memory should be forgotten, or rather be stored in the episodic or semantic memory systems. Our experiments indicate that an agent with human-like memory systems can outperform an agent without this memory structure in the environment.},
   number={1},
-  journal={Proceedings of the AAAI Conference on Artificial Intelligence}, author={Kim, Taewoon and Cochez, Michael and Francois-Lavet, Vincent and Neerincx, Mark and Vossen, Piek},
+  journal={Proceedings of the AAAI Conference on Artificial Intelligence},
+  author={Kim, Taewoon and Cochez, Michael and Francois-Lavet, Vincent and Neerincx, Mark and Vossen, Piek},
   year={2023},
   month={Jun.},
   pages={48-56}
 }
 ```
-
-## Authors
-
-- [Taewoon Kim](https://taewoon.kim/)
-- [Michael Cochez](https://www.cochez.nl/)
-- [Vincent Francois-Lavet](http://vincent.francois-l.be/)
-- [Mark Neerincx](https://ocw.tudelft.nl/teachers/m_a_neerincx/)
-- [Piek Vossen](https://vossen.info/)
-
-## License
-
-[MIT](https://choosealicense.com/licenses/mit/)
